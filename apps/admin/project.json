@@ -2,7 +2,7 @@
   "projectType": "application",
   "root": "apps/admin",
   "sourceRoot": "apps/admin/src",
-  "prefix": "tips-project",
+  "prefix": "tips",
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",

@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Message } from '@tips-project/api-interfaces';
+import { Component } from '@angular/core';
+import { Message } from '@tips/api-interfaces';
 
 @Component({
-  selector: 'tips-project-root',
+  selector: 'tips-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
