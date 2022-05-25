@@ -10,7 +10,8 @@ import { SurveyTypesModule } from './survey-types/survey-types.module';
 import { SurveysModule } from './surveys/surveys.module';
 import { UsersModule } from './users/users.module';
 
-const envFilePath = getEnvPath(`${process.cwd()}/src/common/envs`);
+const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
+console.log(process.cwd());
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: envFilePath, isGlobal: true }),

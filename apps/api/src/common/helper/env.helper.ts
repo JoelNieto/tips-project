@@ -3,6 +3,7 @@ import { resolve } from 'path';
 
 export function getEnvPath(dest: string) {
   const env: string | undefined = process.env['NODE' + '_ENV'];
+  console.log('ENV', env);
   const fallback: string = resolve(`${dest}/.env`);
   const filename: string = env ? `${env}.env` : 'development.env';
   let filePath: string = resolve(`${dest}/${filename}`);
