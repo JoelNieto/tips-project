@@ -50,6 +50,7 @@ export class SurveyTypesService {
           subMeasureName,
           instructions,
           isRandom,
+          updatedAt: new Date(),
         },
       })
       .setOptions({ new: true });

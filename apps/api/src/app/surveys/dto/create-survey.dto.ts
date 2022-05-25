@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Measure, Survey, SurveyCategory } from '@tips/data/models';
+import { Measure, Survey, SurveyType } from '@tips/data/models';
 import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { DTOBase } from '../../shared/base.schema';
@@ -15,7 +15,7 @@ export class CreateSurveyDto implements DTOBase<Survey> {
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  category: SurveyCategory;
+  type: SurveyType;
 
   @IsArray()
   measures: Measure[];

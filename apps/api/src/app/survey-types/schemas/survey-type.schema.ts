@@ -23,7 +23,7 @@ export class SurveyType
   @Prop({ type: Boolean })
   hasMeasureQuestion: boolean;
 
-  @Prop({ type: Boolean })
+  @Prop({ type: String })
   prefix: string;
 
   @Prop({ type: String })

@@ -5,7 +5,7 @@ export interface Measure extends EntityBase {
   name: string;
   description?: string;
   weighting: number;
-  subMeasure: Measure;
+  subMeasures: Measure[];
   mainQuestion: Question;
   questions: Question[];
 }

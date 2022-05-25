@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSurveyDto } from './dto/create-survey.dto';
-import { UpdateSurveyDto } from './dto/update-survey.dto';
+
+import { CreateSurveyDto } from '../dto/create-survey.dto';
+import { UpdateSurveyDto } from '../dto/update-survey.dto';
 
 @Injectable()
 export class SurveysService {
@@ -23,4 +24,5 @@ export class SurveysService {
   remove(id: number) {
     return `This action removes a #${id} survey`;
   }
+  w;
 }

@@ -1,11 +1,11 @@
 import { EntityBaseUser } from '../authentication';
 import { Measure } from './measures.interface';
-import { SurveyCategory } from './survey-category.interface';
+import { SurveyType } from './survey-type.interface';
 
 export interface Survey extends EntityBaseUser {
   title: string;
   description: string;
-  category: SurveyCategory;
+  type: SurveyType;
   measures: Measure[];
   public: boolean;
   active: boolean;
