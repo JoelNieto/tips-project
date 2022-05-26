@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@tips/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@tips/auth": ["libs/auth/src/index.ts"],
       "@tips/data/models": ["libs/data/models/src/index.ts"],
       "@tips/ui": ["libs/ui/src/index.ts"]
     }
