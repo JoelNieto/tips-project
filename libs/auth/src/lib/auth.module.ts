@@ -1,17 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterModule, Routes } from '@angular/router';
-
-import { SignInComponent } from './sign-in/sign-in.component';
-import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import * as fromAuth from './+state/auth.reducer';
+import { StoreModule } from '@ngrx/store';
+
 import { AuthEffects } from './+state/auth.effects';
 import { AuthFacade } from './+state/auth.facade';
+import * as fromAuth from './+state/auth.reducer';
+import { SignInComponent } from './sign-in/sign-in.component';
 
 const authRoutes: Routes = [
   { path: 'sign-in', component: SignInComponent },
@@ -26,8 +28,10 @@ const authRoutes: Routes = [
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatSnackBarModule,
     StoreModule.forFeature(fromAuth.AUTH_FEATURE_KEY, fromAuth.reducer),
     EffectsModule.forFeature([AuthEffects]),
+    ReactiveFormsModule,
   ],
   declarations: [SignInComponent],
   providers: [AuthFacade],

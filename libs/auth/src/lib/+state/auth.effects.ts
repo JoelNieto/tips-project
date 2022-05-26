@@ -1,27 +1,38 @@
 import { Injectable } from '@angular/core';
-import { createEffect, Actions, ofType } from '@ngrx/effects';
-import { fetch } from '@nrwl/angular';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { AuthService } from '@tips/data/services';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 
-import * as AuthActions from './auth.actions';
-import * as AuthFeature from './auth.reducer';
+import { AuthActions } from './auth.actions';
 
 @Injectable()
 export class AuthEffects {
-  init$ = createEffect(() =>
+  login$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.init),
-      fetch({
-        run: (action) => {
-          // Your custom service 'load' logic goes here. For now just return a success action...
-          return AuthActions.loadAuthSuccess({ auth: [] });
-        },
-        onError: (action, error) => {
-          console.error('Error', error);
-          return AuthActions.loadAuthFailure({ error });
-        },
-      })
+      ofType(AuthActions.login),
+      switchMap(({ request }) =>
+        this.service.login(request).pipe(
+          map((payload) => AuthActions.loginSuccess({ payload })),
+          catchError((error) => of(AuthActions.loginFailure({ error })))
+        )
+      )
     )
   );
 
-  constructor(private readonly actions$: Actions) {}
+  loginSuccess$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AuthActions.loginSuccess),
+        tap(() => this.snackBar.open('Bienvenido'))
+      );
+    },
+    { dispatch: false }
+  );
+
+  constructor(
+    private readonly actions$: Actions,
+    private readonly service: AuthService,
+    private readonly snackBar: MatSnackBar
+  ) {}
 }

@@ -1,15 +1,12 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, emptyProps, props } from '@ngrx/store';
+import { Login } from '@tips/data/models';
 
-import { AuthEntity } from './auth.models';
-
-export const init = createAction('[Auth Page] Init');
-
-export const loadAuthSuccess = createAction(
-  '[Auth/API] Load Auth Success',
-  props<{ auth: AuthEntity[] }>()
-);
-
-export const loadAuthFailure = createAction(
-  '[Auth/API] Load Auth Failure',
-  props<{ error: any }>()
-);
+export const AuthActions = createActionGroup({
+  source: 'Auth/API',
+  events: {
+    Init: emptyProps(),
+    Login: props<{ request: Login }>(),
+    'Login Success': props<{ payload: { access_token: string } }>(),
+    'Login Failure': props<{ error: unknown }>(),
+  },
+});

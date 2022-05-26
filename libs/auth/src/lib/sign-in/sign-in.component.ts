@@ -1,4 +1,7 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+import { AuthFacade } from '../+state/auth.facade';
 
 @Component({
   selector: 'tips-sign-in',
@@ -7,7 +10,21 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInComponent implements OnInit {
-  constructor() {}
+  form!: FormGroup;
+  constructor(
+    private readonly facade: AuthFacade,
+    private readonly fb: FormBuilder
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.facade.init();
+    this.form = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]],
+    });
+  }
+
+  login(): void {
+    this.facade.login(this.form.value);
+  }
 }

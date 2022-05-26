@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { select, Store, Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
+import { Login } from '@tips/data/models';
 
-import * as AuthActions from './auth.actions';
-import * as AuthFeature from './auth.reducer';
+import { AuthActions } from './auth.actions';
 import * as AuthSelectors from './auth.selectors';
 
 @Injectable()
@@ -11,9 +11,9 @@ export class AuthFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loaded$ = this.store.pipe(select(AuthSelectors.getAuthLoaded));
-  allAuth$ = this.store.pipe(select(AuthSelectors.getAllAuth));
-  selectedAuth$ = this.store.pipe(select(AuthSelectors.getSelected));
+  logged$ = this.store.select(AuthSelectors.selectLogged);
+  error$ = this.store.select(AuthSelectors.selectError);
+  token$ = this.store.select(AuthSelectors.selectToken);
 
   constructor(private readonly store: Store) {}
 
@@ -23,5 +23,9 @@ export class AuthFacade {
    */
   init() {
     this.store.dispatch(AuthActions.init());
+  }
+
+  login(request: Login) {
+    this.store.dispatch(AuthActions.login({ request }));
   }
 }
