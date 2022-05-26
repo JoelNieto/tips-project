@@ -8,7 +8,7 @@ export class LoginDTO {
     required: true,
   })
   @IsEmail()
-  username: string;
+  email: string;
 
   @ApiProperty({ example: 'abcd1234', required: true })
   @IsString()

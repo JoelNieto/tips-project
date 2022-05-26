@@ -1,0 +1,25 @@
+{
+  "projectType": "library",
+  "sourceRoot": "libs/data/services/src",
+  "prefix": "tips",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/data/services"],
+      "options": {
+        "jestConfig": "libs/data/services/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/data/services/**/*.ts",
+          "libs/data/services/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

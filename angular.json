@@ -7,6 +7,7 @@
     "api-interfaces": "libs/api-interfaces",
     "auth": "libs/auth",
     "data-models": "libs/data/models",
+    "data-services": "libs/data/services",
     "ui": "libs/ui"
   }
 }
