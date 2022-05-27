@@ -6,3 +6,4 @@ export * from './lib/+state/auth.facade';
 
 export { AuthActions, AuthFeature, AuthSelectors };
 export * from './lib/auth.module';
+export * from './lib/interceptors/access.interceptor';

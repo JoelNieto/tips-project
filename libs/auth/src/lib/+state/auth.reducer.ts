@@ -1,4 +1,5 @@
 import { Action, createReducer, on } from '@ngrx/store';
+import { User } from '@tips/data/models';
 
 import { AuthActions } from './auth.actions';
 
@@ -6,6 +7,7 @@ export const AUTH_FEATURE_KEY = 'auth';
 
 export interface State {
   accessToken: string | undefined;
+  user: User | undefined | null;
   logged: boolean; // has the Auth list been loaded
   error?: unknown | null; // last known error (if any)
 }
@@ -17,6 +19,7 @@ export interface AuthPartialState {
 export const initialState: State = {
   // set initial required properties
   accessToken: undefined,
+  user: undefined,
   logged: false,
   error: null,
 };
@@ -31,6 +34,10 @@ const authReducer = createReducer(
       logged: true,
       accessToken: payload.access_token,
     })
+  ),
+  on(
+    AuthActions.loadProfileSuccess,
+    (state, { payload }): State => ({ ...state, user: payload })
   )
 );
 

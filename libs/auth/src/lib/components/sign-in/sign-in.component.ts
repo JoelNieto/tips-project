@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { AuthFacade } from '../+state/auth.facade';
+import { AuthFacade } from '../../+state/auth.facade';
 
 @Component({
   selector: 'tips-sign-in',

@@ -5,7 +5,7 @@ import { Login } from '@tips/data/models';
 import { AuthActions } from './auth.actions';
 import * as AuthSelectors from './auth.selectors';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AuthFacade {
   /**
    * Combine pieces of state using createSelector,

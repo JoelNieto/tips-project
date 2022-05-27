@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthService } from '@tips/data/services';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs';
 
 import { AuthActions } from './auth.actions';
 
@@ -12,23 +12,33 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.login),
       switchMap(({ request }) =>
-        this.service.login(request).pipe(
-          map((payload) => AuthActions.loginSuccess({ payload })),
-          catchError((error) => of(AuthActions.loginFailure({ error })))
-        )
+        this.service
+          .login(request)
+          .pipe(map((payload) => AuthActions.loginSuccess({ payload })))
       )
     )
   );
 
-  loginSuccess$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AuthActions.loginSuccess),
-        tap(() => this.snackBar.open('Bienvenido'))
-      );
-    },
-    { dispatch: false }
-  );
+  loginSuccess$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AuthActions.loginSuccess),
+      tap(() =>
+        this.snackBar.open('Bienvenido', undefined, { duration: 3000 })
+      ),
+      map(() => AuthActions.loadProfile())
+    );
+  });
+
+  loadProfile$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AuthActions.loadProfile),
+      switchMap(() =>
+        this.service
+          .getProfile()
+          .pipe(map((payload) => AuthActions.loadProfileSuccess({ payload })))
+      )
+    );
+  });
 
   constructor(
     private readonly actions$: Actions,

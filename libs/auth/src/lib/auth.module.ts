@@ -13,7 +13,7 @@ import { StoreModule } from '@ngrx/store';
 import { AuthEffects } from './+state/auth.effects';
 import { AuthFacade } from './+state/auth.facade';
 import * as fromAuth from './+state/auth.reducer';
-import { SignInComponent } from './sign-in/sign-in.component';
+import { SignInComponent } from './components/sign-in/sign-in.component';
 
 const authRoutes: Routes = [
   { path: 'sign-in', component: SignInComponent },
