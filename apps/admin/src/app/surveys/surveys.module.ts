@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -13,6 +14,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 
+import { SurveyTypesEffects } from './+state/survey-types/survey-types.effects';
+import * as fromSurveyTypes from './+state/survey-types/survey-types.reducer';
 import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
@@ -42,11 +45,16 @@ import { TypesComponent } from './types/types.component';
     MatTabsModule,
     MatDialogModule,
     MatSlideToggleModule,
+    MatExpansionModule,
     StoreModule.forFeature(
       fromSurveys.SURVEYS_FEATURE_KEY,
       fromSurveys.reducer
     ),
-    EffectsModule.forFeature([SurveysEffects]),
+    EffectsModule.forFeature([SurveysEffects, SurveyTypesEffects]),
+    StoreModule.forFeature(
+      fromSurveyTypes.surveyTypesFeatureKey,
+      fromSurveyTypes.reducer
+    ),
   ],
   providers: [SurveysFacade],
 })

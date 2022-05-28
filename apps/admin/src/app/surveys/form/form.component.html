@@ -2,9 +2,42 @@
   <mat-card>
     <mat-card-title>Survey</mat-card-title>
     <mat-card-content>
-      <mat-form-field appearance="fill">
-        <mat-label>Name</mat-label>
-        <input matInput />
-      </mat-form-field> </mat-card-content
-  ></mat-card>
+      <div class="row">
+        <mat-form-field appearance="fill" class="col-8">
+          <mat-label>Name</mat-label>
+          <input matInput />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="col-4">
+          <mat-label>Type</mat-label>
+          <mat-select>
+            <mat-option *ngFor="let type of types$ | async" [value]="type">{{
+              type.name
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="col-12">
+          <mat-label>Description</mat-label>
+          <textarea matInput></textarea>
+        </mat-form-field>
+        <div class="header-container">
+          <h2>Measures</h2>
+          <button mat-raised-button color="primary">New measure</button>
+        </div>
+        <mat-accordion class="col-12" multi>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Measure</mat-panel-title>
+            </mat-expansion-panel-header>
+            Content
+          </mat-expansion-panel>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Measure 2</mat-panel-title>
+            </mat-expansion-panel-header>
+            Content 2
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -1,4 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+
+import { SurveysFacade } from '../+state/surveys.facade';
 
 @Component({
   selector: 'tips-form',
@@ -7,7 +9,8 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormComponent implements OnInit {
-  constructor() {}
+  types$ = this.state.allTypes$;
+  constructor(private readonly state: SurveysFacade) {}
 
   ngOnInit(): void {}
 }

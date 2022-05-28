@@ -7,8 +7,8 @@ import { SurveysActions } from './surveys.actions';
 
 @Injectable()
 export class SurveysEffects {
-  init$ = createEffect(() =>
-    this.actions$.pipe(
+  init$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(SurveysActions.init),
       switchMap(() =>
         this.service.getAll().pipe(
@@ -20,8 +20,8 @@ export class SurveysEffects {
           )
         )
       )
-    )
-  );
+    );
+  });
 
   constructor(
     private readonly actions$: Actions,

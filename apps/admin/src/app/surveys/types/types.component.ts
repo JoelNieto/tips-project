@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
+import { SurveysFacade } from '../+state/surveys.facade';
 import { TypesFormComponent } from '../types-form/types-form.component';
 
 @Component({
@@ -10,9 +11,15 @@ import { TypesFormComponent } from '../types-form/types-form.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TypesComponent implements OnInit {
-  constructor(private dialog: MatDialog) {}
+  types$ = this.state.allTypes$;
+  constructor(
+    private dialog: MatDialog,
+    private readonly state: SurveysFacade
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.state.loadTypes();
+  }
 
   newType(): void {
     const dialogRef = this.dialog.open(TypesFormComponent, {
