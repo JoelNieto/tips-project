@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthService } from '@tips/data/services';
 import { map, switchMap, tap } from 'rxjs';
@@ -40,9 +41,20 @@ export class AuthEffects {
     );
   });
 
+  loadProfileSuccess$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AuthActions.loadProfileSuccess),
+        map(() => this.router.navigate(['/app']))
+      );
+    },
+    { dispatch: false }
+  );
+
   constructor(
     private readonly actions$: Actions,
     private readonly service: AuthService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router
   ) {}
 }

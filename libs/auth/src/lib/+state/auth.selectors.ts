@@ -17,5 +17,5 @@ export const selectError = createSelector(
 
 export const selectLogged = createSelector(
   getAuthState,
-  (state: State) => state.logged
+  (state: State) => state?.logged
 );

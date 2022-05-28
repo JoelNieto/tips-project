@@ -1,2 +1,3 @@
 export * from './lib/data-services.module';
 export * from './lib/auth.service';
+export * from './lib/surveys/surveys.service';
