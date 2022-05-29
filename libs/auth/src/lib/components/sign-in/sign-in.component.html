@@ -2,7 +2,7 @@
   <form [formGroup]="form" (ngSubmit)="login()">
     <mat-card>
       <mat-card-title>Login</mat-card-title>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="fill">
         <mat-label>User name</mat-label>
         <input
           matInput
@@ -11,7 +11,7 @@
           formControlName="email"
         />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="fill">
         <mat-label>Password</mat-label>
         <input
           matInput
@@ -23,7 +23,7 @@
       </mat-form-field>
       <mat-card-actions align="end">
         <button
-          mat-raised-button
+          mat-flat-button
           color="primary"
           type="submit"
           [disabled]="form.invalid"

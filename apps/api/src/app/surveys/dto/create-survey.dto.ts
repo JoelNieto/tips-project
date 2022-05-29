@@ -5,10 +5,12 @@ import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-vali
 import { DTOBase } from '../../shared/base.schema';
 
 export class CreateSurveyDto implements DTOBase<Survey> {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   title: string;
 
+  @ApiProperty()
   @IsString()
   @IsOptional()
   description: string;
@@ -17,15 +19,18 @@ export class CreateSurveyDto implements DTOBase<Survey> {
   @IsNotEmpty()
   type: SurveyType;
 
+  @ApiProperty()
   @IsArray()
   measures: Measure[];
 
   @IsBoolean()
   public: boolean;
 
+  @ApiProperty()
   @IsBoolean()
   active: boolean;
 
+  @ApiProperty()
   @IsBoolean()
   final: boolean;
 }

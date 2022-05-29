@@ -1,15 +1,15 @@
-<div class="container">
+<form [formGroup]="form" class="container">
   <mat-card>
     <mat-card-title>Survey</mat-card-title>
     <mat-card-content>
       <div class="row">
         <mat-form-field appearance="fill" class="col-8">
-          <mat-label>Name</mat-label>
-          <input matInput />
+          <mat-label>Title</mat-label>
+          <input matInput type="text" formControlName="title" />
         </mat-form-field>
         <mat-form-field appearance="fill" class="col-4">
           <mat-label>Type</mat-label>
-          <mat-select>
+          <mat-select formControlName="type">
             <mat-option *ngFor="let type of types$ | async" [value]="type">{{
               type.name
             }}</mat-option>
@@ -17,27 +17,33 @@
         </mat-form-field>
         <mat-form-field appearance="fill" class="col-12">
           <mat-label>Description</mat-label>
-          <textarea matInput></textarea>
+          <textarea matInput formControlName="description"></textarea>
         </mat-form-field>
         <div class="header-container">
           <h2>Measures</h2>
-          <button mat-raised-button color="primary">New measure</button>
+          <button mat-flat-button color="primary" (click)="addMeasure()">
+            Add measure
+          </button>
         </div>
-        <mat-accordion class="col-12" multi>
-          <mat-expansion-panel>
+        <mat-accordion class="col-12" multi formArrayName="measures">
+          <mat-expansion-panel
+            *ngFor="let measure of measuresArray.controls; let i = index"
+          >
             <mat-expansion-panel-header>
-              <mat-panel-title>Measure</mat-panel-title>
+              <mat-panel-title>Measure {{ i + 1 }}</mat-panel-title>
             </mat-expansion-panel-header>
-            Content
-          </mat-expansion-panel>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>Measure 2</mat-panel-title>
-            </mat-expansion-panel-header>
-            Content 2
+            <tips-measure-form></tips-measure-form>
+            <button
+              class="remove-measure"
+              mat-stroked-button
+              color="warn"
+              (click)="removeMeasure(i)"
+            >
+              Remove measure
+            </button>
           </mat-expansion-panel>
         </mat-accordion>
       </div>
     </mat-card-content>
   </mat-card>
-</div>
+</form>

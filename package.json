@@ -9,6 +9,7 @@
     "build": "nx build",
     "build:api:staging": "NODE_ENV=staging nx build api --prod",
     "start:api:staging": "node dist/apps/api/main.js",
+    "heroku-postbuild": "NODE_ENV=staging nx build $PROJECT_NAME --prod",
     "test": "nx test"
   },
   "private": true,

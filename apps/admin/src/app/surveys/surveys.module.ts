@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -20,6 +21,7 @@ import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
 import { FormComponent } from './form/form.component';
+import { MeasureFormComponent } from './measure-form/measure-form.component';
 import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
 import { TypesFormComponent } from './types-form/types-form.component';
@@ -31,6 +33,7 @@ import { TypesComponent } from './types/types.component';
     FormComponent,
     TypesComponent,
     TypesFormComponent,
+    MeasureFormComponent,
   ],
   imports: [
     CommonModule,
@@ -39,6 +42,7 @@ import { TypesComponent } from './types/types.component';
     MatButtonModule,
     ReactiveFormsModule,
     MatInputModule,
+    MatIconModule,
     MatFormFieldModule,
     MatCardModule,
     MatSelectModule,
