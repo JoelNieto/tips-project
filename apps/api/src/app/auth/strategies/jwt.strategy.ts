@@ -1,16 +1,15 @@
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { pick } from 'lodash';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { environment } from '../../../environments/environment';
-
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private configService: ConfigService) {
     // TODO: Add cookie auth
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
-      secretOrKey: environment.jwtKey,
+      secretOrKey: configService.get('JWT_SECRET'),
     });
   }
 
