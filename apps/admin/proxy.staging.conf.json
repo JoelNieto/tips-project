@@ -1,0 +1,5 @@
+{
+  "/api": {
+    "target": "https://tips-staging-api.herokuapp.com/api"
+  }
+}
