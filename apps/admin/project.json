@@ -63,10 +63,6 @@
             {
               "replace": "apps/admin/src/environments/environment.ts",
               "with": "apps/admin/src/environments/environment.staging.ts"
-            },
-            {
-              "replace": "apps/admin/proxy.conf.json",
-              "with": "apps/admin/proxy.staging.conf.json"
             }
           ],
           "outputHashing": "all"
@@ -93,10 +89,7 @@
           "browserTarget": "admin:build:development"
         }
       },
-      "defaultConfiguration": "development",
-      "options": {
-        "proxyConfig": "apps/admin/proxy.conf.json"
-      }
+      "defaultConfiguration": "development"
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
