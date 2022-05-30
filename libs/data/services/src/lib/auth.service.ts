@@ -18,5 +18,6 @@ export class AuthService {
       login
     );
 
-  public getProfile = () => this.http.get<User>('/api/auth/profile');
+  public getProfile = () =>
+    this.http.get<User>(`${this.config.backendURL}/auth/profile`);
 }
