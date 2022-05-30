@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  backendURL: '/staging-api',
+  backendURL: 'https://tips-staging-api.herokuapp.com/api',
 };
