@@ -10,7 +10,11 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({ methods: ['*'], origin: [''], allowedHeaders: ['*'] });
+  app.enableCors({
+    methods: ['*'],
+    origin: ['https://staging.tips.cicap.net/', 'http://localhost:4200'],
+    allowedHeaders: ['*'],
+  });
   const globalPrefix = 'api';
   const documentConfig = new DocumentBuilder()
     .setTitle('Tips API')
