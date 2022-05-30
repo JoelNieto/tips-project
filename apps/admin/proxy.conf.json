@@ -2,8 +2,5 @@
   "/api": {
     "target": "http://localhost:3333",
     "secure": false
-  },
-  "/staging-api": {
-    "target": "https://tips-staging-api.herokuapp.com/api"
   }
 }
