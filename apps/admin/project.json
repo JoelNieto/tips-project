@@ -63,6 +63,10 @@
             {
               "replace": "apps/admin/src/environments/environment.ts",
               "with": "apps/admin/src/environments/environment.staging.ts"
+            },
+            {
+              "replace": "apps/admin/proxy.conf.json",
+              "with": "apps/admin/proxy.staging.conf.json"
             }
           ],
           "outputHashing": "all"
