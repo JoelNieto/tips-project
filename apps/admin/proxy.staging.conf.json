@@ -1,5 +1,6 @@
 {
   "/api": {
-    "target": "https://tips-staging-api.herokuapp.com/api:splat 200"
+    "target": "https://tips-staging-api.herokuapp.com/api:splat 200",
+    "secure": true
   }
 }
