@@ -5,9 +5,7 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/admin",
         "index": "apps/admin/src/index.html",
@@ -15,10 +13,7 @@
         "polyfills": "apps/admin/src/polyfills.ts",
         "tsConfig": "apps/admin/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": [
-          "apps/admin/src/favicon.ico",
-          "apps/admin/src/assets"
-        ],
+        "assets": ["apps/admin/src/favicon.ico", "apps/admin/src/assets"],
         "styles": [
           "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
           "apps/admin/src/styles.scss"
@@ -47,6 +42,27 @@
           ],
           "outputHashing": "all"
         },
+        "staging": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/admin/src/environments/environment.ts",
+              "with": "apps/admin/src/environments/environment.staging.ts"
+            }
+          ],
+          "outputHashing": "all"
+        },
         "development": {
           "buildOptimizer": false,
           "optimization": false,
@@ -56,6 +72,7 @@
           "namedChunks": true
         }
       },
+
       "defaultConfiguration": "production"
     },
     "serve": {
@@ -90,9 +107,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/admin"
-      ],
+      "outputs": ["coverage/apps/admin"],
       "options": {
         "jestConfig": "apps/admin/jest.config.js",
         "passWithNoTests": true

@@ -19,7 +19,8 @@
       "@tips/auth": ["libs/auth/src/index.ts"],
       "@tips/data/models": ["libs/data/models/src/index.ts"],
       "@tips/data/services": ["libs/data/services/src/index.ts"],
-      "@tips/ui": ["libs/ui/src/index.ts"]
+      "@tips/ui": ["libs/ui/src/index.ts"],
+      "@tips/app-config": ["libs/app-config/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
