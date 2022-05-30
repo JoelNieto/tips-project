@@ -11,9 +11,9 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    methods: ['*'],
-    origin: ['https://staging.tips.cicap.net/', 'http://localhost:4200'],
-    allowedHeaders: ['*'],
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
   });
   const globalPrefix = 'api';
   const documentConfig = new DocumentBuilder()
