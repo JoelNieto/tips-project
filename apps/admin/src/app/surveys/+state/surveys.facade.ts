@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { SurveyType } from '@tips/data/models';
 
 import { SurveyTypesActions } from './survey-types/survey-types.actions';
 import * as TypesSelectors from './survey-types/survey-types.selectors';
@@ -28,5 +29,12 @@ export class SurveysFacade {
 
   loadTypes() {
     this.store.dispatch(SurveyTypesActions.load());
+  }
+
+  createType(request: SurveyType) {
+    this.store.dispatch(SurveyTypesActions.createType({ request }));
+  }
+  updateType(id: string, request: Partial<SurveyType>) {
+    this.store.dispatch(SurveyTypesActions.updateType({ id, request }));
   }
 }

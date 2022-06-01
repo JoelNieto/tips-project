@@ -1,5 +1,5 @@
 <div class="container">
-  <mat-tab-group mat-align-tabs="center">
+  <mat-tab-group>
     <mat-tab label="Surveys">
       <div class="header-container">
         <h2>Surveys</h2>
@@ -8,7 +8,7 @@
         >
       </div>
 
-      <table mat-table [dataSource]="dataSource">
+      <table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef>Title</th>
           <td mat-cell *matCellDef="let survey">{{ survey.title }}</td>

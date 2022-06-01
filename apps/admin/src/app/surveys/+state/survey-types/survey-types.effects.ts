@@ -11,11 +11,38 @@ export class SurveyTypesEffects {
   load$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(SurveyTypesActions.load),
-      /** An EMPTY observable only emits completion. Replace with your own observable API request */
       switchMap(() =>
         this.service
           .getAll()
           .pipe(map((types) => SurveyTypesActions.loadSuccess({ types })))
+      )
+    );
+  });
+
+  createType$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(SurveyTypesActions.createType),
+      switchMap(({ request }) =>
+        this.service
+          .post(request)
+          .pipe(
+            map((payload) => SurveyTypesActions.createTypeSuccess({ payload }))
+          )
+      )
+    );
+  });
+
+  updateType$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(SurveyTypesActions.updateType),
+      switchMap(({ request, id }) =>
+        this.service
+          .update(id, request)
+          .pipe(
+            map((payload) =>
+              SurveyTypesActions.updateTypeSuccess({ id, payload })
+            )
+          )
       )
     );
   });

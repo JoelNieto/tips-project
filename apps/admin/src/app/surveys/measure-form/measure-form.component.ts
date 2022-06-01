@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'tips-measure-form',
@@ -6,8 +7,11 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   styleUrls: ['./measure-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MeasureFormComponent implements OnInit {
-  constructor() {}
+export class MeasureFormComponent {
+  @Input()
+  public form!: FormGroup;
 
-  ngOnInit(): void {}
+  @Output() addQuestion = new EventEmitter();
+
+  @Output() removeQuestion = new EventEmitter<number>();
 }

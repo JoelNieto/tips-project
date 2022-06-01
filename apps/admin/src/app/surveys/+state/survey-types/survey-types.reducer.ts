@@ -27,10 +27,19 @@ export const initialState: State = typesAdapter.getInitialState({
 export const reducer = createReducer(
   initialState,
 
-  on(SurveyTypesActions.load, (state) => state),
+  on(SurveyTypesActions.load, (state): State => state),
   on(
     SurveyTypesActions.loadSuccess,
     (state, { types }): State =>
       typesAdapter.setAll(types, { ...state, loaded: true })
+  ),
+  on(
+    SurveyTypesActions.createTypeSuccess,
+    (state, { payload }): State => typesAdapter.addOne(payload, state)
+  ),
+  on(
+    SurveyTypesActions.updateTypeSuccess,
+    (state, { id, payload }): State =>
+      typesAdapter.updateOne({ id, changes: payload }, state)
   )
 );

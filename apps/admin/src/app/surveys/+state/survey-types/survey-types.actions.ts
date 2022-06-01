@@ -8,5 +8,11 @@ export const SurveyTypesActions = createActionGroup({
     'Load Success': props<{ types: SurveyType[] }>(),
     'Create Type': props<{ request: SurveyType }>(),
     'Create Type Success': props<{ payload: SurveyType }>(),
+    'Update Type': props<{ id: string; request: Partial<SurveyType> }>(),
+    'Update Type Success': props<{
+      id: string;
+      payload: Partial<SurveyType>;
+    }>(),
+    'Delete Type': props<{ id: string }>(),
   },
 });

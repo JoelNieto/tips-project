@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
@@ -15,7 +15,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req: any, @Body() login: LoginDTO) {
-    Logger.log(JSON.stringify(login), 'login');
     return await this.service.login(req.user);
   }
 

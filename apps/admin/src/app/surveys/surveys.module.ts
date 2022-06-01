@@ -26,6 +26,7 @@ import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
 import { TypesFormComponent } from './types-form/types-form.component';
 import { TypesComponent } from './types/types.component';
+import { QuestionFormComponent } from './question-form/question-form.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { TypesComponent } from './types/types.component';
     TypesComponent,
     TypesFormComponent,
     MeasureFormComponent,
+    QuestionFormComponent,
   ],
   imports: [
     CommonModule,

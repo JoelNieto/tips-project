@@ -1,4 +1,4 @@
-<form [formGroup]="form">
+<form [formGroup]="form" (ngSubmit)="saveChanges()">
   <h1 mat-dialog-title>Survey type</h1>
   <div mat-dialog-content>
     <mat-form-field appearance="fill">
@@ -20,8 +20,13 @@
     >
   </div>
   <div mat-dialog-actions>
-    <button mat-button>Cancel</button>
-    <button mat-flat-button color="primary" [disabled]="form.invalid">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button
+      type="submit"
+      mat-flat-button
+      color="primary"
+      [disabled]="form.invalid || form.pristine"
+    >
       Save
     </button>
   </div>

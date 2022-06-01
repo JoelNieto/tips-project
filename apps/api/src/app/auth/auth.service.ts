@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,10 +13,7 @@ export class AuthService {
     @InjectModel(User.name) private model: Model<UserDocument>,
     private configService: ConfigService,
     private readonly jwt: JwtService
-  ) {
-    const database = configService.get('ENV_NAME');
-    Logger.log(database, 'env');
-  }
+  ) {}
 
   async validateUser(email: string, password: string) {
     const user = await this.model.findOne({ email }).populate('role');
@@ -31,7 +28,6 @@ export class AuthService {
   }
 
   async login(user: UserDocument) {
-    Logger.log(JSON.stringify(user), 'user');
     const payload = {
       email: user.email,
       username: user.username,
