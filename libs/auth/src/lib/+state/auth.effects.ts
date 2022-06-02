@@ -9,16 +9,14 @@ import { AuthActions } from './auth.actions';
 
 @Injectable()
 export class AuthEffects {
-  login$ = createEffect(() =>
-    this.actions$.pipe(
+  login$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(AuthActions.login),
       switchMap(({ request }) =>
-        this.service
-          .login(request)
-          .pipe(map((payload) => AuthActions.loginSuccess({ payload })))
+        this.service.login(request).pipe(map(() => AuthActions.loginSuccess()))
       )
-    )
-  );
+    );
+  });
 
   loginSuccess$ = createEffect(() => {
     return this.actions$.pipe(

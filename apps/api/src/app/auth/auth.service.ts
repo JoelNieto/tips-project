@@ -11,7 +11,7 @@ import { User, UserDocument } from '../users/schema/user.schema';
 export class AuthService {
   constructor(
     @InjectModel(User.name) private model: Model<UserDocument>,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly jwt: JwtService
   ) {}
 
@@ -28,13 +28,18 @@ export class AuthService {
   }
 
   async login(user: UserDocument) {
-    const payload = {
+    return {
       email: user.email,
       username: user.username,
       role: user.role,
       _id: user._id,
     };
+  }
 
-    return { access_token: this.jwt.sign(payload) };
+  public getJWTCookie(payload: Partial<User>) {
+    const token = this.jwt.sign(payload);
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      'JWT_EXPIRATION'
+    )}`;
   }
 }

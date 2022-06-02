@@ -13,7 +13,6 @@ export class AuthFacade {
    */
   logged$ = this.store.select(AuthSelectors.selectLogged);
   error$ = this.store.select(AuthSelectors.selectError);
-  token$ = this.store.select(AuthSelectors.selectToken);
 
   constructor(private readonly store: Store) {}
 
@@ -27,5 +26,9 @@ export class AuthFacade {
 
   login(request: Login) {
     this.store.dispatch(AuthActions.login({ request }));
+  }
+
+  loadProfile() {
+    this.store.dispatch(AuthActions.loadProfile());
   }
 }

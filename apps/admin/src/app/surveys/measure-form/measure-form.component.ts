@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
 
 @Component({
   selector: 'tips-measure-form',
@@ -7,11 +7,16 @@ import { FormGroup } from '@angular/forms';
   styleUrls: ['./measure-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MeasureFormComponent {
-  @Input()
-  public form!: FormGroup;
+export class MeasureFormComponent implements OnInit {
+  @Input() public formGroupName!: number;
 
   @Output() addQuestion = new EventEmitter();
 
   @Output() removeQuestion = new EventEmitter<number>();
+  form!: FormGroup;
+  constructor(private rootFormGroup: FormGroupDirective) {}
+  ngOnInit(): void {
+    const control = this.rootFormGroup.control.get('measures') as FormArray;
+    this.form = control.at(this.formGroupName) as FormGroup;
+  }
 }

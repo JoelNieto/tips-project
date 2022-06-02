@@ -6,7 +6,6 @@ import { AuthActions } from './auth.actions';
 export const AUTH_FEATURE_KEY = 'auth';
 
 export interface State {
-  accessToken: string | undefined;
   user: User | undefined | null;
   logged: boolean; // has the Auth list been loaded
   error?: unknown | null; // last known error (if any)
@@ -18,7 +17,6 @@ export interface AuthPartialState {
 
 export const initialState: State = {
   // set initial required properties
-  accessToken: undefined,
   user: undefined,
   logged: false,
   error: null,
@@ -26,18 +24,10 @@ export const initialState: State = {
 
 const authReducer = createReducer(
   initialState,
-  on(AuthActions.init, (state) => ({ ...state, logged: false, error: null })),
-  on(
-    AuthActions.loginSuccess,
-    (state, { payload }): State => ({
-      ...state,
-      logged: true,
-      accessToken: payload.access_token,
-    })
-  ),
+  on(AuthActions.init, (state): State => ({ ...state, error: null })),
   on(
     AuthActions.loadProfileSuccess,
-    (state, { payload }): State => ({ ...state, user: payload })
+    (state, { payload }): State => ({ ...state, user: payload, logged: true })
   )
 );
 

@@ -5,6 +5,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app/app.module';
 
@@ -15,6 +16,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
+  app.use(cookieParser());
   const globalPrefix = 'api';
   const documentConfig = new DocumentBuilder()
     .setTitle('Tips API')

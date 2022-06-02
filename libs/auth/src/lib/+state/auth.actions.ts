@@ -6,7 +6,7 @@ export const AuthActions = createActionGroup({
   events: {
     Init: emptyProps(),
     Login: props<{ request: Login }>(),
-    'Login Success': props<{ payload: { access_token: string } }>(),
+    'Login Success': emptyProps(),
     'Login Failure': props<{ error: unknown }>(),
     'Load Profile': emptyProps(),
     'Load Profile Success': props<{ payload: User }>(),

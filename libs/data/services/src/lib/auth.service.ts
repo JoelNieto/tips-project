@@ -13,10 +13,7 @@ export class AuthService {
   ) {}
 
   public login = (login: Login) =>
-    this.http.post<{ access_token: string }>(
-      `${this.config.backendURL}/auth/login`,
-      login
-    );
+    this.http.post(`${this.config.backendURL}/auth/login`, login);
 
   public getProfile = () =>
     this.http.get<User>(`${this.config.backendURL}/auth/profile`);

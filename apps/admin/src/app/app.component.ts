@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { Message } from '@tips/api-interfaces';
+import { AuthFacade } from '@tips/auth';
 
 @Component({
   selector: 'tips-root',
@@ -8,6 +8,7 @@ import { Message } from '@tips/api-interfaces';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  hello$ = this.http.get<Message>('/api/hello');
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth: AuthFacade) {
+    this.auth.loadProfile();
+  }
 }

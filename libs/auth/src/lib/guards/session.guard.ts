@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild, Router, UrlTree } from '@angular/router';
-import { iif, mergeMap, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { AuthFacade } from '../+state/auth.facade';
 
@@ -14,18 +14,10 @@ export class SessionGuard implements CanActivate, CanActivateChild {
   ) {}
 
   canActivate(): Observable<boolean | UrlTree> {
-    return this.auth.logged$.pipe(
-      mergeMap((logged) =>
-        iif(() => logged, of(logged), of(this.router.createUrlTree(['/'])))
-      )
-    );
+    return of(true);
   }
 
   canActivateChild(): Observable<boolean | UrlTree> {
-    return this.auth.logged$.pipe(
-      mergeMap((logged) =>
-        iif(() => logged, of(logged), of(this.router.createUrlTree(['/'])))
-      )
-    );
+    return of(true);
   }
 }

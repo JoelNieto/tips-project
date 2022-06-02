@@ -17,7 +17,6 @@ export class SignInComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.facade.init();
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],

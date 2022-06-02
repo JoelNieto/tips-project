@@ -1,16 +1,16 @@
-<div class="row">
+<form [formGroup]="form" class="row">
   <mat-form-field class="col-8" appearance="fill">
     <mat-label>Name</mat-label>
-    <input type="text" matInput />
+    <input type="text" matInput formControlName="name" />
   </mat-form-field>
   <mat-form-field class="col-4" appearance="fill">
     <mat-label>Weighting</mat-label>
-    <input type="number" matInput />
+    <input type="number" matInput formControlName="weighting" />
     <mat-icon matSuffix>percent</mat-icon>
   </mat-form-field>
   <mat-form-field appearance="fill">
     <mat-label>Description</mat-label>
-    <textarea matInput></textarea>
+    <textarea matInput formControlName="description"></textarea>
   </mat-form-field>
   <div class="header-container">
     <h3>Questions</h3>
@@ -38,4 +38,4 @@
       <mat-slide-toggle class="col-2">Reverse</mat-slide-toggle>
     </div>
   </mat-card>
-</div>
+</form>
