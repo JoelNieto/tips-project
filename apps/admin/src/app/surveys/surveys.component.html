@@ -1,28 +1,32 @@
 <div class="container">
   <mat-tab-group>
-    <mat-tab label="Surveys">
+    <mat-tab [label]="'Surveys' | translate">
       <div class="header-container">
-        <h2>Surveys</h2>
-        <a mat-flat-button color="primary" [routerLink]="['form']"
-          >New survey</a
-        >
+        <h2>{{ 'Surveys' | translate }}</h2>
+        <a mat-flat-button color="primary" [routerLink]="['form']">{{
+          'New survey' | translate
+        }}</a>
       </div>
 
       <table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'Title' | translate }}</th>
           <td mat-cell *matCellDef="let survey">{{ survey.title }}</td>
         </ng-container>
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'Type' | translate }}</th>
           <td mat-cell *matCellDef="let survey">{{ survey.type.name }}</td>
         </ng-container>
         <ng-container matColumnDef="createdAt">
-          <th mat-header-cell *matHeaderCellDef>Created at</th>
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'Created at' | translate }}
+          </th>
           <td mat-cell *matCellDef="let survey">{{ survey.createdAt }}</td>
         </ng-container>
         <ng-container matColumnDef="updatedAt">
-          <th mat-header-cell *matHeaderCellDef>Updated at</th>
+          <th mat-header-cell *matHeaderCellDef>
+            {{ 'Updated at' | translate }}
+          </th>
           <td mat-cell *matCellDef="let survey">{{ survey.updatedAt }}</td>
         </ng-container>
         <tr
@@ -38,7 +42,7 @@
         ></tr>
       </table>
     </mat-tab>
-    <mat-tab label="Types"><tips-types></tips-types></mat-tab>
-    <mat-tab label="Measures"></mat-tab>
+    <mat-tab [label]="'Types' | translate"><tips-types></tips-types></mat-tab>
+    <mat-tab [label]="'Measures' | translate"></mat-tab>
   </mat-tab-group>
 </div>
