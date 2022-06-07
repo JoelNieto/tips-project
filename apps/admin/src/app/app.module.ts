@@ -18,9 +18,13 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavigationComponent } from './navigation/navigation.component';
+import { HomeComponent } from './home/home.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatCardModule } from '@angular/material/card';
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
-  declarations: [AppComponent, NavigationComponent],
+  declarations: [AppComponent, NavigationComponent, HomeComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
@@ -44,6 +48,9 @@ import { NavigationComponent } from './navigation/navigation.component';
     MatSidenavModule,
     MatIconModule,
     MatListModule,
+    MatGridListModule,
+    MatCardModule,
+    MatMenuModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AccessInterceptor, multi: true },

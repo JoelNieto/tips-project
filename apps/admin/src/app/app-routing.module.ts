@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { SessionGuard } from '@tips/auth';
 
+import { HomeComponent } from './home/home.component';
 import { NavigationComponent } from './navigation/navigation.component';
 
 export const routes: Routes = [
@@ -11,11 +12,13 @@ export const routes: Routes = [
     canActivate: [SessionGuard],
     canActivateChild: [SessionGuard],
     children: [
+      { path: 'home', component: HomeComponent },
       {
         path: 'surveys',
         loadChildren: () =>
           import('./surveys/surveys.module').then((m) => m.SurveysModule),
       },
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
   {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Measure } from '@tips/data/models';
+import { Measure, Question } from '@tips/data/models';
 
 import { SurveysFacade } from '../+state/surveys.facade';
 
@@ -48,6 +48,14 @@ export class FormComponent implements OnInit {
   addMeasure() {
     const control = this.form.get('measures') as FormArray;
     control.push(this.initMeasure());
+  }
+
+  initQuestion(question?: Question): FormGroup {
+    return this._fb.group({
+      _id: [question?._id ?? null],
+      title: [question?.title ?? ''],
+      text: [question?.text ?? '', [Validators.required, Validators.minLength(5)]]
+    })
   }
 
   removeMeasure(i: number) {

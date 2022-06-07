@@ -15,18 +15,21 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 
+import { AnswersEffects } from './+state/answers/answers.effects';
+import * as fromAnswers from './+state/answers/answers.reducer';
 import { SurveyTypesEffects } from './+state/survey-types/survey-types.effects';
 import * as fromSurveyTypes from './+state/survey-types/survey-types.reducer';
 import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
+import { AnswerFormComponent } from './answer-form/answer-form.component';
 import { FormComponent } from './form/form.component';
 import { MeasureFormComponent } from './measure-form/measure-form.component';
+import { QuestionFormComponent } from './question-form/question-form.component';
 import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
 import { TypesFormComponent } from './types-form/types-form.component';
 import { TypesComponent } from './types/types.component';
-import { QuestionFormComponent } from './question-form/question-form.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +39,7 @@ import { QuestionFormComponent } from './question-form/question-form.component';
     TypesFormComponent,
     MeasureFormComponent,
     QuestionFormComponent,
+    AnswerFormComponent,
   ],
   imports: [
     CommonModule,
@@ -56,11 +60,16 @@ import { QuestionFormComponent } from './question-form/question-form.component';
       fromSurveys.SURVEYS_FEATURE_KEY,
       fromSurveys.reducer
     ),
-    EffectsModule.forFeature([SurveysEffects, SurveyTypesEffects]),
+    EffectsModule.forFeature([
+      SurveysEffects,
+      SurveyTypesEffects,
+      AnswersEffects,
+    ]),
     StoreModule.forFeature(
       fromSurveyTypes.surveyTypesFeatureKey,
       fromSurveyTypes.reducer
     ),
+    StoreModule.forFeature(fromAnswers.answersFeatureKey, fromAnswers.reducer),
   ],
   providers: [SurveysFacade],
 })
