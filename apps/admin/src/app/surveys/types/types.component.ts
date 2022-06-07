@@ -39,13 +39,13 @@ export class TypesComponent implements OnInit {
   }
 
   newType(): void {
-    const dialogRef = this.dialog.open(TypesFormComponent, {
+    this.dialog.open(TypesFormComponent, {
       width: '40vw',
     });
   }
 
   editType(type: SurveyType): void {
-    const dialogRef = this.dialog.open(TypesFormComponent, {
+    this.dialog.open(TypesFormComponent, {
       data: type,
       width: '40vw',
     });
