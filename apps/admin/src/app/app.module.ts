@@ -1,6 +1,7 @@
 import { LayoutModule } from '@angular/cdk/layout';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -18,7 +19,9 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavigationComponent } from './navigation/navigation.component';
-
+import localeEs from '@angular/common/locales/es-PA';
+import { LOCALE_ID, NgModule } from '@angular/core';
+registerLocaleData(localeEs, 'es-PA');
 @NgModule({
   declarations: [AppComponent, NavigationComponent],
   imports: [
@@ -48,6 +51,7 @@ import { NavigationComponent } from './navigation/navigation.component';
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AccessInterceptor, multi: true },
     { provide: APP_CONFIG, useValue: environment },
+    { provide: LOCALE_ID, useValue: 'es-PA' },
   ],
   bootstrap: [AppComponent],
 })

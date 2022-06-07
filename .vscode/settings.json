@@ -1,3 +1,5 @@
 {
-  "vsicons.presets.angular": true
+  "vsicons.presets.angular": true,
+  "errorLens.onSave": true,
+  "editor.formatOnSave": true
 }
