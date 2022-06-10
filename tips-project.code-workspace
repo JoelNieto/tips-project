@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"name": "admin",
+			"path": "apps/admin"
+		},
+		{
+			"name": "api",
+			"path": "apps/api"
+		},
+		{
+			"name": "auth",
+			"path": "libs/auth"
+		},
+		{
+			"name": "data",
+			"path": "libs/data"
+		},
+		{
+			"name": "ui",
+			"path": "libs/ui"
+		},
+		{
+			"name": "project",
+			"path": "."
+		}
+	],
+	"settings": {
+		"errorLens.onSave": true
+	}
+}

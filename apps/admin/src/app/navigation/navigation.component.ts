@@ -1,5 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AuthFacade } from '@tips/auth';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
@@ -16,6 +17,9 @@ export class NavigationComponent {
       map((result) => result.matches),
       shareReplay()
     );
-
-  constructor(private breakpointObserver: BreakpointObserver) {}
+  user$ = this.store.profile$;
+  constructor(
+    private breakpointObserver: BreakpointObserver,
+    private readonly store: AuthFacade
+  ) {}
 }

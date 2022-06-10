@@ -1,39 +1,39 @@
 <div class="header-container">
-  <h2>Survey types</h2>
-  <button mat-flat-button color="primary" (click)="newType()">New Type</button>
+  <h2>{{ 'Survey types' | translate }}</h2>
+  <button mat-flat-button color="primary" (click)="newType()">
+    {{ 'New type' | translate }}
+  </button>
 </div>
 <div>
   <table mat-table [dataSource]="dataSource">
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'Name' | translate }}</th>
       <td mat-cell *matCellDef="let item">{{ item.name }}</td>
     </ng-container>
     <ng-container matColumnDef="prefix">
-      <th mat-header-cell *matHeaderCellDef>Prefix</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'Prefix' | translate }}</th>
       <td mat-cell *matCellDef="let item">{{ item.prefix }}</td>
     </ng-container>
     <ng-container matColumnDef="measureName">
-      <th mat-header-cell *matHeaderCellDef>Measure Name</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ 'Measure name' | translate }}
+      </th>
       <td mat-cell *matCellDef="let item">{{ item.measureName }}</td>
     </ng-container>
-    <ng-container matColumnDef="subMeasureName">
-      <th mat-header-cell *matHeaderCellDef>Sub Measure Name</th>
-      <td mat-cell *matCellDef="let item">{{ item.subMeasureName }}</td>
-    </ng-container>
     <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef>Created at</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'Created at' | translate }}</th>
       <td mat-cell *matCellDef="let item">
         {{ item.createdAt | date: 'short' }}
       </td>
     </ng-container>
     <ng-container matColumnDef="updatedAt">
-      <th mat-header-cell *matHeaderCellDef>Updated at</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'Updated at' | translate }}</th>
       <td mat-cell *matCellDef="let item">
         {{ item.updatedAt | date: 'short' }}
       </td>
     </ng-container>
     <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <th mat-header-cell *matHeaderCellDef>{{ 'Actions' | translate }}</th>
       <td mat-cell *matCellDef="let item">
         <button mat-icon-button color="primary" (click)="editType(item)">
           <mat-icon>edit</mat-icon>

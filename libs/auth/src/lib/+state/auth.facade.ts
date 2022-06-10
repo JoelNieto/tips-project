@@ -13,6 +13,7 @@ export class AuthFacade {
    */
   logged$ = this.store.select(AuthSelectors.selectLogged);
   error$ = this.store.select(AuthSelectors.selectError);
+  profile$ = this.store.select(AuthSelectors.selectProfile);
 
   constructor(private readonly store: Store) {}
 

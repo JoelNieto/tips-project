@@ -26,6 +26,8 @@
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span>Tips - Human Resources</span>
+      <div class="spacer"></div>
+      <button>{{ (user$ | async)?.username }}</button>
     </mat-toolbar>
     <router-outlet></router-outlet>
   </mat-sidenav-content>

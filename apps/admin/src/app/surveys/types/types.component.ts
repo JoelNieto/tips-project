@@ -18,7 +18,6 @@ export class TypesComponent implements OnInit {
     'name',
     'prefix',
     'measureName',
-    'subMeasureName',
     'createdAt',
     'updatedAt',
     'actions',

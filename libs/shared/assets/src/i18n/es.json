@@ -1,5 +1,6 @@
 {
 	"AppName": "Tips",
+	"Name": "Nombre",
 	"Survey": "Encuesta",
 	"Surveys": "Encuestas",
 	"Title": "Titulo",
@@ -8,5 +9,14 @@
 	"Updated at": "Actualizado",
 	"Type": "Tipo",
 	"Types": "Tipos",
-	"Measures": "Dimensiones"
+	"Measures": "Dimensiones",
+	"Survey types": "Tipos de encuestas",
+	"Survey type": "Tipos de encuesta",
+	"New type": "Nuevo tipo",
+	"Prefix": "Prefijo",
+	"Actions": "Acciones",
+	"Measure name": "Nombre dimension",
+	"Instructions": "Instrucciones",
+	"Save": "Guardar",
+	"Cancel": "Cancelar"
 }
