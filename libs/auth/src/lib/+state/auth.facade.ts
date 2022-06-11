@@ -22,7 +22,7 @@ export class AuthFacade {
    * or more tasks in your Effects.
    */
   init() {
-    this.store.dispatch(AuthActions.init());
+    this.store.dispatch(AuthActions.init()); 
   }
 
   login(request: Login) {

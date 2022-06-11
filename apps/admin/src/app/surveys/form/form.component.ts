@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormGroup, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Measure, Question } from '@tips/data/models';
 
 import { SurveysFacade } from '../+state/surveys.facade';
@@ -12,10 +12,10 @@ import { SurveysFacade } from '../+state/surveys.facade';
 })
 export class FormComponent implements OnInit {
   types$ = this.state.allTypes$;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   constructor(
     private readonly state: SurveysFacade,
-    private readonly _fb: FormBuilder
+    private readonly _fb: UntypedFormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -42,24 +42,47 @@ export class FormComponent implements OnInit {
   }
 
   get measuresArray() {
-    return this.form.get('measures') as FormArray;
+    return this.form.get('measures') as UntypedFormArray;
   }
 
   addMeasure() {
-    const control = this.form.get('measures') as FormArray;
+    const control = this.form.get('measures') as UntypedFormArray;
     control.push(this.initMeasure());
   }
 
-  initQuestion(question?: Question): FormGroup {
+  initQuestion(question?: Question): UntypedFormGroup {
     return this._fb.group({
       _id: [question?._id ?? null],
       title: [question?.title ?? ''],
-      text: [question?.text ?? '', [Validators.required, Validators.minLength(5)]]
-    })
+      text: [
+        question?.text ?? '',
+        [Validators.required, Validators.minLength(5)],
+      ],
+      weighting: [
+        question?.weighting ?? 10,
+        [Validators.required, Validators.min],
+      ],
+      reverse: [question?.reverse ?? false],
+    });
   }
 
-  removeMeasure(i: number) {
-    const control = this.form.get('measures') as FormArray;
+  initExistingQuestion(measure: Measure): FormGroup[] {
+    const controls: FormGroup[] = [];
+    measure.questions.forEach((question) => {
+      controls.push(this.initQuestion(question));
+    });
+    return controls;
+  }
+
+  removeMeasure(i: number): void {
+    const control = this.form.get('measures') as UntypedFormArray;
     control.removeAt(i);
+  }
+
+  addQuestion(i: number) {
+    const controls = this.form.get('measures') as FormArray;
+    const measure = controls.at(i);
+    const questions = measure.get('questions') as FormArray;
+    questions.push(this.initQuestion());
   }
 }

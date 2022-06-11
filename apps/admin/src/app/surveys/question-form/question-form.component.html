@@ -1,1 +1,19 @@
-<p>question-form works!</p>
+<form action="" class="row">
+  <mat-form-field class="col-5" appearance="fill">
+    <mat-label>Title</mat-label>
+    <input type="text" matInput />
+    <mat-hint>Optional (Use with wheels)</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="col-7" appearance="fill">
+    <mat-label>Question Text</mat-label>
+    <input matInput placeholder="Question" />
+    <mat-icon matSuffix>question_mark</mat-icon>
+  </mat-form-field>
+  <mat-form-field class="col-3" appearance="fill">
+    <mat-label>Weighting</mat-label>
+    <input type="number" matInput />
+    <mat-icon matSuffix>percent</mat-icon>
+  </mat-form-field>
+  <mat-slide-toggle class="col-2">Multiple</mat-slide-toggle>
+  <mat-slide-toggle class="col-2">Reverse</mat-slide-toggle>
+</form>

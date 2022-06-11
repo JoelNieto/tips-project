@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
+import { UntypedFormArray, UntypedFormGroup, FormGroupDirective } from '@angular/forms';
 
 @Component({
   selector: 'tips-measure-form',
@@ -13,10 +13,10 @@ export class MeasureFormComponent implements OnInit {
   @Output() addQuestion = new EventEmitter();
 
   @Output() removeQuestion = new EventEmitter<number>();
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   constructor(private rootFormGroup: FormGroupDirective) {}
   ngOnInit(): void {
-    const control = this.rootFormGroup.control.get('measures') as FormArray;
-    this.form = control.at(this.formGroupName) as FormGroup;
+    const control = this.rootFormGroup.control.get('measures') as UntypedFormArray;
+    this.form = control.at(this.formGroupName) as UntypedFormGroup;
   }
 }
