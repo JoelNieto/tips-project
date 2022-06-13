@@ -24,6 +24,8 @@ import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
 import { AnswerFormComponent } from './answer-form/answer-form.component';
+import { FormService } from './form.service';
+import { FormStore } from './form/form-store/form.store';
 import { FormComponent } from './form/form.component';
 import { MeasureFormComponent } from './measure-form/measure-form.component';
 import { QuestionFormComponent } from './question-form/question-form.component';
@@ -73,6 +75,6 @@ import { TypesComponent } from './types/types.component';
     ),
     StoreModule.forFeature(fromAnswers.answersFeatureKey, fromAnswers.reducer),
   ],
-  providers: [SurveysFacade],
+  providers: [SurveysFacade, FormStore, FormService],
 })
 export class SurveysModule {}

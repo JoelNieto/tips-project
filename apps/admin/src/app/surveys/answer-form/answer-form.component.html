@@ -1,1 +1,20 @@
-<p>answer-form works!</p>
+<form [formGroup]="form" class="row">
+  <mat-form-field class="col-5" appearance="fill">
+    <mat-label>Title</mat-label>
+    <input type="text" matInput formControlName="title" />
+    <mat-hint>Optional (Use with wheels)</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="col-7" appearance="fill">
+    <mat-label>Question Text</mat-label>
+    <input matInput placeholder="Question" formControlName="text" />
+    <mat-icon matSuffix>question_mark</mat-icon>
+  </mat-form-field>
+  <mat-form-field class="col-3" appearance="fill">
+    <mat-label>Weighting</mat-label>
+    <input type="number" matInput formControlName="weighting" />
+    <mat-icon matSuffix>percent</mat-icon>
+  </mat-form-field>
+  <mat-slide-toggle class="col-2" formControlName="reverse"
+    >Reverse</mat-slide-toggle
+  >
+</form>

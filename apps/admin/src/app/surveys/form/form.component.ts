@@ -1,24 +1,43 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { FormArray, FormGroup, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Measure, Question } from '@tips/data/models';
 
 import { SurveysFacade } from '../+state/surveys.facade';
+import { FormService } from '../form.service';
+import { FormStore } from './form-store/form.store';
 
 @Component({
   selector: 'tips-form',
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [FormStore, FormService],
 })
-export class FormComponent implements OnInit {
+export class FormComponent implements OnInit, OnDestroy {
   types$ = this.state.allTypes$;
-  form!: UntypedFormGroup;
+  form!: FormGroup;
+  newQuestion$ = this.service.newQuestion;
+  removeQuestion$ = this.service.removeQuestion;
   constructor(
     private readonly state: SurveysFacade,
-    private readonly _fb: UntypedFormBuilder
+    private readonly _fb: FormBuilder,
+    private readonly store: FormStore,
+    private readonly service: FormService
   ) {}
 
+  ngOnDestroy(): void {
+    this.newQuestion$.complete();
+    this.removeQuestion$.complete();
+  }
+
   ngOnInit(): void {
+    this.newQuestion$.subscribe({
+      next: (id) => this.addQuestion(id),
+    });
+
+    this.removeQuestion$.subscribe({
+      next: ({ measure, index }) => this.removeQuestion(measure, index),
+    });
     this.form = this._fb.group({
       title: ['', [Validators.required]],
       description: ['', []],
@@ -37,20 +56,21 @@ export class FormComponent implements OnInit {
         measure?.weighting ?? 10,
         [Validators.required, Validators.min(1)],
       ],
+      questions: this._fb.array([this.initQuestion()]),
       description: [measure?.description ?? ''],
     });
   }
 
   get measuresArray() {
-    return this.form.get('measures') as UntypedFormArray;
+    return this.form.get('measures') as FormArray;
   }
 
   addMeasure() {
-    const control = this.form.get('measures') as UntypedFormArray;
+    const control = this.form.get('measures') as FormArray;
     control.push(this.initMeasure());
   }
 
-  initQuestion(question?: Question): UntypedFormGroup {
+  initQuestion(question?: Question): FormGroup {
     return this._fb.group({
       _id: [question?._id ?? null],
       title: [question?.title ?? ''],
@@ -75,14 +95,24 @@ export class FormComponent implements OnInit {
   }
 
   removeMeasure(i: number): void {
-    const control = this.form.get('measures') as UntypedFormArray;
+    const control = this.form.get('measures') as FormArray;
     control.removeAt(i);
   }
 
   addQuestion(i: number) {
     const controls = this.form.get('measures') as FormArray;
-    const measure = controls.at(i);
+
+    const measure = controls.at(i) as FormGroup;
+
     const questions = measure.get('questions') as FormArray;
+
     questions.push(this.initQuestion());
+  }
+
+  removeQuestion(measureId: number, index: number) {
+    const measures = this.form.get('measures') as FormArray;
+    const measure = measures.at(measureId);
+    const questions = measure.get('questions') as FormArray;
+    questions.removeAt(index);
   }
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { FormGroupDirective, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
+import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
 
 @Component({
   selector: 'tips-question-form',
@@ -8,14 +8,12 @@ import { FormGroupDirective, UntypedFormArray, UntypedFormGroup } from '@angular
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuestionFormComponent implements OnInit {
-  @Input() formGroupName!: number;
-  form!: UntypedFormGroup;
+  @Input() index!: number;
+  form!: FormGroup;
   constructor(private rootFormGroup: FormGroupDirective) {}
 
   ngOnInit(): void {
-    const control = this.rootFormGroup.control.get(
-      'questions'
-    ) as UntypedFormArray;
-    this.form = control.at(this.formGroupName) as UntypedFormGroup;
+    const control = this.rootFormGroup.control.get('questions') as FormArray;
+    this.form = control.at(this.index) as FormGroup;
   }
 }

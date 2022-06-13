@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
 
 @Component({
   selector: 'tips-answer-form',
@@ -7,7 +8,13 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnswerFormComponent implements OnInit {
-  constructor() {}
+  @Input() index!: number;
 
-  ngOnInit(): void {}
+  form!: FormGroup;
+  constructor(private rootFormGroup: FormGroupDirective) {}
+
+  ngOnInit(): void {
+    const control = this.rootFormGroup.control.get('questions') as FormArray;
+    this.form = control.at(this.index) as FormGroup;
+  }
 }
