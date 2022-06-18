@@ -14,4 +14,7 @@ export class SurveysService {
 
   public getAll = () =>
     this.http.get<Survey[]>(`${this.config.backendURL}/surveys`);
+
+  public post = (survey: Survey) =>
+    this.http.post<Survey>(`${this.config.backendURL}/surveys`, survey);
 }

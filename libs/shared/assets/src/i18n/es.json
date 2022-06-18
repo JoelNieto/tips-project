@@ -1,22 +1,38 @@
 {
 	"AppName": "Tips",
 	"Name": "Nombre",
-	"Survey": "Encuesta",
-	"Surveys": "Encuestas",
+	"Survey": {
+		"Title": "Encuesta",
+		"Plural": "Encuestas",
+		"New": "Nueva encuesta",
+		"Edit": "Editar encuesta"
+	},
+	"Question": {
+		"Title": "Pregunta",
+		"Plural": "Preguntas",
+		"New": "Nueva pregunta",
+		"Edit": "Editar pregunta",
+		"Remove": "Borrar pregunta"
+	},
+	"Measure": {
+		"Title": "Dimension",
+		"Plural": "Dimensiones",
+		"Name": "Nombre dimension",
+		"New": "Nueva dimension",
+		"Remove": "Borrar dimension"
+	},
 	"Title": "Titulo",
-	"New survey": "Nueva encuesta",
 	"Created at": "Creado",
 	"Updated at": "Actualizado",
 	"Type": "Tipo",
 	"Types": "Tipos",
-	"Measures": "Dimensiones",
 	"Survey types": "Tipos de encuestas",
 	"Survey type": "Tipos de encuesta",
 	"New type": "Nuevo tipo",
 	"Prefix": "Prefijo",
 	"Actions": "Acciones",
-	"Measure name": "Nombre dimension",
 	"Instructions": "Instrucciones",
+	"Description": "Descripcion",
 	"Save": "Guardar",
 	"Cancel": "Cancelar"
 }

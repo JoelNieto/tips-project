@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { SurveyType } from '@tips/data/models';
+import { Store } from '@ngrx/store';
+import { Survey, SurveyType } from '@tips/data/models';
 
 import { SurveyTypesActions } from './survey-types/survey-types.actions';
 import * as TypesSelectors from './survey-types/survey-types.selectors';
@@ -13,9 +13,9 @@ export class SurveysFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loaded$ = this.store.pipe(select(SurveysSelectors.getSurveysLoaded));
-  allSurveys$ = this.store.pipe(select(SurveysSelectors.getAllSurveys));
-  selectedSurveys$ = this.store.pipe(select(SurveysSelectors.getSelected));
+  loaded$ = this.store.select(SurveysSelectors.getSurveysLoaded);
+  allSurveys$ = this.store.select(SurveysSelectors.getAllSurveys);
+  selectedSurveys$ = this.store.select(SurveysSelectors.getSelected);
   allTypes$ = this.store.select(TypesSelectors.getAllTypes);
   constructor(private readonly store: Store) {}
 
@@ -25,6 +25,10 @@ export class SurveysFacade {
    */
   init() {
     this.store.dispatch(SurveysActions.init());
+  }
+
+  create(request: Survey) {
+    this.store.dispatch(SurveysActions.createSurvey({ request }));
   }
 
   loadTypes() {

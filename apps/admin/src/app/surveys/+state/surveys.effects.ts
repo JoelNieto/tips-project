@@ -23,6 +23,19 @@ export class SurveysEffects {
     );
   });
 
+  create$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(SurveysActions.createSurvey),
+      switchMap(({ request }) =>
+        this.service
+          .post(request)
+          .pipe(
+            map((payload) => SurveysActions.createSurveySuccess({ payload }))
+          )
+      )
+    );
+  });
+
   constructor(
     private readonly actions$: Actions,
     private readonly service: SurveysService

@@ -12,14 +12,17 @@ export class CreateSurveyMeasureDto implements DTOBase<Measure> {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   description?: string;
 
   @ApiProperty()
   @IsNumber()
+  @IsNotEmpty()
   weighting: number;
 
   @ApiProperty()
   @IsArray()
+  @IsOptional()
   subMeasures: Measure[];
 
   @ApiProperty()
@@ -28,5 +31,6 @@ export class CreateSurveyMeasureDto implements DTOBase<Measure> {
 
   @ApiProperty()
   @IsArray()
+  @IsNotEmpty()
   questions: Question[];
 }

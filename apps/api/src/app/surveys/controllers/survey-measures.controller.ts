@@ -22,7 +22,7 @@ export class SurveyMeasuresController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.surveyMeasuresService.findOne(+id);
+    return this.surveyMeasuresService.findOne(id);
   }
 
   @Patch(':id')

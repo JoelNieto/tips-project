@@ -1,4 +1,4 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as models from '@tips/data/models';
 import { Document } from 'mongoose';
 
@@ -7,6 +7,7 @@ import { QuestionSchema } from './question.schema';
 
 export type MeasureDocument = SurveyMeasure & Document;
 
+@Schema()
 export class SurveyMeasure
   extends SchemaBase
   implements ModelBase<models.Measure>
@@ -23,7 +24,7 @@ export class SurveyMeasure
   @Prop({ type: Array })
   subMeasures: models.Measure[];
 
-  @Prop({ type: QuestionSchema })
+  @Prop({ type: QuestionSchema, required: false })
   mainQuestion: models.Question;
 
   @Prop({ type: [QuestionSchema] })

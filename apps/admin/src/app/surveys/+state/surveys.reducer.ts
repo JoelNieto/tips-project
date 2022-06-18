@@ -27,18 +27,28 @@ export const initialState: State = surveysAdapter.getInitialState({
 
 const surveysReducer = createReducer(
   initialState,
-  on(SurveysActions.init, (state) => ({
-    ...state,
-    loaded: false,
-    error: null,
-  })),
+  on(
+    SurveysActions.init,
+    (state): State => ({
+      ...state,
+      loaded: false,
+      error: null,
+    })
+  ),
   on(SurveysActions.loadSurveysSuccess, (state, { surveys }) =>
     surveysAdapter.setAll(surveys, { ...state, loaded: true })
   ),
-  on(SurveysActions.loadSurveysFailure, (state, { error }) => ({
-    ...state,
-    error,
-  }))
+  on(
+    SurveysActions.loadSurveysFailure,
+    (state, { error }): State => ({
+      ...state,
+      error,
+    })
+  ),
+  on(
+    SurveysActions.createSurveySuccess,
+    (state, { payload }): State => surveysAdapter.addOne(payload, state)
+  )
 );
 
 export function reducer(state: State | undefined, action: Action) {

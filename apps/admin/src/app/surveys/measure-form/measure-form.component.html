@@ -1,32 +1,29 @@
 <form [formGroup]="form" class="row">
-  <mat-form-field class="col-8" appearance="fill">
+  <mat-form-field class="col-8" appearance="outline">
     <mat-label>{{ 'Name' | translate }}</mat-label>
     <input type="text" matInput formControlName="name" />
   </mat-form-field>
-  <mat-form-field class="col-4" appearance="fill">
+  <mat-form-field class="col-4" appearance="outline">
     <mat-label>{{ 'Weighting' | translate }}</mat-label>
     <input type="number" matInput formControlName="weighting" />
     <mat-icon matSuffix>percent</mat-icon>
   </mat-form-field>
-  <mat-form-field appearance="fill">
+  <mat-form-field appearance="outline">
     <mat-label>{{ 'Description' | translate }}</mat-label>
     <textarea matInput formControlName="description"></textarea>
   </mat-form-field>
   <div class="header-container">
-    <h3>{{ 'Questions' | translate }}</h3>
+    <h3>{{ 'Question.Plural' | translate }}</h3>
     <button mat-raised-button color="accent" (click)="addQuestion()">
-      {{ 'Add question' | translate }}
+      {{ 'Question.New' | translate }}
     </button>
   </div>
   <div formArrayName="questions">
-    <mat-card
-      *ngFor="let question of questionArray.controls; let i = index"
-      class="mat-elevation-z8"
-    >
+    <mat-card *ngFor="let question of questionArray.controls; let i = index">
+      <mat-card-title
+        >{{ 'Question.Title' | translate }} {{ i + 1 }}</mat-card-title
+      >
       <mat-card-content>
-        <mat-card-title
-          >{{ 'Question' | translate }} {{ i + 1 }}</mat-card-title
-        >
         <tips-question-form [index]="i"></tips-question-form>
         <button
           mat-stroked-button
@@ -34,7 +31,7 @@
           class="remove-question"
           (click)="removeQuestion(i)"
         >
-          {{ 'Remove question' | translate }}
+          {{ 'Question.Remove' | translate }}
         </button>
       </mat-card-content>
     </mat-card>

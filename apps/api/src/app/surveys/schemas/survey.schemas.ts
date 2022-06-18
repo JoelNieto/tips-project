@@ -17,7 +17,7 @@ export class Survey extends SchemaBase implements ModelBase<models.Survey> {
   @Prop({ type: mongoSchema.Types.ObjectId, ref: 'SurveyType' })
   type: models.SurveyType;
 
-  @Prop({ type: [MeasureSchema] })
+  @Prop([MeasureSchema])
   measures: models.Measure[];
 
   @Prop({ type: Boolean, default: true })

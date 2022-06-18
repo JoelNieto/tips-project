@@ -75,3 +75,7 @@ body {
 mat-form-field {
   width: 100%;
 }
+
+[mat-raised-button], [mat-button], [mat-flat-button], [mat-stroked-button] {
+  text-transform: uppercase;
+}

@@ -6,7 +6,7 @@ import { NxModule } from '@nrwl/angular';
 import { hot } from 'jasmine-marbles';
 import { Observable } from 'rxjs';
 
-import * as SurveysActions from './surveys.actions';
+import { SurveysActions } from './surveys.actions';
 import { SurveysEffects } from './surveys.effects';
 
 describe('SurveysEffects', () => {

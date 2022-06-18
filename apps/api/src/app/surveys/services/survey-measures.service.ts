@@ -1,20 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { CreateSurveyMeasureDto } from '../dto/create-survey-measure.dto';
 import { UpdateSurveyMeasureDto } from '../dto/update-survey-measure.dto';
+import { MeasureDocument, SurveyMeasure } from '../schemas/survey-measure.schema';
 
 @Injectable()
 export class SurveyMeasuresService {
-  create(createSurveyMeasureDto: CreateSurveyMeasureDto) {
-    return 'This action adds a new surveyMeasure';
+  constructor(
+    @InjectModel(SurveyMeasure.name) private model: Model<MeasureDocument>
+  ) {}
+
+  async create(dto: CreateSurveyMeasureDto) {
+    Logger.log(dto, 'dto');
+    const created = new this.model(dto);
+    return await created.save();
   }
 
   findAll() {
-    return `This action returns all surveyMeasures`;
+    return this.model.find({}).populate('questions');
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} surveyMeasure`;
+  findOne(id: string) {
+    return this.model.findById(id).populate('questions');
   }
 
   update(id: number, updateSurveyMeasureDto: UpdateSurveyMeasureDto) {

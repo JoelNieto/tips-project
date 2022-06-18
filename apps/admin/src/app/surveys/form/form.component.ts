@@ -21,7 +21,6 @@ export class FormComponent implements OnInit, OnDestroy {
   constructor(
     private readonly state: SurveysFacade,
     private readonly _fb: FormBuilder,
-    private readonly store: FormStore,
     private readonly service: FormService
   ) {}
 
@@ -38,6 +37,7 @@ export class FormComponent implements OnInit, OnDestroy {
     this.removeQuestion$.subscribe({
       next: ({ measure, index }) => this.removeQuestion(measure, index),
     });
+
     this.form = this._fb.group({
       title: ['', [Validators.required]],
       description: ['', []],
@@ -50,7 +50,6 @@ export class FormComponent implements OnInit, OnDestroy {
 
   initMeasure(measure?: Measure) {
     return this._fb.group({
-      _id: [measure?._id ?? null],
       name: [measure?.name ?? '', [Validators.required]],
       weighting: [
         measure?.weighting ?? 10,
@@ -72,7 +71,6 @@ export class FormComponent implements OnInit, OnDestroy {
 
   initQuestion(question?: Question): FormGroup {
     return this._fb.group({
-      _id: [question?._id ?? null],
       title: [question?.title ?? ''],
       text: [
         question?.text ?? '',
@@ -101,11 +99,8 @@ export class FormComponent implements OnInit, OnDestroy {
 
   addQuestion(i: number) {
     const controls = this.form.get('measures') as FormArray;
-
     const measure = controls.at(i) as FormGroup;
-
     const questions = measure.get('questions') as FormArray;
-
     questions.push(this.initQuestion());
   }
 
@@ -114,5 +109,14 @@ export class FormComponent implements OnInit, OnDestroy {
     const measure = measures.at(measureId);
     const questions = measure.get('questions') as FormArray;
     questions.removeAt(index);
+  }
+
+  saveSurvey() {
+    const { value } = this.form;
+    console.log(
+      '🚀 ~ file: form.component.ts ~ line 118 ~ FormComponent ~ saveSurvey ~ value',
+      value
+    );
+    this.state.create(value);
   }
 }

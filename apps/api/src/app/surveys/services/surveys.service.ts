@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -11,6 +11,7 @@ export class SurveysService {
   constructor(@InjectModel(Survey.name) private model: Model<SurveyDocument>) {}
 
   async create(createSurveyDto: CreateSurveyDto) {
+    Logger.debug(JSON.stringify(createSurveyDto.measures), 'measures');
     const created = new this.model(createSurveyDto);
     return await created.save();
   }
