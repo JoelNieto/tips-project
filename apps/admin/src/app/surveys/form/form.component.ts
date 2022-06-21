@@ -38,13 +38,25 @@ export class FormComponent implements OnInit, OnDestroy {
       next: ({ measure, index }) => this.removeQuestion(measure, index),
     });
 
-    this.form = this._fb.group({
-      title: ['', [Validators.required]],
-      description: ['', []],
-      type: [undefined, [Validators.required]],
-      public: [false, []],
-      final: [false, []],
-      measures: this._fb.array([this.initMeasure()]),
+    this.state.loadAnswers();
+
+    this.initForm();
+  }
+
+  initForm() {
+    this.state.selectedSurveys$.subscribe({
+      next: (survey) => {
+        this.form = this._fb.group({
+          title: [survey?.title ?? '', [Validators.required]],
+          description: [survey?.description ?? '', []],
+          type: [survey?.type ?? undefined, [Validators.required]],
+          public: [survey?.public ?? false, []],
+          final: [survey?.final ?? false, []],
+          measures: survey?.measures
+            ? this._fb.array(this.initExistingMeasure(survey.measures))
+            : this._fb.array([this.initMeasure()]),
+        });
+      },
     });
   }
 
@@ -55,9 +67,19 @@ export class FormComponent implements OnInit, OnDestroy {
         measure?.weighting ?? 10,
         [Validators.required, Validators.min(1)],
       ],
-      questions: this._fb.array([this.initQuestion()]),
+      questions: measure
+        ? this._fb.array(this.initExistingQuestion(measure))
+        : this._fb.array([this.initQuestion()]),
       description: [measure?.description ?? ''],
     });
+  }
+
+  initExistingMeasure(measures: Measure[]): FormGroup[] {
+    const controls: FormGroup[] = [];
+    measures.forEach((item) => {
+      controls.push(this.initMeasure(item));
+    });
+    return controls;
   }
 
   get measuresArray() {
@@ -81,6 +103,7 @@ export class FormComponent implements OnInit, OnDestroy {
         [Validators.required, Validators.min],
       ],
       reverse: [question?.reverse ?? false],
+      answersSet: [question?.answersSet ?? null, [Validators.required]],
     });
   }
 
@@ -113,10 +136,10 @@ export class FormComponent implements OnInit, OnDestroy {
 
   saveSurvey() {
     const { value } = this.form;
-    console.log(
-      '🚀 ~ file: form.component.ts ~ line 118 ~ FormComponent ~ saveSurvey ~ value',
-      value
-    );
     this.state.create(value);
+  }
+
+  compareFn(item1: any, item2: any) {
+    return item1 && item2 ? item1._id === item2._id : item1 === item2;
   }
 }

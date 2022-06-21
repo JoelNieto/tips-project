@@ -18,5 +18,15 @@ export class AnswersEffects {
     );
   });
 
+  create$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AnswersActions.createSet),
+      switchMap(({ request }) =>
+        this.service
+          .post(request)
+          .pipe(map((payload) => AnswersActions.createSetSuccess({ payload })))
+      )
+    );
+  });
   constructor(private actions$: Actions, private service: AnswersSetsService) {}
 }

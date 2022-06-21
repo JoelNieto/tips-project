@@ -1,38 +1,40 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { SURVEYS_FEATURE_KEY, State, surveysAdapter } from './surveys.reducer';
+
+import { State, SURVEYS_FEATURE_KEY, surveysAdapter } from './surveys.reducer';
 
 // Lookup the 'Surveys' feature state managed by NgRx
-export const getSurveysState =
+export const selectSurveysState =
   createFeatureSelector<State>(SURVEYS_FEATURE_KEY);
 
 const { selectAll, selectEntities } = surveysAdapter.getSelectors();
 
-export const getSurveysLoaded = createSelector(
-  getSurveysState,
+export const selectSurveysLoaded = createSelector(
+  selectSurveysState,
   (state: State) => state.loaded
 );
 
-export const getSurveysError = createSelector(
-  getSurveysState,
+export const selectSurveysError = createSelector(
+  selectSurveysState,
   (state: State) => state.error
 );
 
-export const getAllSurveys = createSelector(getSurveysState, (state: State) =>
-  selectAll(state)
+export const selectAllSurveys = createSelector(
+  selectSurveysState,
+  (state: State) => selectAll(state)
 );
 
-export const getSurveysEntities = createSelector(
-  getSurveysState,
+export const selectSurveysEntities = createSelector(
+  selectSurveysState,
   (state: State) => selectEntities(state)
 );
 
-export const getSelectedId = createSelector(
-  getSurveysState,
+export const selectSelectedId = createSelector(
+  selectSurveysState,
   (state: State) => state.selectedId
 );
 
-export const getSelected = createSelector(
-  getSurveysEntities,
-  getSelectedId,
+export const selectSelected = createSelector(
+  selectSurveysEntities,
+  selectSelectedId,
   (entities, selectedId) => (selectedId ? entities[selectedId] : undefined)
 );

@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Answer, AnswersSet } from '@tips/data/models';
+
+import { SurveysFacade } from '../+state/surveys.facade';
 
 @Component({
   selector: 'tips-answer-form',
@@ -8,13 +12,51 @@ import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnswerFormComponent implements OnInit {
-  @Input() index!: number;
-
   form!: FormGroup;
-  constructor(private rootFormGroup: FormGroupDirective) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) private set: AnswersSet,
+    private readonly _fb: FormBuilder,
+    private readonly store: SurveysFacade
+  ) {}
 
   ngOnInit(): void {
-    const control = this.rootFormGroup.control.get('questions') as FormArray;
-    this.form = control.at(this.index) as FormGroup;
+    this.form = this._fb.group({
+      name: [this.set?.name ?? '', [Validators.required]],
+      answers: this.set?.answers
+        ? this._fb.array(this.initExistingAnswers(this.set.answers))
+        : this._fb.array([this.initAnswer()]),
+    });
+  }
+
+  initAnswer(answer?: Answer) {
+    return this._fb.group({
+      text: [answer?.text ?? '', [Validators.required]],
+      value: [answer?.value ?? null, [Validators.required]],
+    });
+  }
+
+  initExistingAnswers(answers: Answer[]): FormGroup[] {
+    const controls: FormGroup[] = [];
+    answers.forEach((item) => {
+      controls.push(this.initAnswer(item));
+    });
+    return controls;
+  }
+
+  addAnswer() {
+    this.answersArray.push(this.initAnswer());
+  }
+
+  removeAnswer(index: number) {
+    this.answersArray.removeAt(index);
+  }
+
+  get answersArray() {
+    return this.form.get('answers') as FormArray;
+  }
+
+  saveAnswerSet() {
+    const { value } = this.form;
+    this.store.createSet(value);
   }
 }

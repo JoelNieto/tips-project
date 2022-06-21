@@ -9,7 +9,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="col-4">
           <mat-label>{{ 'Type' | translate }}</mat-label>
-          <mat-select formControlName="type">
+          <mat-select formControlName="type" [compareWith]="compareFn">
             <mat-option>--</mat-option>
             <mat-option *ngFor="let type of types$ | async" [value]="type">{{
               type.name
@@ -21,7 +21,7 @@
           <textarea matInput formControlName="description"></textarea>
         </mat-form-field>
         <div class="header-container">
-          <h2>{{ 'Measures' | translate }}</h2>
+          <h2>{{ 'Measure.Plural' | translate }}</h2>
           <button mat-flat-button color="primary" (click)="addMeasure()">
             {{ 'Measure.New' | translate }}
           </button>

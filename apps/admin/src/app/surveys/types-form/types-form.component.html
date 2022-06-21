@@ -13,11 +13,15 @@
       <mat-label>{{ 'Prefix' | translate }}</mat-label>
       <input matInput type="text" formControlName="prefix" />
     </mat-form-field>
-    <mat-slide-toggle formControlName="hasRadar">Has Radar</mat-slide-toggle>
-    <mat-slide-toggle formControlName="hasBar">Has Bar</mat-slide-toggle>
-    <mat-slide-toggle formControlName="hasMeasureQuestion"
-      >Has Measure Question</mat-slide-toggle
-    >
+    <mat-slide-toggle formControlName="hasRadar">{{
+      'Has Radar' | translate
+    }}</mat-slide-toggle>
+    <mat-slide-toggle formControlName="hasBar">{{
+      'Has Bar' | translate
+    }}</mat-slide-toggle>
+    <mat-slide-toggle formControlName="hasMeasureQuestion">{{
+      'Has Measure Question' | translate
+    }}</mat-slide-toggle>
   </div>
   <div mat-dialog-actions>
     <button mat-button mat-dialog-close>{{ 'Cancel' | translate }}</button>

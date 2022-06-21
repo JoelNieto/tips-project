@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -24,10 +24,14 @@ import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
 import { AnswerFormComponent } from './answer-form/answer-form.component';
+import { EditSurveyComponent } from './edit-survey/edit-survey.component';
 import { FormService } from './form.service';
 import { FormStore } from './form/form-store/form.store';
 import { FormComponent } from './form/form.component';
+import { HomeComponent } from './home/home.component';
+import { ListComponent } from './list/list.component';
 import { MeasureFormComponent } from './measure-form/measure-form.component';
+import { NewSurveyComponent } from './new-survey/new-survey.component';
 import { QuestionFormComponent } from './question-form/question-form.component';
 import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
@@ -43,6 +47,10 @@ import { TypesComponent } from './types/types.component';
     MeasureFormComponent,
     QuestionFormComponent,
     AnswerFormComponent,
+    NewSurveyComponent,
+    ListComponent,
+    HomeComponent,
+    EditSurveyComponent,
   ],
   imports: [
     CommonModule,
@@ -50,6 +58,7 @@ import { TypesComponent } from './types/types.component';
     MatTableModule,
     MatButtonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatInputModule,
     MatIconModule,
     MatFormFieldModule,

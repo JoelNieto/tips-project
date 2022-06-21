@@ -3,7 +3,7 @@
     <mat-card>
       <mat-card-title>Login</mat-card-title>
       <mat-form-field appearance="outline">
-        <mat-label>User name</mat-label>
+        <mat-label>{{ 'User name' | translate }}</mat-label>
         <input
           matInput
           placeholder="user@domain.com"
@@ -12,7 +12,7 @@
         />
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
+        <mat-label>{{ 'Password' | translate }}</mat-label>
         <input
           matInput
           type="password"
@@ -28,7 +28,7 @@
           type="submit"
           [disabled]="form.invalid"
         >
-          Enviar
+          {{ 'Enter' | translate }}
         </button>
       </mat-card-actions>
     </mat-card>

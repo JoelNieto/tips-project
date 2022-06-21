@@ -1,20 +1,31 @@
 <form [formGroup]="form" class="row">
   <mat-form-field class="col-5" appearance="outline">
-    <mat-label>Title</mat-label>
+    <mat-label>{{ 'Title' | translate }}</mat-label>
     <input type="text" matInput formControlName="title" />
     <mat-hint>Optional (Use with wheels)</mat-hint>
   </mat-form-field>
   <mat-form-field class="col-7" appearance="outline">
-    <mat-label>Question Text</mat-label>
+    <mat-label>{{ 'Question Text' | translate }}</mat-label>
     <input matInput placeholder="Question" formControlName="text" />
     <mat-icon matSuffix>question_mark</mat-icon>
   </mat-form-field>
   <mat-form-field class="col-3" appearance="outline">
-    <mat-label>Weighting</mat-label>
+    <mat-label>{{ 'Weighting' | translate }}</mat-label>
     <input type="number" matInput formControlName="weighting" />
     <mat-icon matSuffix>percent</mat-icon>
   </mat-form-field>
-  <mat-slide-toggle class="col-2" formControlName="reverse"
-    >Reverse</mat-slide-toggle
-  >
+
+  <mat-form-field class="col-3" appearance="outline">
+    <mat-label>{{ 'Answers' | translate }}</mat-label>
+    <mat-select formControlName="answersSet" name="answers">
+      <mat-option>--</mat-option>
+      <mat-option *ngFor="let set of sets$ | async" [value]="set">{{
+        set.name
+      }}</mat-option>
+    </mat-select>
+    <mat-hint (click)="addAnswerSet()">Optional (Use with wheels)</mat-hint>
+  </mat-form-field>
+  <mat-slide-toggle class="col-2" formControlName="reverse">{{
+    'Reverse' | translate
+  }}</mat-slide-toggle>
 </form>

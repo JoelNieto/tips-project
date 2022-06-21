@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+
+import { SurveysFacade } from '../+state/surveys.facade';
+import { AnswerFormComponent } from '../answer-form/answer-form.component';
 
 @Component({
   selector: 'tips-question-form',
@@ -10,10 +14,19 @@ import { FormArray, FormGroup, FormGroupDirective } from '@angular/forms';
 export class QuestionFormComponent implements OnInit {
   @Input() index!: number;
   form!: FormGroup;
-  constructor(private rootFormGroup: FormGroupDirective) {}
+  sets$ = this.store.allAnswers$;
+  constructor(
+    private rootFormGroup: FormGroupDirective,
+    private dialog: MatDialog,
+    private store: SurveysFacade
+  ) {}
 
   ngOnInit(): void {
     const control = this.rootFormGroup.control.get('questions') as FormArray;
     this.form = control.at(this.index) as FormGroup;
+  }
+
+  addAnswerSet() {
+    this.dialog.open(AnswerFormComponent, { width: '40vw' });
   }
 }

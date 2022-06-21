@@ -9,7 +9,7 @@ export const SURVEYS_FEATURE_KEY = 'surveys';
 export interface State extends EntityState<Survey> {
   selectedId?: string | number; // which Surveys record has been selected
   loaded: boolean; // has the Surveys list been loaded
-  error?: string | null; // last known error (if any)
+  error?: string | null | unknown; // last known error (if any)
 }
 
 export interface SurveysPartialState {
@@ -48,6 +48,13 @@ const surveysReducer = createReducer(
   on(
     SurveysActions.createSurveySuccess,
     (state, { payload }): State => surveysAdapter.addOne(payload, state)
+  ),
+  on(
+    SurveysActions.setSurvey,
+    (state, { id }): State => ({
+      ...state,
+      selectedId: id,
+    })
   )
 );
 

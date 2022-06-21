@@ -7,10 +7,9 @@ export const selectSurveyTypesState =
     fromSurveyTypes.surveyTypesFeatureKey
   );
 
-const { selectAll, selectEntities } =
-  fromSurveyTypes.typesAdapter.getSelectors();
+const { selectAll } = fromSurveyTypes.typesAdapter.getSelectors();
 
-export const getAllTypes = createSelector(
+export const selectAllTypes = createSelector(
   selectSurveyTypesState,
   (state: fromSurveyTypes.State) => selectAll(state)
 );
