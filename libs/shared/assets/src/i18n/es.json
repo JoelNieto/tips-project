@@ -26,7 +26,12 @@
     "Plural": "Sets de Preguntas"
   },
   "Company": {
-    "Plural": "Empresas"
+    "Title": "Empresa",
+    "Plural": "Empresas",
+    "Name": "Nombre empresa",
+    "New": "Nueva empresa",
+    "Edit": "Editar empresa",
+    "Full_Name": "Nombre comercial"
   },
   "Title": "Titulo",
   "Created at": "Creado",
