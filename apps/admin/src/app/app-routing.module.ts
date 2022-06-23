@@ -18,6 +18,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./surveys/surveys.module').then((m) => m.SurveysModule),
       },
+      {
+        path: 'corporate',
+        loadChildren: () =>
+          import('./corporate/corporate.module').then((m) => m.CorporateModule),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },

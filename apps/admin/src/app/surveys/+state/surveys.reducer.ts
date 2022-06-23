@@ -49,6 +49,9 @@ const surveysReducer = createReducer(
     SurveysActions.createSurveySuccess,
     (state, { payload }): State => surveysAdapter.addOne(payload, state)
   ),
+  on(SurveysActions.updateSurveySuccess, (state, { id, payload }) =>
+    surveysAdapter.updateOne({ id, changes: payload }, state)
+  ),
   on(
     SurveysActions.setSurvey,
     (state, { id }): State => ({

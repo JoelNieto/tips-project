@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -11,7 +11,6 @@ export class SurveysService {
   constructor(@InjectModel(Survey.name) private model: Model<SurveyDocument>) {}
 
   async create(createSurveyDto: CreateSurveyDto) {
-    Logger.debug(JSON.stringify(createSurveyDto.measures), 'measures');
     const created = new this.model(createSurveyDto);
     return await created.save();
   }
@@ -24,8 +23,22 @@ export class SurveysService {
     return this.model.findById(id);
   }
 
-  update(id: string, updateSurveyDto: UpdateSurveyDto) {
-    return `This action updates a #${id} survey`;
+  async update(id: string, dto: UpdateSurveyDto) {
+    const { title, description, measures, type, final } = dto;
+
+    const updated = await this.model
+      .findByIdAndUpdate(id, {
+        $set: {
+          title,
+          description,
+          measures,
+          type,
+          final,
+          updatedAt: new Date(),
+        },
+      })
+      .setOptions({ new: true });
+    return updated;
   }
 
   remove(id: string) {

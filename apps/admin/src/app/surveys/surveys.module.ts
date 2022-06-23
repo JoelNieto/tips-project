@@ -37,6 +37,7 @@ import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
 import { TypesFormComponent } from './types-form/types-form.component';
 import { TypesComponent } from './types/types.component';
+import { AnswerSetsComponent } from './answer-sets/answer-sets.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { TypesComponent } from './types/types.component';
     ListComponent,
     HomeComponent,
     EditSurveyComponent,
+    AnswerSetsComponent,
   ],
   imports: [
     CommonModule,

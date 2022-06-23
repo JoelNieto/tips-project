@@ -136,7 +136,15 @@ export class FormComponent implements OnInit, OnDestroy {
 
   saveSurvey() {
     const { value } = this.form;
-    this.state.create(value);
+    this.state.selectedSurveys$.subscribe({
+      next: (survey) => {
+        if (survey) {
+          this.state.update(survey._id, value);
+        } else {
+          this.state.create(value);
+        }
+      },
+    });
   }
 
   compareFn(item1: any, item2: any) {

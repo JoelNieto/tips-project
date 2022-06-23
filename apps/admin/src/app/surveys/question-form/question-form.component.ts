@@ -29,4 +29,7 @@ export class QuestionFormComponent implements OnInit {
   addAnswerSet() {
     this.dialog.open(AnswerFormComponent, { width: '40vw' });
   }
+
+  compareFn = (item1: any, item2: any) =>
+    item1 && item2 ? item1._id === item2._id : item1 === item2;
 }

@@ -9,6 +9,7 @@ import { SurveyCategoriesModule } from './survey-categories/survey-categories.mo
 import { SurveyTypesModule } from './survey-types/survey-types.module';
 import { SurveysModule } from './surveys/surveys.module';
 import { UsersModule } from './users/users.module';
+import { CompaniesModule } from './companies/companies.module';
 
 const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
 console.log(process.cwd());
@@ -28,6 +29,7 @@ console.log(process.cwd());
     SurveysModule,
     SurveyCategoriesModule,
     SurveyTypesModule,
+    CompaniesModule,
   ],
 })
 export class AppModule {}

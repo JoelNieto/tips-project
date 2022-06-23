@@ -1,38 +1,45 @@
 {
-	"AppName": "Tips",
-	"Name": "Nombre",
-	"Survey": {
-		"Title": "Encuesta",
-		"Plural": "Encuestas",
-		"New": "Nueva encuesta",
-		"Edit": "Editar encuesta"
-	},
-	"Question": {
-		"Title": "Pregunta",
-		"Plural": "Preguntas",
-		"New": "Nueva pregunta",
-		"Edit": "Editar pregunta",
-		"Remove": "Borrar pregunta"
-	},
-	"Measure": {
-		"Title": "Dimension",
-		"Plural": "Dimensiones",
-		"Name": "Nombre dimension",
-		"New": "Nueva dimension",
-		"Remove": "Borrar dimension"
-	},
-	"Title": "Titulo",
-	"Created at": "Creado",
-	"Updated at": "Actualizado",
-	"Type": "Tipo",
-	"Types": "Tipos",
-	"Survey types": "Tipos de encuestas",
-	"Survey type": "Tipos de encuesta",
-	"New type": "Nuevo tipo",
-	"Prefix": "Prefijo",
-	"Actions": "Acciones",
-	"Instructions": "Instrucciones",
-	"Description": "Descripcion",
-	"Save": "Guardar",
-	"Cancel": "Cancelar"
+  "AppName": "Tips",
+  "Name": "Nombre",
+  "Survey": {
+    "Title": "Encuesta",
+    "Plural": "Encuestas",
+    "New": "Nueva encuesta",
+    "Edit": "Editar encuesta"
+  },
+  "Question": {
+    "Title": "Pregunta",
+    "Plural": "Preguntas",
+    "New": "Nueva pregunta",
+    "Edit": "Editar pregunta",
+    "Remove": "Borrar pregunta"
+  },
+  "Measure": {
+    "Title": "Dimension",
+    "Plural": "Dimensiones",
+    "Name": "Nombre dimension",
+    "New": "Nueva dimension",
+    "Remove": "Borrar dimension"
+  },
+  "AnswerSet": {
+    "Add": "+ Nuevo set",
+    "Plural": "Sets de Preguntas"
+  },
+  "Company": {
+    "Plural": "Empresas"
+  },
+  "Title": "Titulo",
+  "Created at": "Creado",
+  "Updated at": "Actualizado",
+  "Type": "Tipo",
+  "Types": "Tipos",
+  "Survey types": "Tipos de encuestas",
+  "Survey type": "Tipos de encuesta",
+  "New type": "Nuevo tipo",
+  "Prefix": "Prefijo",
+  "Actions": "Acciones",
+  "Instructions": "Instrucciones",
+  "Description": "Descripcion",
+  "Save": "Guardar",
+  "Cancel": "Cancelar"
 }
