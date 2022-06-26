@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes, TitleStrategy } from '@angular/router';
 import { SessionGuard } from '@tips/auth';
+import { TitleStrategyService } from '@tips/util';
 
 import { HomeComponent } from './home/home.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -12,7 +13,7 @@ export const routes: Routes = [
     canActivate: [SessionGuard],
     canActivateChild: [SessionGuard],
     children: [
-      { path: 'home', component: HomeComponent },
+      { path: 'home', component: HomeComponent, title: 'Home' },
       {
         path: 'surveys',
         loadChildren: () =>
@@ -29,6 +30,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('@tips/auth').then((m) => m.AuthModule),
+    title: 'Authentication',
   },
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
 ];
@@ -38,5 +40,6 @@ export const routes: Routes = [
     RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
   ],
   exports: [RouterModule],
+  providers: [{ provide: TitleStrategy, useClass: TitleStrategyService }],
 })
 export class AppRoutingModule {}

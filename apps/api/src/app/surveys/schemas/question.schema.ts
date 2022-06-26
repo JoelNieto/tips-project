@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as models from '@tips/data/models';
-import { Document } from 'mongoose';
+import { Document, Schema as mongoSchema } from 'mongoose';
 
 import { ModelBase, SchemaBase } from '../../shared/base.schema';
-import { AnswerSetSchema } from './answer-set.schema';
 
 export type QuestionDocument = Question & Document;
 
@@ -24,7 +23,7 @@ export class Question extends SchemaBase implements ModelBase<models.Question> {
   @Prop({ type: Boolean })
   multiAnswer: boolean;
 
-  @Prop({ type: AnswerSetSchema })
+  @Prop({ type: mongoSchema.Types.ObjectId, ref: 'AnswerSet' })
   answersSet: models.AnswersSet;
 }
 

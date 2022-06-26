@@ -1,11 +1,25 @@
 {
   "AppName": "Tips",
   "Name": "Nombre",
+  "First name": "Nombre",
+  "Last name": "Apellido",
+  "Birth date": "Fecha de nacimiento",
+  "Gender": "Sexo",
+  "Document Id": "Nro. documento",
+  "Weighting": "Ponderacion",
+  "Text": "Texto",
   "Survey": {
     "Title": "Encuesta",
     "Plural": "Encuestas",
     "New": "Nueva encuesta",
-    "Edit": "Editar encuesta"
+    "Edit": "Editar encuesta",
+    "Module": "Modulo de Encuestas",
+    "Created": "Encuesta creada exitosamente",
+    "Updated": "Encuesta actualizada exitosamente"
+  },
+  "Corporate": {
+    "Name": "Corporativo",
+    "Module": "Modulo Corporativo"
   },
   "Question": {
     "Title": "Pregunta",
@@ -23,7 +37,11 @@
   },
   "AnswerSet": {
     "Add": "+ Nuevo set",
-    "Plural": "Sets de Preguntas"
+    "New": "Nuevo set",
+    "Plural": "Sets de respuestas"
+  },
+  "Answer": {
+    "Plural": "Respuestas"
   },
   "Company": {
     "Title": "Empresa",

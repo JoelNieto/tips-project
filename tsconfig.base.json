@@ -21,7 +21,8 @@
       "@tips/data/models": ["libs/data/models/src/index.ts"],
       "@tips/data/services": ["libs/data/services/src/index.ts"],
       "@tips/shared/assets": ["libs/shared/assets/src/index.ts"],
-      "@tips/ui": ["libs/ui/src/index.ts"]
+      "@tips/ui": ["libs/ui/src/index.ts"],
+      "@tips/util": ["libs/util/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

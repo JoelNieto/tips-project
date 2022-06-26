@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Answer, AnswersSet } from '@tips/data/models';
 
 import { SurveysFacade } from '../+state/surveys.facade';
@@ -16,7 +16,8 @@ export class AnswerFormComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) private set: AnswersSet,
     private readonly _fb: FormBuilder,
-    private readonly store: SurveysFacade
+    private readonly store: SurveysFacade,
+    private readonly dialogRef: MatDialogRef<AnswerFormComponent>
   ) {}
 
   ngOnInit(): void {
@@ -58,5 +59,6 @@ export class AnswerFormComponent implements OnInit {
   saveAnswerSet() {
     const { value } = this.form;
     this.store.createSet(value);
+    this.dialogRef.close();
   }
 }

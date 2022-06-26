@@ -24,6 +24,14 @@
       "name": "ui",
       "path": "libs/ui"
     },
+    {
+      "name": "util",
+      "path": "libs/util"
+    },
+    {
+      "name": "project",
+      "path": "./"
+    }
   ],
   "settings": {
     "errorLens.onSave": true,

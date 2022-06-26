@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { EffectsModule } from '@ngrx/effects';
@@ -24,6 +25,8 @@ import { SurveysEffects } from './+state/surveys.effects';
 import { SurveysFacade } from './+state/surveys.facade';
 import * as fromSurveys from './+state/surveys.reducer';
 import { AnswerFormComponent } from './answer-form/answer-form.component';
+import { AnswerSetsComponent } from './answer-sets/answer-sets.component';
+import { DetailsComponent } from './details/details.component';
 import { EditSurveyComponent } from './edit-survey/edit-survey.component';
 import { FormService } from './form.service';
 import { FormStore } from './form/form-store/form.store';
@@ -37,7 +40,6 @@ import { SurveysRoutingModule } from './surveys-routing.module';
 import { SurveysComponent } from './surveys.component';
 import { TypesFormComponent } from './types-form/types-form.component';
 import { TypesComponent } from './types/types.component';
-import { AnswerSetsComponent } from './answer-sets/answer-sets.component';
 
 @NgModule({
   declarations: [
@@ -53,12 +55,14 @@ import { AnswerSetsComponent } from './answer-sets/answer-sets.component';
     HomeComponent,
     EditSurveyComponent,
     AnswerSetsComponent,
+    DetailsComponent,
   ],
   imports: [
     CommonModule,
     SurveysRoutingModule,
     MatTableModule,
     MatButtonModule,
+    MatSnackBarModule,
     ReactiveFormsModule,
     FormsModule,
     MatInputModule,

@@ -1,0 +1,59 @@
+<div class="container">
+  <mat-card *ngIf="survey$ | async as survey">
+    <div class="header-container">
+      <mat-card-title
+        >{{ survey.title }} | {{ survey.type.name }}</mat-card-title
+      >
+      <a mat-fab color="primary" [routerLink]="['edit']">
+        <mat-icon>edit</mat-icon>
+      </a>
+    </div>
+
+    <mat-card-subtitle>{{ survey.description }}</mat-card-subtitle>
+    <h3>{{ 'Measure.Plural' | translate }}</h3>
+    <mat-accordion multi>
+      <mat-expansion-panel *ngFor="let measure of survey.measures">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ measure.name }}</mat-panel-title>
+          <mat-panel-description>
+            {{ measure.description }}</mat-panel-description
+          >
+        </mat-expansion-panel-header>
+        <h4>{{ 'Questions' | translate }}</h4>
+        <table mat-table [dataSource]="measure.questions">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>{{ 'Title' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="text">
+            <th mat-header-cell *matHeaderCellDef>{{ 'Text' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.text }}</td>
+          </ng-container>
+          <ng-container matColumnDef="answers">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'Answer.Plural' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">{{ item.answersSet.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="weighting">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'Weighting' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">{{ item.weighting }}%</td>
+          </ng-container>
+          <tr
+            mat-header-row
+            *matHeaderRowDef="['title', 'text', 'answers', 'weighting']"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: ['title', 'text', 'answers', 'weighting']
+            "
+          ></tr>
+        </table>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </mat-card>
+</div>

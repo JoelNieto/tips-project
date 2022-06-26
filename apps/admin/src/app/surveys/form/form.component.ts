@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Measure, Question } from '@tips/data/models';
+import { first } from 'rxjs';
 
 import { SurveysFacade } from '../+state/surveys.facade';
 import { FormService } from '../form.service';
@@ -136,7 +137,7 @@ export class FormComponent implements OnInit, OnDestroy {
 
   saveSurvey() {
     const { value } = this.form;
-    this.state.selectedSurveys$.subscribe({
+    this.state.selectedSurveys$.pipe(first()).subscribe({
       next: (survey) => {
         if (survey) {
           this.state.update(survey._id, value);

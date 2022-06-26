@@ -9,6 +9,7 @@
     "data-models": "libs/data/models",
     "data-services": "libs/data/services",
     "shared-assets": "libs/shared/assets",
-    "ui": "libs/ui"
+    "ui": "libs/ui",
+    "util": "libs/util"
   }
 }

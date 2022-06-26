@@ -16,7 +16,7 @@ export class SurveysService {
   }
 
   findAll() {
-    return this.model.find({}).populate('type');
+    return this.model.find({}).populate('type measures.questions.answersSet');
   }
 
   findOne(id: string) {
@@ -38,7 +38,7 @@ export class SurveysService {
         },
       })
       .setOptions({ new: true })
-      .populate('type');
+      .populate('type measures.questions.answersSet');
     return updated;
   }
 

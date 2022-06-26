@@ -11,7 +11,7 @@ export class AnswerSet
   extends SchemaBase
   implements ModelBase<models.AnswersSet>
 {
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, unique: true })
   name: string;
 
   @Prop({ type: Array, default: [] })

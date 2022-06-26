@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { DetailsComponent } from './details/details.component';
 import { EditSurveyComponent } from './edit-survey/edit-survey.component';
 import { HomeComponent } from './home/home.component';
 import { NewSurveyComponent } from './new-survey/new-survey.component';
@@ -10,11 +11,11 @@ const routes: Routes = [
   {
     path: '',
     component: SurveysComponent,
-    title: 'Surveys',
     children: [
-      { path: '', component: HomeComponent },
-      { path: 'new', component: NewSurveyComponent },
-      { path: ':id', component: EditSurveyComponent },
+      { path: '', component: HomeComponent, title: 'Surveys' },
+      { path: 'new', component: NewSurveyComponent, title: 'New' },
+      { path: ':id', component: DetailsComponent },
+      { path: ':id/edit', component: EditSurveyComponent },
     ],
   },
 ];

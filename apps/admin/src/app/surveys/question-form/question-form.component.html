@@ -22,7 +22,6 @@
       name="answers"
       [compareWith]="compareFn"
     >
-      <mat-option>--</mat-option>
       <mat-option *ngFor="let set of sets$ | async" [value]="set">{{
         set.name
       }}</mat-option>

@@ -41,7 +41,7 @@ export class CompaniesEffects {
     );
   });
 
-  update = createEffect(() => {
+  update$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(CompaniesActions.updateCompany),
       switchMap(({ id, changes }) =>

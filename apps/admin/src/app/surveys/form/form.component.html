@@ -54,7 +54,7 @@
     mat-raised-button
     id="save-button"
     color="primary"
-    [disabled]="!form.valid"
+    [disabled]="!form.valid || form.pristine"
     (click)="saveSurvey()"
   >
     {{ 'Save' | translate }}
