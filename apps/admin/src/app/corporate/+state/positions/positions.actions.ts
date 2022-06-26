@@ -2,7 +2,7 @@ import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Position } from '@tips/data/models';
 
 export const PositionsActions = createActionGroup({
-  source: 'Positions',
+  source: 'Company/Positions',
   events: {
     Init: emptyProps(),
     'Load Positions Success': props<{ positions: Position[] }>(),

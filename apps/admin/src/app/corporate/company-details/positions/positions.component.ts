@@ -5,7 +5,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Position } from '@tips/data/models';
 import { filter } from 'rxjs';
 
-import { CompaniesFacade } from '../../+state/companies.facade';
 import { PositionsFacade } from '../../+state/positions/positions.facade';
 import { PositionsFormComponent } from '../../positions-form/positions-form.component';
 
@@ -19,7 +18,6 @@ export class PositionsComponent implements OnInit {
   dataSource = new MatTableDataSource<Position>();
   constructor(
     private readonly store: PositionsFacade,
-    private readonly companies: CompaniesFacade,
     private readonly dialog: MatDialog
   ) {}
 
@@ -33,7 +31,7 @@ export class PositionsComponent implements OnInit {
       },
     });
 
-    this.companies.selectedCompanies$
+    this.store.selectedCompany$
       .pipe(filter((company) => company !== undefined))
       .subscribe({ next: () => this.store.init() });
   }

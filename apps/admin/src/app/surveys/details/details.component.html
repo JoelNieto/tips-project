@@ -1,15 +1,22 @@
 <div class="container">
   <mat-card *ngIf="survey$ | async as survey">
     <div class="header-container">
-      <mat-card-title
-        >{{ survey.title }} | {{ survey.type.name }}</mat-card-title
-      >
-      <a mat-fab color="primary" [routerLink]="['edit']">
-        <mat-icon>edit</mat-icon>
-      </a>
+      <div class="div">
+        <mat-card-title
+          >{{ survey.title }} | {{ survey.type.name }}</mat-card-title
+        >
+        <mat-card-subtitle>{{ survey.description }}</mat-card-subtitle>
+      </div>
+      <div>
+        <a mat-fab color="accent" [routerLink]="['edit']">
+          <mat-icon>calendar_month</mat-icon>
+        </a>
+        <a mat-fab color="primary" [routerLink]="['edit']">
+          <mat-icon>edit</mat-icon>
+        </a>
+      </div>
     </div>
 
-    <mat-card-subtitle>{{ survey.description }}</mat-card-subtitle>
     <h3>{{ 'Measure.Plural' | translate }}</h3>
     <mat-accordion multi>
       <mat-expansion-panel *ngFor="let measure of survey.measures">

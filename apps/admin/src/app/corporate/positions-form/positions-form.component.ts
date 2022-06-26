@@ -25,7 +25,7 @@ export class PositionsFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.selectedCompany.subscribe({
+    this.store.selectedCompany$.subscribe({
       next: (company) => {
         this.form = this._fb.group({
           name: [this.position?.name ?? '', [Validators.required]],

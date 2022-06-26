@@ -16,7 +16,7 @@ export class ProfilesService {
     private user: UsersService
   ) {}
 
-  create(createProfileDto: CreateProfileDto) {
+  async create(createProfileDto: CreateProfileDto) {
     const { firstName, lastName, email, documentId } = createProfileDto;
     const user = new this.userModel({
       username: `${firstName} ${lastName}`,
@@ -26,7 +26,8 @@ export class ProfilesService {
     user.save();
     const profile = { ...createProfileDto, user };
     const created = new this.model(profile);
-    return created.save().then((x) => x.populate('company position'));
+    const x = await created.save();
+    return await x.populate('company position');
   }
 
   findAll() {

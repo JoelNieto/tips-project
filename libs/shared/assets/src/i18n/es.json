@@ -64,6 +64,12 @@
     "Plural": "Colaboradores",
     "Singular": "Colaborador"
   },
+  "Project": {
+    "Plural": "Proyectos",
+    "New": "Nuevo proyecto",
+    "Singular": "Proyecto",
+    "Edit": "Editar proyecto"
+  },
   "Title": "Titulo",
   "Created at": "Creado",
   "Updated at": "Actualizado",

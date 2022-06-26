@@ -38,6 +38,11 @@ import { CorporateComponent } from './corporate.component';
 import { EmployeesFormComponent } from './employees-form/employees-form.component';
 import { HomeComponent } from './home/home.component';
 import { PositionsFormComponent } from './positions-form/positions-form.component';
+import { ProjectsComponent } from './company-details/projects/projects.component';
+import { ProjectsFormComponent } from './projects-form/projects-form.component';
+import * as fromProjects from './+state/projects/projects.reducer';
+import { ProjectsEffects } from './+state/projects/projects.effects';
+import { ProjectsFacade } from './+state/projects/projects.facade';
 
 @NgModule({
   declarations: [
@@ -50,6 +55,8 @@ import { PositionsFormComponent } from './positions-form/positions-form.componen
     PositionsComponent,
     PositionsFormComponent,
     EmployeesFormComponent,
+    ProjectsComponent,
+    ProjectsFormComponent,
   ],
   imports: [
     CommonModule,
@@ -85,7 +92,17 @@ import { PositionsFormComponent } from './positions-form/positions-form.componen
       fromPositions.reducer
     ),
     EffectsModule.forFeature([PositionsEffects]),
+    StoreModule.forFeature(
+      fromProjects.PROJECTS_FEATURE_KEY,
+      fromProjects.reducer
+    ),
+    EffectsModule.forFeature([ProjectsEffects]),
   ],
-  providers: [CompaniesFacade, EmployeesFacade, PositionsFacade],
+  providers: [
+    CompaniesFacade,
+    EmployeesFacade,
+    PositionsFacade,
+    ProjectsFacade,
+  ],
 })
 export class CorporateModule {}

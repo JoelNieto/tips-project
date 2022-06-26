@@ -12,6 +12,7 @@ import { SurveyTypesModule } from './survey-types/survey-types.module';
 import { SurveysModule } from './surveys/surveys.module';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
+import { ProjectsModule } from './projects/projects.module';
 
 const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
 
@@ -34,6 +35,7 @@ const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
     CompaniesModule,
     PositionsModule,
     ProfilesModule,
+    ProjectsModule,
   ],
 })
 export class AppModule {}

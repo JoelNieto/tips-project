@@ -4,6 +4,7 @@ import mongoose, { Model } from 'mongoose';
 
 import { Position, PositionDocument } from '../positions/schemas/position.schema';
 import { Profile, ProfileDocument } from '../profiles/schemas/profile.schema';
+import { Project, ProjectDocument } from '../projects/schemas/project.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Company, CompanyDocument } from './schemas/company.schema';
@@ -13,7 +14,8 @@ export class CompaniesService {
   constructor(
     @InjectModel(Company.name) private model: Model<CompanyDocument>,
     @InjectModel(Position.name) private positions: Model<PositionDocument>,
-    @InjectModel(Profile.name) private profiles: Model<ProfileDocument>
+    @InjectModel(Profile.name) private profiles: Model<ProfileDocument>,
+    @InjectModel(Project.name) private projects: Model<ProjectDocument>
   ) {}
 
   create(createCompanyDto: CreateCompanyDto) {
@@ -58,5 +60,11 @@ export class CompaniesService {
     return this.profiles
       .find({ company: new mongoose.Types.ObjectId(id) })
       .populate('company position');
+  }
+
+  getProjects(id: string) {
+    return this.projects
+      .find({ company: new mongoose.Types.ObjectId(id) })
+      .populate('company');
   }
 }

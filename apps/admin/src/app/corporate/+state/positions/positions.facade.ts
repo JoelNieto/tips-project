@@ -15,7 +15,7 @@ export class PositionsFacade {
   loaded$ = this.store.select(PositionsSelectors.selectPositionsLoaded);
   allPositions$ = this.store.select(PositionsSelectors.selectAllPositions);
   selectedPositions$ = this.store.select(PositionsSelectors.selectSelected);
-  selectedCompany = this.store.select(CompaniesSelectors.selectSelected);
+  selectedCompany$ = this.store.select(CompaniesSelectors.selectSelected);
   constructor(private readonly store: Store) {}
 
   /**

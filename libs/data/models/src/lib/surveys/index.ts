@@ -5,3 +5,5 @@ export * from './question.interface';
 export * from './survey-category.interface';
 export * from './survey.interface';
 export * from './survey-type.interface';
+export * from './project.interface';
+export * from './assignments.interface';

@@ -44,4 +44,9 @@ export class CompaniesController {
   findProfiles(@Param('id') id: string) {
     return this.companiesService.getProfiles(id);
   }
+
+  @Get(':id/projects')
+  findProjects(@Param('id') id: string) {
+    return this.companiesService.getProjects(id);
+  }
 }
