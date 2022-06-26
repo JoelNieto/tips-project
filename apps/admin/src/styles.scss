@@ -1,5 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
+@use '@angular/material' as mat;
+
+$custom-typography: mat.define-typography-config(
+  $font-family: 'Work Sans'
+);
+
+@include mat.core($custom-typography);
+
 html,
 body {
   height: 100%;
@@ -78,4 +86,18 @@ mat-form-field {
 
 [mat-raised-button], [mat-button], [mat-flat-button], [mat-stroked-button] {
   text-transform: uppercase;
+}
+
+.medium-dialog {
+  width: 80vw;
+  @media (min-width: 992px) {
+    width: 40vw;
+  }
+}
+
+.large-dialog {
+  width: 80vw;
+  @media (min-width: 992px) {
+    width: 70vw;
+  }
 }

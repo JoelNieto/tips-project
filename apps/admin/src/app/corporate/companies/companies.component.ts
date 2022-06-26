@@ -27,10 +27,13 @@ export class CompaniesComponent implements OnInit {
   }
 
   createCompany() {
-    this.dialog.open(CompaniesFormComponent, { width: '40vw' });
+    this.dialog.open(CompaniesFormComponent, { panelClass: 'medium-dialog' });
   }
 
   editCompany(company: Company) {
-    this.dialog.open(CompaniesFormComponent, { data: company, width: '40vw' });
+    this.dialog.open(CompaniesFormComponent, {
+      data: company,
+      panelClass: 'medium-dialog',
+    });
   }
 }

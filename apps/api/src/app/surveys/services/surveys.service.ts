@@ -12,7 +12,7 @@ export class SurveysService {
 
   async create(createSurveyDto: CreateSurveyDto) {
     const created = new this.model(createSurveyDto);
-    return await created.save();
+    return await created.save().then((x) => x.populate('type'));
   }
 
   findAll() {
@@ -37,7 +37,8 @@ export class SurveysService {
           updatedAt: new Date(),
         },
       })
-      .setOptions({ new: true });
+      .setOptions({ new: true })
+      .populate('type');
     return updated;
   }
 

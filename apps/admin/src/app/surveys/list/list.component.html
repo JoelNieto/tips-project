@@ -4,7 +4,7 @@
     {{ 'Survey.New' | translate }}
   </a>
 </div>
-<table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
+<table mat-table [dataSource]="dataSource">
   <ng-container matColumnDef="title">
     <th mat-header-cell *matHeaderCellDef>{{ 'Title' | translate }}</th>
     <td mat-cell *matCellDef="let survey">{{ survey.title }}</td>

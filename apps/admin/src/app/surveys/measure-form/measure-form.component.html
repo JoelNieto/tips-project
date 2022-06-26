@@ -1,14 +1,14 @@
 <form [formGroup]="form" class="row">
-  <mat-form-field class="col-8" appearance="outline">
+  <mat-form-field class="col-8" appearance="fill">
     <mat-label>{{ 'Name' | translate }}</mat-label>
     <input type="text" matInput formControlName="name" />
   </mat-form-field>
-  <mat-form-field class="col-4" appearance="outline">
+  <mat-form-field class="col-4" appearance="fill">
     <mat-label>{{ 'Weighting' | translate }}</mat-label>
     <input type="number" matInput formControlName="weighting" />
     <mat-icon matSuffix>percent</mat-icon>
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="fill">
     <mat-label>{{ 'Description' | translate }}</mat-label>
     <textarea matInput formControlName="description"></textarea>
   </mat-form-field>

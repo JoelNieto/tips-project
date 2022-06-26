@@ -4,18 +4,20 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { getEnvPath } from '../common/helper/env.helper';
 import { AuthModule } from './auth/auth.module';
+import { CompaniesModule } from './companies/companies.module';
+import { PositionsModule } from './positions/positions.module';
 import { RolesModule } from './roles/roles.module';
 import { SurveyCategoriesModule } from './survey-categories/survey-categories.module';
 import { SurveyTypesModule } from './survey-types/survey-types.module';
 import { SurveysModule } from './surveys/surveys.module';
 import { UsersModule } from './users/users.module';
-import { CompaniesModule } from './companies/companies.module';
+import { ProfilesModule } from './profiles/profiles.module';
 
 const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
-console.log(process.cwd());
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: envFilePath, isGlobal: true }),
+    ConfigModule.forRoot({ envFilePath, isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -30,6 +32,8 @@ console.log(process.cwd());
     SurveyCategoriesModule,
     SurveyTypesModule,
     CompaniesModule,
+    PositionsModule,
+    ProfilesModule,
   ],
 })
 export class AppModule {}

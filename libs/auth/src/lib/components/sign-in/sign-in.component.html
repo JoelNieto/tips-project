@@ -2,7 +2,7 @@
   <form [formGroup]="form" (ngSubmit)="login()">
     <mat-card>
       <mat-card-title>Login</mat-card-title>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="fill">
         <mat-label>{{ 'User name' | translate }}</mat-label>
         <input
           matInput
@@ -11,7 +11,7 @@
           formControlName="email"
         />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="fill">
         <mat-label>{{ 'Password' | translate }}</mat-label>
         <input
           matInput

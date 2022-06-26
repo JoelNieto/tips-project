@@ -7,4 +7,5 @@ export interface Position extends EntityBase {
   name: string;
   isPosition: boolean;
   children: Position[];
+  parent: Position;
 }

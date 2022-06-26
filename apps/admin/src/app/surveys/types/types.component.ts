@@ -39,14 +39,14 @@ export class TypesComponent implements OnInit {
 
   newType(): void {
     this.dialog.open(TypesFormComponent, {
-      width: '40vw',
+      panelClass: 'medium-dialog',
     });
   }
 
   editType(type: SurveyType): void {
     this.dialog.open(TypesFormComponent, {
       data: type,
-      width: '40vw',
+      panelClass: 'medium-dialog',
     });
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role, User } from '@tips/data/models';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 import { DTOBase } from '../../shared/base.schema';
 
@@ -17,7 +17,11 @@ export class CreateUserDto implements DTOBase<User> {
   @IsString()
   password: string;
 
-  @ApiProperty({ required: true })
+  @ApiProperty()
   @IsNotEmpty()
   role: Role;
+
+  @ApiProperty()
+  @IsBoolean()
+  isAdmin: boolean;
 }

@@ -2,7 +2,7 @@
   <h1 mat-dialog-title>{{ 'Answer set' | translate }}</h1>
   <div mat-dialog-content>
     <div class="row">
-      <mat-form-field appearance="outline" class="col-6">
+      <mat-form-field appearance="fill" class="col-6">
         <mat-label>{{ 'Name' | translate }}</mat-label>
         <input matInput type="text" formControlName="name" />
       </mat-form-field>
@@ -10,11 +10,11 @@
     <ng-container formArrayName="answers">
       <div *ngFor="let answer of answersArray.controls; let i = index">
         <div class="row" [formGroupName]="i">
-          <mat-form-field appearance="outline" class="col-6">
+          <mat-form-field appearance="fill" class="col-6">
             <mat-label>{{ 'Text' | translate }}</mat-label>
             <input matInput type="text" formControlName="text" />
           </mat-form-field>
-          <mat-form-field appearance="outline" class="col-5">
+          <mat-form-field appearance="fill" class="col-5">
             <mat-label>{{ 'Value' | translate }}</mat-label>
             <input matInput type="number" formControlName="value" />
           </mat-form-field>

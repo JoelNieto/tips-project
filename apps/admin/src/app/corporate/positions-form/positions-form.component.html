@@ -1,0 +1,37 @@
+<form [formGroup]="form" (ngSubmit)="saveChanges()">
+  <h2 mat-dialog-title>
+    {{ (position ? 'Position.Edit' : 'Position.New') | translate }}
+  </h2>
+  <mat-form-field appearance="fill">
+    <mat-label>{{ 'Name' | translate }}</mat-label>
+    <input type="text" matInput formControlName="name" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>{{ 'Code' | translate }}</mat-label>
+    <input type="text" matInput formControlName="code" />
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>{{ 'Position.Parent' | translate }}</mat-label>
+    <mat-select formControlName="parent" [compareWith]="compareFn">
+      <mat-option
+        *ngFor="let position of positions$ | async"
+        [value]="position"
+        >{{ position.name }}</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
+  <mat-slide-toggle formControlName="isPosition">{{
+    'Position.Is' | translate
+  }}</mat-slide-toggle>
+  <div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>{{ 'Cancel' | translate }}</button>
+    <button
+      type="submit"
+      mat-flat-button
+      color="primary"
+      [disabled]="form.invalid || form.pristine"
+    >
+      {{ 'Save' | translate }}
+    </button>
+  </div>
+</form>

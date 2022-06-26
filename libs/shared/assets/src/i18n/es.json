@@ -33,6 +33,19 @@
     "Edit": "Editar empresa",
     "Full_Name": "Nombre comercial"
   },
+  "Position": {
+    "Plural": "Cargos",
+    "Singular": "Cargo",
+    "New": "Nuevo cargo",
+    "Edit": "Editar cargo",
+    "Parent": "Reporta a",
+    "Is": "Es cargo"
+  },
+  "Employee": {
+    "New": "Nuevo colaborador",
+    "Plural": "Colaboradores",
+    "Singular": "Colaborador"
+  },
   "Title": "Titulo",
   "Created at": "Creado",
   "Updated at": "Actualizado",

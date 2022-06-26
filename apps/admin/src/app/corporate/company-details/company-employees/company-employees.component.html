@@ -1,0 +1,78 @@
+<div class="header-container">
+  <h3>{{ 'Employee.Plural' | translate }}</h3>
+  <button mat-flat-button color="primary" (click)="createEmployee()">
+    {{ 'Employee.New' | translate }}
+  </button>
+</div>
+<table mat-table [dataSource]="dataSource">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>{{ 'Name' | translate }}</th>
+    <td mat-cell *matCellDef="let profile">
+      {{ profile.firstName }} {{ profile.lastName }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef>
+      {{ 'Position.Singular' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let profile">
+      {{ profile.position.name }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="email">
+    <th mat-header-cell *matHeaderCellDef>
+      {{ 'Email' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.email }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef>{{ 'Created at' | translate }}</th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.createdAt | date: 'medium' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="updatedAt">
+    <th mat-header-cell *matHeaderCellDef>{{ 'Updated at' | translate }}</th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.updatedAt | date: 'medium' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>{{ 'Actions' | translate }}</th>
+    <td mat-cell *matCellDef="let item">
+      <button mat-icon-button color="primary" (click)="editEmployee(item)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="warn">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+  <tr
+    mat-header-row
+    *matHeaderRowDef="[
+      'name',
+      'position',
+      'email',
+      'createdAt',
+      'updatedAt',
+      'actions'
+    ]"
+  ></tr>
+  <tr
+    mat-row
+    *matRowDef="
+      let row;
+      columns: [
+        'name',
+        'position',
+        'email',
+        'createdAt',
+        'updatedAt',
+        'actions'
+      ]
+    "
+  ></tr>
+</table>

@@ -1,17 +1,17 @@
 <form [formGroup]="form" (ngSubmit)="saveChanges()">
   <h1 mat-dialog-title>{{ 'Company.Title' | translate }}</h1>
   <div mat-dialog-content>
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="fill">
       <mat-label>{{ 'Name' | translate }}</mat-label>
       <input type="text" matInput formControlName="name" />
       <mat-hint>{{ 'Company.Name' | translate }}</mat-hint>
     </mat-form-field>
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="fill">
       <mat-label>{{ 'Full name' | translate }}</mat-label>
       <input type="text" matInput formControlName="fullName" />
       <mat-hint>{{ 'Company.Full_Name' | translate }}</mat-hint>
     </mat-form-field>
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="fill">
       <mat-label>{{ 'Notes' | translate }}</mat-label>
       <textarea
         name="notes"

@@ -2,5 +2,17 @@
   <mat-card>
     <mat-card-title>{{ (company$ | async)?.name }}</mat-card-title>
     <mat-card-subtitle>{{ (company$ | async)?.fullName }}</mat-card-subtitle>
+    <mat-tab-group animationDuration="0ms">
+      <mat-tab [label]="'Employee.Plural' | translate">
+        <div class="container">
+          <tips-company-employees></tips-company-employees>
+        </div>
+      </mat-tab>
+      <mat-tab [label]="'Position.Plural' | translate">
+        <div class="container">
+          <tips-positions></tips-positions>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </mat-card>
 </div>

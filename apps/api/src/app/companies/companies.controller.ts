@@ -34,4 +34,14 @@ export class CompaniesController {
   remove(@Param('id') id: string) {
     return this.companiesService.remove(id);
   }
+
+  @Get(':id/positions')
+  findPositions(@Param('id') id: string) {
+    return this.companiesService.getPositions(id);
+  }
+
+  @Get(':id/profiles')
+  findProfiles(@Param('id') id: string) {
+    return this.companiesService.getProfiles(id);
+  }
 }

@@ -1,13 +1,20 @@
 <div class="container">
-  <mat-tab-group animationDuration="0ms">
-    <mat-tab [label]="'Survey.Plural' | translate">
-      <div class="container">
-        <tips-list></tips-list>
-      </div>
-    </mat-tab>
-    <mat-tab [label]="'Types' | translate"><tips-types></tips-types></mat-tab>
-    <mat-tab [label]="'AnswerSet.Plural' | translate"
-      ><tips-answer-sets></tips-answer-sets
-    ></mat-tab>
-  </mat-tab-group>
+  <mat-card>
+    <mat-card-title>{{ 'Survey.Module' | translate }}</mat-card-title>
+    <mat-card-content>
+      <mat-tab-group animationDuration="0ms">
+        <mat-tab [label]="'Survey.Plural' | translate">
+          <div class="container">
+            <tips-list></tips-list>
+          </div>
+        </mat-tab>
+        <mat-tab [label]="'Types' | translate"
+          ><tips-types></tips-types
+        ></mat-tab>
+        <mat-tab [label]="'AnswerSet.Plural' | translate"
+          ><tips-answer-sets></tips-answer-sets
+        ></mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
 </div>
