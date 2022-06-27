@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -18,6 +19,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
+import { CalendarModule } from 'angular-calendar';
 
 import { CompaniesEffects } from './+state/companies.effects';
 import { CompaniesFacade } from './+state/companies.facade';
@@ -28,21 +30,24 @@ import * as fromEmployees from './+state/employees/employees.reducer';
 import { PositionsEffects } from './+state/positions/positions.effects';
 import { PositionsFacade } from './+state/positions/positions.facade';
 import * as fromPositions from './+state/positions/positions.reducer';
+import { ProjectsEffects } from './+state/projects/projects.effects';
+import { ProjectsFacade } from './+state/projects/projects.facade';
+import * as fromProjects from './+state/projects/projects.reducer';
 import { CompaniesFormComponent } from './companies-form/companies-form.component';
 import { CompaniesComponent } from './companies/companies.component';
 import { CompanyDetailsComponent } from './company-details/company-details.component';
 import { CompanyEmployeesComponent } from './company-details/company-employees/company-employees.component';
 import { PositionsComponent } from './company-details/positions/positions.component';
+import { CompanyProjectsComponent } from './company-details/projects/company-projects.component';
 import { CorporateRoutingModule } from './corporate-routing.module';
 import { CorporateComponent } from './corporate.component';
 import { EmployeesFormComponent } from './employees-form/employees-form.component';
 import { HomeComponent } from './home/home.component';
 import { PositionsFormComponent } from './positions-form/positions-form.component';
-import { ProjectsComponent } from './company-details/projects/projects.component';
+import { ProjectDetailsComponent } from './project-details/project-details.component';
+import { ProjectScheduleComponent } from './project-details/project-schedule/project-schedule.component';
 import { ProjectsFormComponent } from './projects-form/projects-form.component';
-import * as fromProjects from './+state/projects/projects.reducer';
-import { ProjectsEffects } from './+state/projects/projects.effects';
-import { ProjectsFacade } from './+state/projects/projects.facade';
+import { ProjectsComponent } from './projects/projects.component';
 
 @NgModule({
   declarations: [
@@ -55,8 +60,11 @@ import { ProjectsFacade } from './+state/projects/projects.facade';
     PositionsComponent,
     PositionsFormComponent,
     EmployeesFormComponent,
-    ProjectsComponent,
     ProjectsFormComponent,
+    CompanyProjectsComponent,
+    ProjectsComponent,
+    ProjectDetailsComponent,
+    ProjectScheduleComponent,
   ],
   imports: [
     CommonModule,
@@ -76,7 +84,9 @@ import { ProjectsFacade } from './+state/projects/projects.facade';
     MatDialogModule,
     MatSortModule,
     ReactiveFormsModule,
+    MatButtonToggleModule,
     TranslateModule,
+    CalendarModule,
     StoreModule.forFeature(
       fromCompanies.COMPANIES_FEATURE_KEY,
       fromCompanies.reducer

@@ -25,7 +25,7 @@ export class CompaniesFacade {
     this.store.dispatch(CompaniesActions.init());
   }
 
-  selectCompany(id: string) {
+  selectCompany(id: string | undefined) {
     this.store.dispatch(CompaniesActions.selectCompany({ id }));
   }
 

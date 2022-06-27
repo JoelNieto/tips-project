@@ -34,4 +34,8 @@ export class ProjectsFacade {
   update(id: string, request: Project) {
     this.store.dispatch(ProjectsActions.updateProject({ id, request }));
   }
+
+  setProject(id: string | undefined) {
+    this.store.dispatch(ProjectsActions.setProject({ id }));
+  }
 }

@@ -1,0 +1,90 @@
+<div class="header-container">
+  <h3>{{ 'Project.Plural' | translate }}</h3>
+  <button type="button" mat-flat-button color="primary">
+    {{ 'Project.New' | translate }}
+  </button>
+</div>
+<table mat-table [dataSource]="dataSource" matSort>
+  <ng-container matColumnDef="title">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Title' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+  </ng-container>
+  <ng-container matColumnDef="code">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Code' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">{{ item.code }}</td>
+  </ng-container>
+  <ng-container matColumnDef="company">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Company.Singular' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">{{ item.company.name }}</td>
+  </ng-container>
+  <ng-container matColumnDef="startDate">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Start date' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.startDate | date: 'mediumDate' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="endDate">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'End Date' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.endDate | date: 'mediumDate' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Created at' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.createdAt | date: 'medium' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="updatedAt">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+      {{ 'Updated at' | translate }}
+    </th>
+    <td mat-cell *matCellDef="let item">
+      {{ item.updatedAt | date: 'medium' }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>{{ 'Actions' | translate }}</th>
+    <td mat-cell *matCellDef="let item">
+      <a mat-icon-button color="accent" [routerLink]="['projects', item._id]">
+        <mat-icon>visibility</mat-icon>
+      </a>
+      <button mat-icon-button color="primary">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="warn">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+  <tr
+    mat-header-row
+    *matHeaderRowDef="[
+      'title',
+      'code',
+      'company',
+      'createdAt',
+      'updatedAt',
+      'actions'
+    ]"
+  ></tr>
+  <tr
+    mat-row
+    *matRowDef="
+      let row;
+      columns: ['title', 'code', 'company', 'createdAt', 'updatedAt', 'actions']
+    "
+  ></tr>
+</table>

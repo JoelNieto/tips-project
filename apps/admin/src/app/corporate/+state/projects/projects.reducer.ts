@@ -41,6 +41,10 @@ const projectsReducer = createReducer(
       projectsAdapter.setAll(payload, { ...state, loaded: true })
   ),
   on(
+    ProjectsActions.setProject,
+    (state, { id }): State => ({ ...state, selectedId: id })
+  ),
+  on(
     ProjectsActions.loadProjectsFailure,
     (state, { error }): State => ({
       ...state,

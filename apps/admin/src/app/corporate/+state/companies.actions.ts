@@ -8,7 +8,7 @@ export const CompaniesActions = createActionGroup({
     'Load Companies': emptyProps(),
     'Load Companies Success': props<{ payload: Company[] }>(),
     'Load Companies Failure': props<{ error: any }>(),
-    'Select Company': props<{ id: string }>(),
+    'Select Company': props<{ id: string | undefined }>(),
     'Create Company': props<{ request: Company }>(),
     'Create Company Success': props<{ payload: Company }>(),
     'Create Company Failure': props<{ error: any }>(),

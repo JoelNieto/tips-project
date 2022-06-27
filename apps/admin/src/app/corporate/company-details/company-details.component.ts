@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { CompaniesFacade } from '../+state/companies.facade';
@@ -9,7 +9,7 @@ import { CompaniesFacade } from '../+state/companies.facade';
   styleUrls: ['./company-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CompanyDetailsComponent implements OnInit {
+export class CompanyDetailsComponent implements OnInit, OnDestroy {
   company$ = this.store.selectedCompanies$;
   constructor(
     private readonly store: CompaniesFacade,
@@ -22,5 +22,9 @@ export class CompanyDetailsComponent implements OnInit {
         this.store.selectCompany(params['id']);
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.store.selectCompany(undefined);
   }
 }

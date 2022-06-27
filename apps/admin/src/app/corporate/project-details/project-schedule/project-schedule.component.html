@@ -1,0 +1,30 @@
+<div class="row">
+  <div class="col-4">
+    <mat-button-toggle-group>
+      <mat-button-toggle mwlCalendarPreviousView>{{
+        'Previous' | translate
+      }}</mat-button-toggle>
+      <mat-button-toggle mwlCalendarToday>{{
+        'Today' | translate
+      }}</mat-button-toggle>
+      <mat-button-toggle mwlCalendarNextView>{{
+        'Next' | translate
+      }}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  <div class="col-4">
+    <h5>
+      {{ viewDate | calendarDate: view + 'ViewTitle':'es-PA':weekStartsOn }}
+    </h5>
+  </div>
+  <div class="col-4">
+    <mat-button-toggle-group>
+      <mat-button-toggle (click)="setView(CalendarView.Week)">{{
+        'Week' | translate
+      }}</mat-button-toggle>
+      <mat-button-toggle (click)="setView(CalendarView.Month)">{{
+        'Month' | translate
+      }}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</div>

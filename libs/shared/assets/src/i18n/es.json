@@ -45,6 +45,7 @@
   },
   "Company": {
     "Title": "Empresa",
+    "Singular": "Empresa",
     "Plural": "Empresas",
     "Name": "Nombre empresa",
     "New": "Nueva empresa",

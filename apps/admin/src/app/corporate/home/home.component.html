@@ -3,6 +3,11 @@
     <mat-card-title>{{ 'Corporate.Module' | translate }}</mat-card-title>
     <mat-card-content>
       <mat-tab-group animationDuration="0ms">
+        <mat-tab [label]="'Project.Plural' | translate">
+          <div class="container">
+            <tips-projects></tips-projects>
+          </div>
+        </mat-tab>
         <mat-tab [label]="'Company.Plural' | translate">
           <div class="container">
             <tips-companies></tips-companies>

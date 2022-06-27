@@ -3,7 +3,7 @@
 @use '@angular/material' as mat;
 
 $custom-typography: mat.define-typography-config(
-  $font-family: 'Work Sans'
+  $font-family: 'Rubik'
 );
 
 @include mat.core($custom-typography);

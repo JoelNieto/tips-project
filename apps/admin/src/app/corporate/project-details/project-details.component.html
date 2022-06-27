@@ -1,0 +1,17 @@
+<div class="container" *ngIf="project$ | async as project">
+  <mat-card>
+    <mat-card-title>{{ project.title }} | {{ project.code }}</mat-card-title>
+    <mat-card-subtitle>{{ project.description }}</mat-card-subtitle>
+    <mat-tab-group>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>calendar_month</mat-icon>
+          {{ 'Schedule' | translate }}
+        </ng-template>
+        <div class="container">
+          <tips-project-schedule></tips-project-schedule>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

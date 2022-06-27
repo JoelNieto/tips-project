@@ -1,12 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Project } from '@tips/data/models';
-import { filter } from 'rxjs';
 
-import { ProjectsFacade } from '../../+state/projects/projects.facade';
-import { ProjectsFormComponent } from '../../projects-form/projects-form.component';
+import { ProjectsFacade } from '../+state/projects/projects.facade';
 
 @Component({
   selector: 'tips-projects',
@@ -16,13 +13,10 @@ import { ProjectsFormComponent } from '../../projects-form/projects-form.compone
 })
 export class ProjectsComponent implements OnInit {
   dataSource = new MatTableDataSource<Project>();
-  constructor(
-    private readonly store: ProjectsFacade,
-    private readonly dialog: MatDialog
-  ) {}
+  projects$ = this.store.allProjects$;
 
+  constructor(private readonly store: ProjectsFacade) {}
   @ViewChild(MatSort) sort!: MatSort;
-
   ngOnInit(): void {
     this.store.allProjects$.subscribe({
       next: (projects) => {
@@ -30,19 +24,6 @@ export class ProjectsComponent implements OnInit {
         this.dataSource.sort = this.sort;
       },
     });
-    this.store.selectedCompany$
-      .pipe(filter((company) => company !== undefined))
-      .subscribe({ next: () => this.store.init() });
-  }
-
-  createProject() {
-    this.dialog.open(ProjectsFormComponent, { panelClass: 'medium-dialog' });
-  }
-
-  editProject(project: Project) {
-    this.dialog.open(ProjectsFormComponent, {
-      panelClass: 'medium-dialog',
-      data: project,
-    });
+    this.store.init();
   }
 }

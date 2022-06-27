@@ -7,6 +7,7 @@ export const ProjectsActions = createActionGroup({
     Init: emptyProps(),
     'Load Projects Success': props<{ payload: Project[] }>(),
     'Load Projects Failure': props<{ error: any }>(),
+    'Set Project': props<{ id: string | undefined }>(),
     'Create Project': props<{ request: Project }>(),
     'Create Project Success': props<{ payload: Project }>(),
     'Update Project': props<{ id: string; request: Partial<Project> }>(),
