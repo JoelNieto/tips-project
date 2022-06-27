@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -38,6 +38,7 @@ export class AuthService {
 
   public getJWTCookie(payload: Partial<User>) {
     const token = this.jwt.sign(payload);
+    Logger.log(token);
     return `Authentication=${token}; Path=/; Max-Age=${this.configService.get(
       'JWT_EXPIRATION'
     )}`;
