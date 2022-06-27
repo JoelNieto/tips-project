@@ -38,7 +38,7 @@ export class AuthService {
 
   public getJWTCookie(payload: Partial<User>) {
     const token = this.jwt.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+    return `Authentication=${token}; Path=/; Max-Age=${this.configService.get(
       'JWT_EXPIRATION'
     )}`;
   }

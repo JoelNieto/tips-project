@@ -25,7 +25,7 @@ export class AuthController {
 
     const cookie = this.service.getJWTCookie(payload);
     response.setHeader('Set-Cookie', cookie);
-    return response.status(200).send();
+    return response.status(200).send(cookie);
   }
 
   @UseGuards(JwtAuthGuard)
