@@ -23,9 +23,8 @@ export class AuthController {
     const { user } = req;
     const payload = await this.service.login(user);
 
-    const cookie = this.service.getJWTCookie(payload);
-    response.setHeader('set-cookie', cookie);
-    return response.status(200).send();
+    const token = this.service.getToken(payload);
+    return response.status(200).send({ token });
   }
 
   @UseGuards(JwtAuthGuard)

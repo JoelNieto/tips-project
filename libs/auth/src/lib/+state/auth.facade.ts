@@ -14,7 +14,7 @@ export class AuthFacade {
   logged$ = this.store.select(AuthSelectors.selectLogged);
   error$ = this.store.select(AuthSelectors.selectError);
   profile$ = this.store.select(AuthSelectors.selectProfile);
-
+  token$ = this.store.select(AuthSelectors.selectToken);
   constructor(private readonly store: Store) {}
 
   /**
@@ -22,7 +22,7 @@ export class AuthFacade {
    * or more tasks in your Effects.
    */
   init() {
-    this.store.dispatch(AuthActions.init()); 
+    this.store.dispatch(AuthActions.init());
   }
 
   login(request: Login) {

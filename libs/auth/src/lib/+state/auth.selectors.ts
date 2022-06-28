@@ -17,5 +17,10 @@ export const selectLogged = createSelector(
 
 export const selectProfile = createSelector(
   selectAuthState,
-  (state: State) => state.user
+  (state: State) => state?.user
+);
+
+export const selectToken = createSelector(
+  selectAuthState,
+  (state: State) => state?.token
 );
