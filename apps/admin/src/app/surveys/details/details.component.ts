@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -11,7 +11,7 @@ import { SurveysFacade } from '../+state/surveys.facade';
   styleUrls: ['./details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DetailsComponent implements OnInit {
+export class DetailsComponent implements OnInit, OnDestroy {
   survey$ = this.store.selectedSurveys$;
   constructor(
     private store: SurveysFacade,
@@ -29,5 +29,9 @@ export class DetailsComponent implements OnInit {
     this.survey$.subscribe({
       next: (survey) => [this.title.setTitle(survey?.title ?? '')],
     });
+  }
+
+  ngOnDestroy(): void {
+    this.store.setSurvey(undefined);
   }
 }
