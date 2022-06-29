@@ -46,7 +46,7 @@ export class SurveysFacade {
     this.store.dispatch(AnswersActions.createSet({ request: set }));
   }
 
-  setSurvey(id: string) {
+  setSurvey(id: string | undefined) {
     this.store.dispatch(SurveysActions.setSurvey({ id }));
   }
 

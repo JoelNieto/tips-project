@@ -13,7 +13,7 @@ export const SurveysActions = createActionGroup({
     'Update Survey': props<{ id: string; request: Survey }>(),
     'Update Survey Success': props<{ id: string; payload: Survey }>(),
     'Update Survey Failure': props<{ error: unknown }>(),
-    'Set Survey': props<{ id: string }>(),
+    'Set Survey': props<{ id: string | undefined }>(),
     'Load Survey': emptyProps(),
     'Load Survey Success': props<{ payload: Survey }>(),
     'Clear Selection': emptyProps(),

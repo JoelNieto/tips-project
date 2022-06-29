@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { SurveysFacade } from '../+state/surveys.facade';
@@ -9,7 +9,7 @@ import { SurveysFacade } from '../+state/surveys.facade';
   styleUrls: ['./edit-survey.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditSurveyComponent implements OnInit {
+export class EditSurveyComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private readonly state: SurveysFacade
@@ -19,5 +19,9 @@ export class EditSurveyComponent implements OnInit {
     this.route.params.subscribe({
       next: (params) => this.state.setSurvey(params['id']),
     });
+  }
+
+  ngOnDestroy(): void {
+    this.state.setSurvey(undefined);
   }
 }
