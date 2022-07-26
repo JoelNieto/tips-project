@@ -5,11 +5,13 @@ import localeEs from '@angular/common/locales/es-PA';
 import { LOCALE_ID, NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -74,6 +76,20 @@ const translateLoader = (http: HttpClient) =>
     MatMenuModule,
   ],
   providers: [
+    {
+      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+      useValue: {
+        duration: 3500,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      },
+    },
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        appearance: 'fill',
+      },
+    },
     { provide: HTTP_INTERCEPTORS, useClass: AccessInterceptor, multi: true },
     { provide: APP_CONFIG, useValue: environment },
     { provide: LOCALE_ID, useValue: 'es-PA' },

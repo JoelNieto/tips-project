@@ -1,0 +1,84 @@
+<form [formGroup]="form" (ngSubmit)="saveChanges()">
+  <h1 mat-dialog-title>{{ 'Assignment.New' | translate }}</h1>
+  <div class="row">
+    <mat-form-field>
+      <mat-label>{{ 'Title' | translate }}</mat-label>
+      <input matInput formControlName="title" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'Description' | translate }}</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>
+        {{ 'Company.Singular' | translate }}
+      </mat-label>
+      <mat-select formControlName="company" [compareWith]="compareFn">
+        <mat-option>--{{ 'Not selected' | translate }}--</mat-option>
+        <mat-option
+          *ngFor="let company of companies$ | async"
+          [value]="company"
+          >{{ company.name }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>
+        {{ 'Project.Singular' | translate }}
+      </mat-label>
+      <mat-select formControlName="project" [compareWith]="compareFn">
+        <mat-option>--{{ 'Not selected' | translate }}--</mat-option>
+        <mat-option
+          *ngFor="let project of projects$ | async"
+          [value]="project"
+          >{{ project.title }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>
+        {{ 'Survey.Title' | translate }}
+      </mat-label>
+      <mat-select formControlName="survey" [compareWith]="compareFn">
+        <mat-option *ngFor="let survey of surveys$ | async" [value]="survey">{{
+          survey.title
+        }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="col-6">
+      <mat-label>{{ 'Start date' | translate }}</mat-label>
+      <input
+        matInput
+        [matDatepicker]="startPicker"
+        formControlName="startDate"
+      />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="startPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field class="col-6">
+      <mat-label>{{ 'End date' | translate }}</mat-label>
+      <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="endPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>{{ 'Cancel' | translate }}</button>
+    <button
+      mat-flat-button
+      type="submit"
+      [disabled]="form.invalid"
+      color="primary"
+    >
+      {{ 'Save' | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

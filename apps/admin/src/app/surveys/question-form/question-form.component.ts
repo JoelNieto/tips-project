@@ -27,7 +27,7 @@ export class QuestionFormComponent implements OnInit {
   }
 
   addAnswerSet() {
-    this.dialog.open(AnswerFormComponent, { width: '40vw' });
+    this.dialog.open(AnswerFormComponent, { panelClass: 'medium-dialog' });
   }
 
   compareFn = (item1: any, item2: any) =>

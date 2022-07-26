@@ -11,7 +11,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // TODO: Add cookie auth
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJWT,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: configService.get('JWT_SECRET'),

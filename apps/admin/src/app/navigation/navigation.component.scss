@@ -20,6 +20,13 @@
   flex: 1 1 auto;
 }
 
-mat-icon {
-  margin-right: .5rem;
+.active {
+  mat-icon {
+    color: #8e24aa;
+  }
+
+  .mat-line {
+    font-weight: bold !important;
+  }
+
 }

@@ -1,12 +1,12 @@
 {
   "folders": [
     {
-      "name": "admin",
-      "path": "apps/admin"
-    },
-    {
       "name": "api",
       "path": "apps/api"
+    },
+    {
+      "name": "admin",
+      "path": "apps/admin"
     },
     {
       "name": "auth",

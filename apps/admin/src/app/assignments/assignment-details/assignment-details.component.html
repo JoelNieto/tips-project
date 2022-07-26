@@ -1,0 +1,6 @@
+<mat-card>
+  <ng-container *ngIf="assignment$ | async as assignment">
+    <mat-card-title>{{ assignment.title }}</mat-card-title>
+    <mat-card-subtitle>{{ assignment.company?.fullName }}</mat-card-subtitle>
+  </ng-container>
+</mat-card>

@@ -24,6 +24,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./corporate/corporate.module').then((m) => m.CorporateModule),
       },
+      {
+        path: 'assignments',
+        loadChildren: () =>
+          import('./assignments/assignments.module').then(
+            (m) => m.AssignmentsModule
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },

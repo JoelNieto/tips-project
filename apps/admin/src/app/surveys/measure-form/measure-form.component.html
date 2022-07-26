@@ -1,14 +1,14 @@
 <form [formGroup]="form" class="row">
-  <mat-form-field class="col-8" appearance="fill">
+  <mat-form-field class="col-8">
     <mat-label>{{ 'Name' | translate }}</mat-label>
     <input type="text" matInput formControlName="name" />
   </mat-form-field>
-  <mat-form-field class="col-4" appearance="fill">
+  <mat-form-field class="col-4">
     <mat-label>{{ 'Weighting' | translate }}</mat-label>
     <input type="number" matInput formControlName="weighting" />
     <mat-icon matSuffix>percent</mat-icon>
   </mat-form-field>
-  <mat-form-field appearance="fill">
+  <mat-form-field>
     <mat-label>{{ 'Description' | translate }}</mat-label>
     <textarea matInput formControlName="description"></textarea>
   </mat-form-field>
@@ -26,7 +26,7 @@
       <mat-card-content>
         <tips-question-form [index]="i"></tips-question-form>
         <button
-          mat-stroked-button
+          mat-raised-button
           color="warn"
           class="remove-question"
           (click)="removeQuestion(i)"

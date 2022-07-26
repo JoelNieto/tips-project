@@ -2,15 +2,15 @@
   <h2 mat-dialog-title>
     {{ (position ? 'Position.Edit' : 'Position.New') | translate }}
   </h2>
-  <mat-form-field appearance="fill">
+  <mat-form-field>
     <mat-label>{{ 'Name' | translate }}</mat-label>
     <input type="text" matInput formControlName="name" />
   </mat-form-field>
-  <mat-form-field appearance="fill">
+  <mat-form-field>
     <mat-label>{{ 'Code' | translate }}</mat-label>
     <input type="text" matInput formControlName="code" />
   </mat-form-field>
-  <mat-form-field appearance="fill">
+  <mat-form-field>
     <mat-label>{{ 'Position.Parent' | translate }}</mat-label>
     <mat-select formControlName="parent" [compareWith]="compareFn">
       <mat-option

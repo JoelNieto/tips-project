@@ -1,10 +1,63 @@
 <div class="container">
   <div class="header-container">
     <h2>{{ 'AnswerSet.Plural' | translate }}</h2>
-
-    <button mat-flat-button color="primary">
-      {{ 'AnswerSet.New' | translate }}</button
-    >'
+    <button mat-flat-button color="primary" (click)="createSet()">
+      {{ 'AnswerSet.New' | translate }}
+    </button>
   </div>
-  <table></table>
+  <table mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-soft-header>
+        {{ 'Name' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+    </ng-container>
+    <ng-container matColumnDef="answers">
+      <th mat-header-cell *matHeaderCellDef mat-soft-header>
+        #{{ 'Answers' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let item">{{ item.answers.length }}</td>
+    </ng-container>
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ 'Created at' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.createdAt | date: 'short' }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="updatedAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{ 'Updated at' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.updatedAt | date: 'short' }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'Actions' | translate }}</th>
+      <td mat-cell *matCellDef="let item">
+        <button mat-icon-button color="accent" (click)="editSet(item)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <tr
+      mat-header-row
+      *matHeaderRowDef="[
+        'name',
+        'answers',
+        'createdAt',
+        'updatedAt',
+        'actions'
+      ]"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="
+        let row;
+        columns: ['name', 'answers', 'createdAt', 'updatedAt', 'actions']
+      "
+    ></tr>
+  </table>
 </div>

@@ -12,19 +12,10 @@
       }}</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
-  <div class="col-4">
-    <h5>
+  <div class="col-4 text-center">
+    <h3>
       {{ viewDate | calendarDate: view + 'ViewTitle':'es-PA':weekStartsOn }}
-    </h5>
-  </div>
-  <div class="col-4">
-    <mat-button-toggle-group>
-      <mat-button-toggle (click)="setView(CalendarView.Week)">{{
-        'Week' | translate
-      }}</mat-button-toggle>
-      <mat-button-toggle (click)="setView(CalendarView.Month)">{{
-        'Month' | translate
-      }}</mat-button-toggle>
-    </mat-button-toggle-group>
+    </h3>
   </div>
 </div>
+<mwl-calendar-month-view [viewDate]="viewDate"></mwl-calendar-month-view>

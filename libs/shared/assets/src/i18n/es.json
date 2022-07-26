@@ -71,6 +71,10 @@
     "Singular": "Proyecto",
     "Edit": "Editar proyecto"
   },
+  "Assignment": {
+    "Plural": " Asignaciones",
+    "New": "Nueva asignacion"
+  },
   "Title": "Titulo",
   "Created at": "Creado",
   "Updated at": "Actualizado",

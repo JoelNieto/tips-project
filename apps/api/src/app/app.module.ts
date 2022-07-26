@@ -13,6 +13,7 @@ import { SurveysModule } from './surveys/surveys.module';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { ProjectsModule } from './projects/projects.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 
 const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
 
@@ -36,6 +37,7 @@ const envFilePath = getEnvPath(`${process.cwd()}/apps/api/src/common/envs`);
     PositionsModule,
     ProfilesModule,
     ProjectsModule,
+    AssignmentsModule,
   ],
 })
 export class AppModule {}

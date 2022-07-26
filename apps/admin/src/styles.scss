@@ -3,8 +3,25 @@
 @use '@angular/material' as mat;
 
 $custom-typography: mat.define-typography-config(
-  $font-family: 'Rubik'
+  $font-family: 'Work Sans',
 );
+
+$my-primary: mat.define-palette(mat.$purple-palette, 800);
+$my-accent: mat.define-palette(mat.$green-palette, 600);
+$my-warn: mat.define-palette(mat.$red-palette, 500);
+
+$my-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+      warn: $my-warn,
+    ),
+  )
+);
+
+@include mat.core-theme($my-theme);
+@include mat.all-component-themes($my-theme);
 
 @include mat.core($custom-typography);
 
@@ -12,9 +29,10 @@ html,
 body {
   height: 100%;
 }
+
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: 'Work Sans', 'Helvetica Neue', sans-serif;
 }
 
 .container {
@@ -27,6 +45,7 @@ body {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
+
   & > * {
     grid-column: span 12;
   }
@@ -36,39 +55,51 @@ body {
   * {
     grid-column: span 12;
   }
+
   .col-1 {
     grid-column: span 1;
   }
+
   .col-2 {
     grid-column: span 2;
   }
+
   .col-3 {
     grid-column: span 3;
   }
+
   .col-4 {
     grid-column: span 4;
   }
+
   .col-5 {
     grid-column: span 5;
   }
+
   .col-6 {
     grid-column: span 6;
   }
+
   .col-7 {
     grid-column: span 7;
   }
+
   .col-8 {
     grid-column: span 8;
   }
+
   .col-9 {
     grid-column: span 9;
   }
+
   .col-10 {
     grid-column: span 10;
   }
+
   .col-11 {
     grid-column: span 11;
   }
+
   .col-12 {
     grid-column: span 12;
   }
@@ -84,12 +115,16 @@ mat-form-field {
   width: 100%;
 }
 
-[mat-raised-button], [mat-button], [mat-flat-button], [mat-stroked-button] {
+[mat-raised-button],
+[mat-button],
+[mat-flat-button],
+[mat-stroked-button] {
   text-transform: uppercase;
 }
 
 .medium-dialog {
   width: 80vw;
+
   @media (min-width: 992px) {
     width: 40vw;
   }
@@ -97,7 +132,25 @@ mat-form-field {
 
 .large-dialog {
   width: 80vw;
+
   @media (min-width: 992px) {
     width: 70vw;
+  }
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.alert {
+  color: white;
+  border: none;
+
+  &.success {
+    background: #48bb78;
+  }
+
+  &.failure {
+    background: #f56565;
   }
 }

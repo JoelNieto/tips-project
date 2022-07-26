@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { compare } from 'bcrypt';
@@ -11,7 +10,6 @@ import { User, UserDocument } from '../users/schema/user.schema';
 export class AuthService {
   constructor(
     @InjectModel(User.name) private model: Model<UserDocument>,
-    private readonly configService: ConfigService,
     private readonly jwt: JwtService
   ) {}
 
@@ -19,11 +17,13 @@ export class AuthService {
     const user = await this.model.findOne({ email }).populate('role');
 
     if (!user) {
-      return null;
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     if (await compare(password, user.password)) {
       return user;
+    } else {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
   }
 

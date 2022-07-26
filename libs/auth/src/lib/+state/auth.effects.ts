@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '@tips/data/services';
-import { map, switchMap, tap } from 'rxjs';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 
 import { AuthActions } from './auth.actions';
 
@@ -14,9 +14,10 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(AuthActions.login),
       switchMap(({ request }) =>
-        this.service
-          .login(request)
-          .pipe(map(({ token }) => AuthActions.loginSuccess({ token })))
+        this.service.login(request).pipe(
+          map(({ token }) => AuthActions.loginSuccess({ token })),
+          catchError((error) => of(AuthActions.loginFailure({ error })))
+        )
       )
     );
   });
@@ -26,14 +27,29 @@ export class AuthEffects {
       ofType(AuthActions.loginSuccess),
       tap(() =>
         this.snackBar.open(this.translate.instant('Welcome'), undefined, {
-          duration: 3000,
-          verticalPosition: 'top',
-          horizontalPosition: 'center',
+          panelClass: ['alert', 'success'],
         })
       ),
       map(() => AuthActions.loadProfile())
     );
   });
+
+  loginFailure$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(AuthActions.loginFailure),
+        tap(({ error }) => console.error(error)),
+        map(() =>
+          this.snackBar.open(
+            this.translate.instant('Something went wrong'),
+            undefined,
+            { panelClass: ['alert', 'failure'] }
+          )
+        )
+      );
+    },
+    { dispatch: false }
+  );
 
   loadProfile$ = createEffect(() => {
     return this.actions$.pipe(

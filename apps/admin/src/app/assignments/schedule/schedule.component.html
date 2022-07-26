@@ -1,0 +1,53 @@
+<ng-template #loading>
+  <div class="text-center">
+    <i class="fas fa-spin fa-spinner fa-5x"></i> <br />
+    Loading events...
+  </div>
+</ng-template>
+<div *ngIf="events$ | async; else loading; let events">
+  <div class="header-container">
+    <div class="icon-container">
+      <button
+        mat-flat-button
+        color="primary"
+        mwlCalendarPreviousView
+        [view]="view"
+        [(viewDate)]="viewDate"
+        (viewDateChange)="closeOpenMonthViewDay()"
+      >
+        {{ 'Previous' | translate }}
+      </button>
+      <button
+        mat-stroked-button
+        mwlCalendarToday
+        [(viewDate)]="viewDate"
+        (viewDateChange)="closeOpenMonthViewDay()"
+      >
+        {{ 'Today' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        mwlCalendarNextView
+        [view]="view"
+        [(viewDate)]="viewDate"
+        (viewDateChange)="closeOpenMonthViewDay()"
+      >
+        {{ 'Next' | translate }}
+      </button>
+    </div>
+    <mat-card-title
+      >{{ viewDate | calendarDate: view + 'ViewTitle':'es-PA' }}
+    </mat-card-title>
+    <div></div>
+  </div>
+
+  <mwl-calendar-month-view
+    [viewDate]="viewDate"
+    [events]="events"
+    [activeDayIsOpen]="activeDayIsOpen"
+    (dayClicked)="dayClicked($event.day)"
+    (eventClicked)="eventClicked($event.event)"
+  >
+  </mwl-calendar-month-view>
+</div>
