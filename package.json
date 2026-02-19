@@ -2,7 +2,9 @@
   "name": "@tips-project/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "serve:dev": "nx run-many --parallel --target=serve --projects=web-app,web-server"
+  },
   "private": true,
   "dependencies": {
     "@angular-devkit/build-angular": "~21.1.0",
