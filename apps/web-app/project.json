@@ -61,7 +61,11 @@
           "buildTarget": "web-app:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "dependsOn": ["web-server:serve"],
+      "options": {
+        "proxyConfig": "apps/web-app/proxy.conf.json"
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint"
