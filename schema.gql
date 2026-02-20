@@ -2,6 +2,83 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CompanyEntity {
+  city: String
+  country: String
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  description: String
+  email: String
+  id: ID!
+  industry: String
+  legalName: String
+  logo: String
+  name: String!
+  phone: String
+  postalCode: String
+  size: String
+  state: String
+  street: String
+  taxId: String
+  updatedAt: DateTime!
+  website: String
+}
+
+input CreateCompanyInput {
+  city: String
+  country: String
+  description: String
+  email: String
+  industry: String
+  legalName: String
+  logo: String
+  name: String!
+  phone: String
+  postalCode: String
+  size: String
+  state: String
+  street: String
+  taxId: String
+  website: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createCompany(input: CreateCompanyInput!): CompanyEntity!
+  deleteCompany(id: ID!): CompanyEntity!
+  updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
+}
+
 type Query {
+  companies: [CompanyEntity!]!
+  company(id: ID!): CompanyEntity
   hello: String!
+}
+
+input UpdateCompanyInput {
+  city: String
+  country: String
+  description: String
+  email: String
+  industry: String
+  legalName: String
+  logo: String
+  name: String
+  phone: String
+  postalCode: String
+  size: String
+  state: String
+  street: String
+  taxId: String
+  website: String
+}
+
+type UserEntity {
+  email: String!
+  id: ID!
+  name: String!
 }

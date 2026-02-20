@@ -5,9 +5,11 @@ import {
 } from '@angular/common/http';
 import {
   ApplicationConfig,
+  importProvidersFrom,
   inject,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { DialogModule } from '@angular/cdk/dialog';
 import {
   provideClientHydration,
   withEventReplay,
@@ -22,6 +24,7 @@ import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    importProvidersFrom(DialogModule),
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withFetch()),

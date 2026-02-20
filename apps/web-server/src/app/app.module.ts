@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { auth } from './auth/auth';
+import { CompanyModule } from './company/company.module';
 import { PrismaModule } from './prisma.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { PrismaModule } from './prisma.module';
       driver: ApolloDriver,
     }),
     PrismaModule,
+    CompanyModule,
   ],
   controllers: [AppController],
   providers: [AppResolver, AppService],

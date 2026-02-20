@@ -60,10 +60,12 @@ import { AuthService } from '../auth/auth.service';
 
       <!-- Mobile overlay -->
       @if (sidebarOpen()) {
-        <div
-          class="fixed inset-0 z-20 bg-black/30 lg:hidden"
+        <button
+          type="button"
+          class="fixed inset-0 z-20 block w-full bg-black/30 lg:hidden"
+          aria-label="Close menu"
           (click)="sidebarOpen.set(false)"
-        ></div>
+        ></button>
       }
 
       <!-- Main content -->
@@ -96,6 +98,7 @@ export default class DashboardShellComponent {
 
   protected readonly navItems = [
     { path: '/dashboard', label: 'Home', exact: true, icon: 'home' },
+    { path: '/dashboard/companies', label: 'Companies', exact: false, icon: 'business' },
     { path: '/dashboard/tips', label: 'Tips', exact: false, icon: 'payments' },
     { path: '/dashboard/reports', label: 'Reports', exact: false, icon: 'bar_chart' },
     { path: '/dashboard/settings', label: 'Settings', exact: false, icon: 'settings' },
