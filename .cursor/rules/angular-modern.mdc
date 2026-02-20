@@ -1,0 +1,21 @@
+---
+alwaysApply: true
+---
+
+## Modern Angular Guidelines
+
+Use current Angular patterns (v16+).
+
+- Prefer standalone components, directives, and pipes.
+- Always use single-file components.
+- Default export component classes.
+- Use signals for local state when appropriate; avoid unnecessary RxJS for simple state.
+- Use the new control flow syntax (`@if`, `@for`, `@switch`) instead of structural directives.
+- Favor `inject()` over constructor injection when it keeps code cleaner.
+- Use `provideHttpClient()` and `provideRouter()` in bootstrap instead of module-based providers.
+- Enforce `rxResource` for data fetching in services and components.
+- Keep components lean: push data access and business logic into services.
+- Prefer `OnPush` change detection; use `signal`/`computed` to minimize manual `markForCheck`.
+- Use `DestroyRef` or `takeUntilDestroyed` for cleanup in RxJS streams.
+- Avoid `NgModule` unless required for legacy or third-party integrations.
+- Prefer `afterRenderEffect` over `ngOnInit` for component initialization

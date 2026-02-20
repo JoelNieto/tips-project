@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+
+## NestJS Backend Guidelines
+
+Use current NestJS patterns with GraphQL (code-first) and Prisma.
+
+- Keep modules cohesive: one domain per module with its resolver/service.
+- Put business logic in services; resolvers/controllers stay thin.
+- Use DTOs/InputTypes for all GraphQL inputs and outputs; avoid exposing Prisma models directly.
+- Prefer dependency injection over static helpers; inject shared services.
+- Use `PrismaService` for data access; wrap multi-step writes in `$transaction`.
+- Validate inputs with `class-validator`; fail fast on invalid args.
+- Enforce auth/roles with guards and decorators; never trust client IDs.
+- Prefer explicit error handling and meaningful GraphQL errors.
+- Keep naming consistent: `*.resolver.ts`, `*.service.ts`, `*.module.ts`, `dto/`, `entities/`.
