@@ -3,14 +3,17 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
+import { auth } from './auth/auth';
 import { PrismaModule } from './prisma.module';
 
 @Module({
   imports: [
+    AuthModule.forRoot({ auth }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
       useFactory: async () => ({

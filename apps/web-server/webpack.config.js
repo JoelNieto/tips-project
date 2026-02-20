@@ -2,6 +2,7 @@ const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
 const { join } = require('path');
 
 module.exports = {
+  cache: false,
   output: {
     path: join(__dirname, '../../dist/apps/web-server'),
     clean: true,
