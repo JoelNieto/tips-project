@@ -15,7 +15,9 @@ import { AuthService } from './auth.service';
   imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+    <div
+      class="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4"
+    >
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
           <div
@@ -27,7 +29,11 @@ import { AuthService } from './auth.service';
             {{ isSignUp() ? 'Create your account' : 'Welcome back' }}
           </h1>
           <p class="text-slate-500 mt-1">
-            {{ isSignUp() ? 'Get started with Tips App' : 'Sign in to your account' }}
+            {{
+              isSignUp()
+                ? 'Get started with Tips App'
+                : 'Sign in to your account'
+            }}
           </p>
         </div>
 
@@ -95,7 +101,9 @@ import { AuthService } from './auth.service';
                 [(ngModel)]="password"
                 name="password"
                 required
-                autocomplete="{{ isSignUp() ? 'new-password' : 'current-password' }}"
+                autocomplete="{{
+                  isSignUp() ? 'new-password' : 'current-password'
+                }}"
                 placeholder="••••••••"
                 class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
@@ -108,7 +116,11 @@ import { AuthService } from './auth.service';
             >
               @if (auth.loading()) {
                 <span class="inline-flex items-center gap-2">
-                  <span class="material-symbols-outlined animate-spin text-xl" aria-hidden="true">progress_activity</span>
+                  <span
+                    class="material-symbols-outlined animate-spin text-xl"
+                    aria-hidden="true"
+                    >progress_activity</span
+                  >
                   {{ isSignUp() ? 'Creating account…' : 'Signing in…' }}
                 </span>
               } @else {
