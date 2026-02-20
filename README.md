@@ -1,82 +1,91 @@
-# TipsProject
+# Tips Project
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A multi-tenant HR platform for designing, scheduling, monitoring, and measuring polls. Built for recruitment, coaching, evaluations, and more.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Features
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Poll design and scheduling** -- create and distribute polls with flexible scheduling
+- **Monitoring and analytics** -- track responses and measure results in real time
+- **Multi-tenant architecture** -- companies grouped into organizations with isolated data
+- **Role-based access control** -- super admin, organization admin, and company-level users
+- **Use cases** -- recruitment screening, coaching feedback, performance evaluations, employee engagement surveys
 
-## Finish your CI setup
+## Tech Stack
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/6huqDXoLsf)
+| Layer | Technology |
+|-------|------------|
+| Frontend | Angular 21, Tailwind CSS 4, Apollo Client, SSR |
+| Backend | NestJS 11, GraphQL (code-first), Apollo Server |
+| Auth | [Better Auth](https://www.better-auth.com/) |
+| Database | PostgreSQL, Prisma 7 |
+| Monorepo | Nx 22 |
+| Testing | Vitest (unit), Playwright (E2E) |
 
+## Project Structure
 
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx serve web-app
+```
+tips-project/
+├── apps/
+│   ├── web-app/          # Angular frontend (SSR-enabled)
+│   ├── web-app-e2e/      # Frontend E2E tests (Playwright)
+│   ├── web-server/       # NestJS GraphQL API
+│   └── web-server-e2e/   # Backend E2E tests
+├── prisma/
+│   ├── schema.prisma     # Database schema
+│   └── migrations/       # Database migrations
+└── generated/
+    └── prisma/           # Generated Prisma client
 ```
 
-To create a production bundle:
+## Getting Started
+
+### Prerequisites
+
+- Node.js (LTS)
+- PostgreSQL
+- [Bun](https://bun.sh/) package manager
+
+### Setup
 
 ```sh
-npx nx build web-app
+# Install dependencies
+bun install
+
+# Set up your database connection
+cp .env.example .env   # then edit DATABASE_URL
+
+# Run database migrations
+bunx prisma migrate dev
+
+# Start both frontend and backend in dev mode
+bun run serve:dev
 ```
 
-To see all available targets to run for a project, run:
+The frontend runs at `http://localhost:4200` and proxies API requests to the backend at `http://localhost:3000`.
+
+## Development Commands
 
 ```sh
-npx nx show project web-app
+# Serve individual apps
+bunx nx serve web-app
+bunx nx serve web-server
+
+# Build for production
+bunx nx build web-app
+bunx nx build web-server
+
+# Run tests
+bunx nx test web-app
+bunx nx test web-server
+
+# Lint
+bunx nx lint web-app
+bunx nx lint web-server
+
+# Visualize project graph
+bunx nx graph
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## License
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/angular:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+MIT
