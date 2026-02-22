@@ -38,17 +38,40 @@ model Company {
   @@map("companies")
 }
 
+model SurveyType {
+  id                 String   @id @default(uuid())
+  name               String
+  description        String?
+  code               String?
+  isActive           Boolean  @default(true)
+  sortOrder          Int?
+  categoryName       String?
+  subcategoryName    String?
+  hasCategories      Boolean  @default(false)
+  hasSubcategories   Boolean  @default(false)
+  visibleCategories  Boolean  @default(false)
+  visibleSubcategories Boolean @default(false)
+  randomizeQuestions Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdById        String
+  createdBy          User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@map("survey_types")
+}
+
 model User {
-  id               String    @id
-  name             String
-  email            String    @unique
-  emailVerified    Boolean   @default(false)
-  image            String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  sessions         Session[]
-  accounts         Account[]
-  companiesCreated Company[]
+  id                 String       @id
+  name               String
+  email              String       @unique
+  emailVerified      Boolean      @default(false)
+  image              String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  companiesCreated   Company[]
+  surveyTypesCreated SurveyType[]
 
   @@map("users")
 }

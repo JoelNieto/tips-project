@@ -99,9 +99,10 @@ export default class DashboardShellComponent {
   protected readonly navItems = [
     { path: '/dashboard', label: 'Home', exact: true, icon: 'home' },
     { path: '/dashboard/companies', label: 'Companies', exact: false, icon: 'business' },
+    { path: '/dashboard/survey-types', label: 'Survey Types', exact: false, icon: 'poll' },
     { path: '/dashboard/tips', label: 'Tips', exact: false, icon: 'payments' },
     { path: '/dashboard/reports', label: 'Reports', exact: false, icon: 'bar_chart' },
-    { path: '/dashboard/settings', label: 'Settings', exact: false, icon: 'settings' },
+    { path: '/dashboard/profile', label: 'Profile', exact: false, icon: 'person' },
   ];
 
   protected toggleSidebar(): void {

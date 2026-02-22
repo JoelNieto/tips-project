@@ -13,4 +13,16 @@ export const dashboardRoutes: Routes = [
     path: 'companies/:id',
     loadComponent: () => import('../companies/company-form'),
   },
+  {
+    path: 'survey-types',
+    loadComponent: () => import('../survey-types/survey-types-list'),
+  },
+  {
+    path: 'survey-types/:id',
+    loadComponent: () => import('../survey-types/survey-type-form'),
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('../profile/profile'),
+  },
 ];

@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { auth } from './auth/auth';
 import { CompanyModule } from './company/company.module';
 import { PrismaModule } from './prisma.module';
+import { SurveyModule } from './survey/survey.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PrismaModule } from './prisma.module';
     }),
     PrismaModule,
     CompanyModule,
+    SurveyModule,
   ],
   controllers: [AppController],
   providers: [AppResolver, AppService],

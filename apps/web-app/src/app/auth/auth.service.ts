@@ -107,6 +107,46 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  async updateUser(data: { name?: string; image?: string | null }): Promise<{ success: boolean; error?: string }> {
+    this._error.set(null);
+    try {
+      const { data: result, error } = await getAuthClient().updateUser(data);
+      if (error) {
+        return { success: false, error: error.message ?? 'Failed to update profile' };
+      }
+      if (result?.status && isPlatformBrowser(this.platformId)) {
+        const { data: sessionData } = await getAuthClient().getSession();
+        if (sessionData?.user) {
+          this._user.set(sessionData.user as User);
+        }
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Failed to update profile' };
+    }
+  }
+
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+    revokeOtherSessions?: boolean
+  ): Promise<{ success: boolean; error?: string }> {
+    this._error.set(null);
+    try {
+      const { error } = await getAuthClient().changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions,
+      });
+      if (error) {
+        return { success: false, error: error.message ?? 'Failed to change password' };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Failed to change password' };
+    }
+  }
+
   private async loadSession(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) {
       this._ready.set(true);
