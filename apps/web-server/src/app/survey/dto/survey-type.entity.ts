@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../../company/dto/user.entity';
 
 @ObjectType()
 export class SurveyTypeEntity {
@@ -17,9 +17,6 @@ export class SurveyTypeEntity {
 
   @Field()
   isActive!: boolean;
-
-  @Field({ nullable: true })
-  sortOrder?: number | null;
 
   @Field({ nullable: true })
   categoryName?: string | null;

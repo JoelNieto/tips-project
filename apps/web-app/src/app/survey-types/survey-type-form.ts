@@ -26,7 +26,6 @@ interface SurveyTypeFormModel {
   description: string;
   code: string;
   isActive: boolean;
-  sortOrder: string;
   categoryName: string;
   subcategoryName: string;
   hasCategories: boolean;
@@ -41,7 +40,6 @@ const emptyModel: SurveyTypeFormModel = {
   description: '',
   code: '',
   isActive: true,
-  sortOrder: '',
   categoryName: '',
   subcategoryName: '',
   hasCategories: false,
@@ -146,31 +144,16 @@ const emptyModel: SurveyTypeFormModel = {
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               ></textarea>
             </div>
-            <div class="mt-4 grid gap-6 sm:grid-cols-2">
-              <div>
-                <label
-                  for="sortOrder"
-                  class="block text-sm font-medium text-slate-700"
-                  >Sort order</label
-                >
-                <input
-                  id="sortOrder"
-                  type="number"
-                  [formField]="surveyTypeForm.sortOrder"
-                  class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div class="flex items-center gap-2 pt-8">
-                <input
-                  id="isActive"
-                  type="checkbox"
-                  [formField]="surveyTypeForm.isActive"
-                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <label for="isActive" class="text-sm font-medium text-slate-700"
-                  >Active</label
-                >
-              </div>
+            <div class="mt-4 flex items-center gap-2">
+              <input
+                id="isActive"
+                type="checkbox"
+                [formField]="surveyTypeForm.isActive"
+                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <label for="isActive" class="text-sm font-medium text-slate-700"
+                >Active</label
+              >
             </div>
           </div>
 
@@ -383,10 +366,6 @@ export default class SurveyTypeFormComponent {
               description: (surveyType['description'] as string) ?? '',
               code: (surveyType['code'] as string) ?? '',
               isActive: (surveyType['isActive'] as boolean) ?? true,
-              sortOrder:
-                surveyType['sortOrder'] != null
-                  ? String(surveyType['sortOrder'])
-                  : '',
               categoryName: (surveyType['categoryName'] as string) ?? '',
               subcategoryName: (surveyType['subcategoryName'] as string) ?? '',
               hasCategories: (surveyType['hasCategories'] as boolean) ?? false,
@@ -419,10 +398,6 @@ export default class SurveyTypeFormComponent {
       description: value.description || undefined,
       code: value.code || undefined,
       isActive: value.isActive,
-      sortOrder: (() => {
-        const n = parseInt(value.sortOrder, 10);
-        return value.sortOrder && !Number.isNaN(n) ? n : undefined;
-      })(),
       categoryName: value.categoryName || undefined,
       subcategoryName: value.subcategoryName || undefined,
       hasCategories: value.hasCategories,

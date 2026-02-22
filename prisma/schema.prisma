@@ -44,7 +44,6 @@ model SurveyType {
   description        String?
   code               String?
   isActive           Boolean  @default(true)
-  sortOrder          Int?
   categoryName       String?
   subcategoryName    String?
   hasCategories      Boolean  @default(false)

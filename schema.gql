@@ -42,6 +42,20 @@ input CreateCompanyInput {
   website: String
 }
 
+input CreateSurveyTypeInput {
+  categoryName: String
+  code: String
+  description: String
+  hasCategories: Boolean = false
+  hasSubcategories: Boolean = false
+  isActive: Boolean = true
+  name: String!
+  randomizeQuestions: Boolean = false
+  subcategoryName: String
+  visibleCategories: Boolean = false
+  visibleSubcategories: Boolean = false
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -49,14 +63,37 @@ scalar DateTime
 
 type Mutation {
   createCompany(input: CreateCompanyInput!): CompanyEntity!
+  createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
   deleteCompany(id: ID!): CompanyEntity!
+  deleteSurveyType(id: ID!): SurveyTypeEntity!
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
+  updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
 }
 
 type Query {
   companies: [CompanyEntity!]!
   company(id: ID!): CompanyEntity
   hello: String!
+  surveyType(id: ID!): SurveyTypeEntity
+  surveyTypes: [SurveyTypeEntity!]!
+}
+
+type SurveyTypeEntity {
+  categoryName: String
+  code: String
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  description: String
+  hasCategories: Boolean!
+  hasSubcategories: Boolean!
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  randomizeQuestions: Boolean!
+  subcategoryName: String
+  updatedAt: DateTime!
+  visibleCategories: Boolean!
+  visibleSubcategories: Boolean!
 }
 
 input UpdateCompanyInput {
@@ -75,6 +112,20 @@ input UpdateCompanyInput {
   street: String
   taxId: String
   website: String
+}
+
+input UpdateSurveyTypeInput {
+  categoryName: String
+  code: String
+  description: String
+  hasCategories: Boolean
+  hasSubcategories: Boolean
+  isActive: Boolean
+  name: String
+  randomizeQuestions: Boolean
+  subcategoryName: String
+  visibleCategories: Boolean
+  visibleSubcategories: Boolean
 }
 
 type UserEntity {

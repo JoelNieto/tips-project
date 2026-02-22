@@ -1,7 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsBoolean,
-  IsInt,
   IsOptional,
   IsString,
   MaxLength,
@@ -31,11 +30,6 @@ export class CreateSurveyTypeInput {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsInt()
-  sortOrder?: number;
 
   @Field({ nullable: true })
   @IsOptional()

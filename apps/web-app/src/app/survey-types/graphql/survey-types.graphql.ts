@@ -8,7 +8,6 @@ export const SURVEY_TYPES_QUERY = gql`
       description
       code
       isActive
-      sortOrder
       categoryName
       subcategoryName
       hasCategories
@@ -35,7 +34,6 @@ export const SURVEY_TYPE_QUERY = gql`
       description
       code
       isActive
-      sortOrder
       categoryName
       subcategoryName
       hasCategories
@@ -62,7 +60,6 @@ export const CREATE_SURVEY_TYPE_MUTATION = gql`
       description
       code
       isActive
-      sortOrder
       categoryName
       subcategoryName
       hasCategories
@@ -89,7 +86,6 @@ export const UPDATE_SURVEY_TYPE_MUTATION = gql`
       description
       code
       isActive
-      sortOrder
       categoryName
       subcategoryName
       hasCategories

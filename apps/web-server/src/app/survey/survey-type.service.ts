@@ -20,7 +20,7 @@ export class SurveyTypeService {
     return this.prisma.surveyType.findMany({
       where,
       include: { createdBy: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -40,7 +40,6 @@ export class SurveyTypeService {
         description: input.description ?? undefined,
         code: input.code ?? undefined,
         isActive: input.isActive ?? true,
-        sortOrder: input.sortOrder ?? undefined,
         categoryName: input.categoryName ?? undefined,
         subcategoryName: input.subcategoryName ?? undefined,
         hasCategories: input.hasCategories ?? false,
@@ -77,7 +76,6 @@ export class SurveyTypeService {
         ...(input.description !== undefined && { description: input.description }),
         ...(input.code !== undefined && { code: input.code }),
         ...(input.isActive !== undefined && { isActive: input.isActive }),
-        ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
         ...(input.categoryName !== undefined && {
           categoryName: input.categoryName,
         }),
