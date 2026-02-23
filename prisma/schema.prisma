@@ -39,24 +39,139 @@ model Company {
 }
 
 model SurveyType {
-  id                 String   @id @default(uuid())
-  name               String
-  description        String?
-  code               String?
-  isActive           Boolean  @default(true)
-  categoryName       String?
-  subcategoryName    String?
-  hasCategories      Boolean  @default(false)
-  hasSubcategories   Boolean  @default(false)
-  visibleCategories  Boolean  @default(false)
-  visibleSubcategories Boolean @default(false)
-  randomizeQuestions Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  createdById        String
-  createdBy          User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  id                   String    @id @default(uuid())
+  name                 String
+  description          String?
+  code                 String?
+  isActive             Boolean   @default(true)
+  categoryName         String?
+  subcategoryName      String?
+  hasCategories        Boolean   @default(false)
+  hasSubcategories     Boolean   @default(false)
+  visibleCategories    Boolean   @default(false)
+  visibleSubcategories Boolean   @default(false)
+  randomizeQuestions   Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  createdById          String
+  createdBy            User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  surveys              Survey[]
 
   @@map("survey_types")
+}
+
+model Survey {
+  id          String   @id @default(uuid())
+  title       String
+  surveyTypeId String
+  surveyType  SurveyType @relation(fields: [surveyTypeId], references: [id], onDelete: Restrict)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  dimensions  Dimension[]
+
+  @@map("surveys")
+}
+
+model Dimension {
+  id                 String    @id @default(uuid())
+  surveyId           String
+  survey             Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  parentDimensionId  String?
+  parentDimension    Dimension?  @relation("DimensionHierarchy", fields: [parentDimensionId], references: [id], onDelete: Cascade)
+  subdimensions      Dimension[] @relation("DimensionHierarchy")
+  title              String
+  description        String?
+  weighting          Float?
+  mainQuestionText   String?
+  order              Int?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  mainQuestionAnswers MainQuestionAnswer[]
+  dimensionQuestions DimensionQuestion[]
+
+  @@map("dimensions")
+}
+
+model MainQuestionAnswer {
+  id          String   @id @default(uuid())
+  dimensionId String
+  dimension   Dimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  text        String
+  sortOrder   Int?
+  value       Float
+  reverseValue Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("main_question_answers")
+}
+
+model Question {
+  id               String   @id @default(uuid())
+  title            String
+  text             String
+  weight           Float?
+  isReversed       Boolean  @default(false)
+  isMultiAnswer    Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdById      String
+  createdBy        User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  answers          Answer[]
+  dimensionQuestions DimensionQuestion[]
+
+  @@map("questions")
+}
+
+model Answer {
+  id          String   @id @default(uuid())
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text        String
+  sortOrder   Int?
+  value       Float
+  reverseValue Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  dimensionQuestionAnswers DimensionQuestionAnswer[]
+
+  @@map("answers")
+}
+
+model DimensionQuestion {
+  id                    String   @id @default(uuid())
+  dimensionId           String
+  dimension             Dimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  questionId            String
+  question              Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  order                 Int?
+  weightOverride        Float?
+  isReversedOverride    Boolean?
+  isMultiAnswerOverride Boolean?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  answerOverrides       DimensionQuestionAnswer[]
+
+  @@map("dimension_questions")
+}
+
+model DimensionQuestionAnswer {
+  id                   String   @id @default(uuid())
+  dimensionQuestionId  String
+  dimensionQuestion    DimensionQuestion @relation(fields: [dimensionQuestionId], references: [id], onDelete: Cascade)
+  answerId             String
+  answer               Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  valueOverride        Float?
+  reverseValueOverride Float?
+  orderOverride        Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([dimensionQuestionId, answerId])
+  @@map("dimension_question_answers")
 }
 
 model User {
@@ -71,6 +186,8 @@ model User {
   accounts           Account[]
   companiesCreated   Company[]
   surveyTypesCreated SurveyType[]
+  surveysCreated     Survey[]
+  questionsCreated   Question[]
 
   @@map("users")
 }

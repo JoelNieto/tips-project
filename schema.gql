@@ -2,6 +2,32 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddQuestionToDimensionInput {
+  dimensionId: String!
+  isMultiAnswerOverride: Boolean
+  isReversedOverride: Boolean
+  order: Float
+  questionId: String!
+  weightOverride: Float
+}
+
+type AnswerEntity {
+  createdAt: DateTime!
+  id: ID!
+  reverseValue: Float
+  sortOrder: Float
+  text: String!
+  updatedAt: DateTime!
+  value: Float!
+}
+
+input AnswerNestedInput {
+  reverseValue: Float
+  sortOrder: Float
+  text: String!
+  value: Float!
+}
+
 type CompanyEntity {
   city: String
   country: String
@@ -24,6 +50,14 @@ type CompanyEntity {
   website: String
 }
 
+input CreateAnswerInput {
+  questionId: String!
+  reverseValue: Float
+  sortOrder: Float
+  text: String!
+  value: Float!
+}
+
 input CreateCompanyInput {
   city: String
   country: String
@@ -40,6 +74,39 @@ input CreateCompanyInput {
   street: String
   taxId: String
   website: String
+}
+
+input CreateDimensionInput {
+  description: String
+  mainQuestionText: String
+  order: Float
+  parentDimensionId: String
+  surveyId: String!
+  title: String!
+  weighting: Float
+}
+
+input CreateMainQuestionAnswerInput {
+  dimensionId: String!
+  reverseValue: Float
+  sortOrder: Float
+  text: String!
+  value: Float!
+}
+
+input CreateQuestionInput {
+  answers: [AnswerNestedInput!]
+  isMultiAnswer: Boolean = false
+  isReversed: Boolean = false
+  text: String!
+  title: String!
+  weight: Float
+}
+
+input CreateSurveyInput {
+  description: String
+  surveyTypeId: String!
+  title: String!
 }
 
 input CreateSurveyTypeInput {
@@ -61,21 +128,116 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DimensionEntity {
+  createdAt: DateTime!
+  description: String
+  dimensionQuestions: [DimensionQuestionEntity!]!
+  id: ID!
+  mainQuestionAnswers: [MainQuestionAnswerEntity!]!
+  mainQuestionText: String
+  order: Float
+  subdimensions: [DimensionEntity!]
+  title: String!
+  updatedAt: DateTime!
+  weighting: Float
+}
+
+type DimensionQuestionAnswerEntity {
+  answer: AnswerEntity!
+  createdAt: DateTime!
+  id: ID!
+  orderOverride: Float
+  reverseValueOverride: Float
+  updatedAt: DateTime!
+  valueOverride: Float
+}
+
+type DimensionQuestionEntity {
+  answerOverrides: [DimensionQuestionAnswerEntity!]!
+  createdAt: DateTime!
+  id: ID!
+  isMultiAnswerOverride: Boolean
+  isReversedOverride: Boolean
+  order: Float
+  question: QuestionEntity!
+  updatedAt: DateTime!
+  weightOverride: Float
+}
+
+type MainQuestionAnswerEntity {
+  createdAt: DateTime!
+  id: ID!
+  reverseValue: Float
+  sortOrder: Float
+  text: String!
+  updatedAt: DateTime!
+  value: Float!
+}
+
 type Mutation {
+  addQuestionToDimension(input: AddQuestionToDimensionInput!): DimensionQuestionEntity!
+  createAnswer(input: CreateAnswerInput!): AnswerEntity!
   createCompany(input: CreateCompanyInput!): CompanyEntity!
+  createDimension(input: CreateDimensionInput!): DimensionEntity!
+  createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  createQuestion(input: CreateQuestionInput!): QuestionEntity!
+  createSurvey(input: CreateSurveyInput!): SurveyEntity!
   createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
+  deleteAnswer(id: ID!): AnswerEntity!
   deleteCompany(id: ID!): CompanyEntity!
+  deleteDimension(id: ID!): DimensionEntity!
+  deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
+  deleteQuestion(id: ID!): QuestionEntity!
+  deleteSurvey(id: ID!): SurveyEntity!
   deleteSurveyType(id: ID!): SurveyTypeEntity!
+  removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
+  updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
+  updateDimension(id: ID!, input: UpdateDimensionInput!): DimensionEntity!
+  updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
+  updateMainQuestionAnswer(id: ID!, input: UpdateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
+  updateSurvey(id: ID!, input: UpdateSurveyInput!): SurveyEntity!
   updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
 }
 
 type Query {
   companies: [CompanyEntity!]!
   company(id: ID!): CompanyEntity
+  dimension(id: ID!): DimensionEntity
+  dimensions(surveyId: ID!): [DimensionEntity!]!
   hello: String!
+  question(id: ID!): QuestionEntity
+  questions: [QuestionEntity!]!
+  survey(id: ID!): SurveyEntity
   surveyType(id: ID!): SurveyTypeEntity
   surveyTypes: [SurveyTypeEntity!]!
+  surveys: [SurveyEntity!]!
+  surveysUsingQuestion(questionId: ID!): [SurveyUsageEntity!]!
+}
+
+type QuestionEntity {
+  answers: [AnswerEntity!]!
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  id: ID!
+  isMultiAnswer: Boolean!
+  isReversed: Boolean!
+  text: String!
+  title: String!
+  updatedAt: DateTime!
+  weight: Float
+}
+
+type SurveyEntity {
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  description: String
+  dimensions: [DimensionEntity!]!
+  id: ID!
+  surveyType: SurveyTypeEntity!
+  title: String!
+  updatedAt: DateTime!
 }
 
 type SurveyTypeEntity {
@@ -96,6 +258,20 @@ type SurveyTypeEntity {
   visibleSubcategories: Boolean!
 }
 
+type SurveyUsageEntity {
+  dimensionId: ID!
+  dimensionTitle: String!
+  surveyId: ID!
+  surveyTitle: String!
+}
+
+input UpdateAnswerInput {
+  reverseValue: Float
+  sortOrder: Float
+  text: String
+  value: Float
+}
+
 input UpdateCompanyInput {
   city: String
   country: String
@@ -112,6 +288,43 @@ input UpdateCompanyInput {
   street: String
   taxId: String
   website: String
+}
+
+input UpdateDimensionInput {
+  description: String
+  mainQuestionText: String
+  order: Float
+  title: String
+  weighting: Float
+}
+
+input UpdateDimensionQuestionOverridesInput {
+  dimensionQuestionId: String!
+  isMultiAnswerOverride: Boolean
+  isReversedOverride: Boolean
+  order: Float
+  weightOverride: Float
+}
+
+input UpdateMainQuestionAnswerInput {
+  reverseValue: Float
+  sortOrder: Float
+  text: String
+  value: Float
+}
+
+input UpdateQuestionInput {
+  isMultiAnswer: Boolean
+  isReversed: Boolean
+  text: String
+  title: String
+  weight: Float
+}
+
+input UpdateSurveyInput {
+  description: String
+  surveyTypeId: String
+  title: String
 }
 
 input UpdateSurveyTypeInput {

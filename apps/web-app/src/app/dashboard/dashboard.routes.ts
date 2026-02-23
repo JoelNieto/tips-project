@@ -22,6 +22,22 @@ export const dashboardRoutes: Routes = [
     loadComponent: () => import('../survey-types/survey-type-form'),
   },
   {
+    path: 'question-bank',
+    loadComponent: () => import('../question-bank/question-bank-list'),
+  },
+  {
+    path: 'question-bank/:id',
+    loadComponent: () => import('../question-bank/question-form'),
+  },
+  {
+    path: 'surveys',
+    loadComponent: () => import('../surveys/surveys-list'),
+  },
+  {
+    path: 'surveys/:id',
+    loadComponent: () => import('../surveys/survey-form'),
+  },
+  {
     path: 'profile',
     loadComponent: () => import('../profile/profile'),
   },

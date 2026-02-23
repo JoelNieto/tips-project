@@ -100,6 +100,8 @@ export default class DashboardShellComponent {
     { path: '/dashboard', label: 'Home', exact: true, icon: 'home' },
     { path: '/dashboard/companies', label: 'Companies', exact: false, icon: 'business' },
     { path: '/dashboard/survey-types', label: 'Survey Types', exact: false, icon: 'poll' },
+    { path: '/dashboard/question-bank', label: 'Question Bank', exact: false, icon: 'quiz' },
+    { path: '/dashboard/surveys', label: 'Surveys', exact: false, icon: 'poll' },
     { path: '/dashboard/tips', label: 'Tips', exact: false, icon: 'payments' },
     { path: '/dashboard/reports', label: 'Reports', exact: false, icon: 'bar_chart' },
     { path: '/dashboard/profile', label: 'Profile', exact: false, icon: 'person' },
