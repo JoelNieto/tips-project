@@ -1,0 +1,88 @@
+# Railway Deployment
+
+One Railway **project** with two **environments**: `staging` and `production`.
+
+Each environment has two **services**:
+
+| Service | Dockerfile | Public | Health check |
+|---------|------------|--------|--------------|
+| `web-server` | `Dockerfile.web-server` | No | `/api/health` |
+| `web-app` | `Dockerfile.web-app` | Yes | `/health` |
+
+## Staging environment
+
+### 1. Create services
+
+1. New Project → connect GitHub repo `tips-project`
+2. Add environment **staging**
+3. Create service **web-server**:
+   - Settings → Build → Dockerfile path: `Dockerfile.web-server`
+   - Networking → disable public networking (private only)
+4. Create service **web-app**:
+   - Dockerfile path: `Dockerfile.web-app`
+   - Networking → enable public networking
+   - Generate domain or add custom domain (e.g. `staging.yourdomain.com`)
+
+### 2. web-server variables (staging)
+
+```env
+DATABASE_URL=<neon-staging-branch-connection-string>
+BETTER_AUTH_SECRET=<openssl rand -base64 32>
+BETTER_AUTH_URL=https://<staging-public-domain>
+TRUSTED_ORIGINS=https://<staging-public-domain>
+NODE_ENV=production
+```
+
+### 3. web-app variables (staging)
+
+Link to `web-server` service, then set:
+
+```env
+API_URL=http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}
+NODE_ENV=production
+```
+
+`PORT` is injected by Railway on each service.
+
+### 4. Deploy triggers
+
+- Service settings → Source → Branch: `staging`
+- Enable auto-deploy on push
+
+## Production environment
+
+Duplicate the staging setup in the **production** environment:
+
+| Setting | Production value |
+|---------|------------------|
+| Git branch | `main` |
+| `DATABASE_URL` | Neon **main** branch connection string |
+| `BETTER_AUTH_URL` / `TRUSTED_ORIGINS` | Production public URL |
+| Custom domain | e.g. `app.yourdomain.com` |
+
+## Service config files
+
+Optional per-service root in Railway dashboard (paste from repo):
+
+- [web-server.railway.json](./web-server.railway.json)
+- [web-app.railway.json](./web-app.railway.json)
+
+## GitHub secrets (for CI migrations)
+
+| Secret | Used for |
+|--------|----------|
+| `DATABASE_URL_STAGING` | `prisma migrate deploy` on `staging` branch |
+| `DATABASE_URL_PRODUCTION` | `prisma migrate deploy` on `main` branch |
+| `STAGING_URL` | Post-deploy smoke tests (optional) |
+| `PRODUCTION_URL` | Post-deploy smoke tests (optional) |
+| `RAILWAY_TOKEN` | Optional Railway CLI deploy (if not using GitHub integration) |
+
+## Smoke test checklist
+
+After deploy:
+
+1. `GET https://<domain>/health` → `{"status":"ok"}`
+2. `GET https://<domain>/api/health` → `{"status":"ok"}`
+3. Sign up / sign in
+4. GraphQL from dashboard
+5. `/survey/invite/<token>` public route

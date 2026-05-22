@@ -63,6 +63,47 @@ bun run serve:dev
 
 The frontend runs at `http://localhost:4200` and proxies API requests to the backend at `http://localhost:3000`.
 
+Copy [`.env.example`](.env.example) and set at least `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL`.
+
+## Cloud Deployment (Railway + Neon)
+
+Production uses a **single public URL** per environment: the Angular SSR app proxies `/api` to the private NestJS service.
+
+| Component | Hosting |
+|-----------|---------|
+| Database | [Neon](https://neon.tech) — `staging` branch + `main` (production) |
+| API | Railway `web-server` (private networking) |
+| Frontend | Railway `web-app` (public domain) |
+
+### Environment variables
+
+| Variable | Service | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | web-server | Neon PostgreSQL connection string |
+| `BETTER_AUTH_SECRET` | web-server | Random secret (`openssl rand -base64 32`) |
+| `BETTER_AUTH_URL` | web-server | Public app URL (e.g. `https://staging.example.com`) |
+| `TRUSTED_ORIGINS` | web-server | Same URL as `BETTER_AUTH_URL` (comma-separated if multiple) |
+| `API_URL` | web-app | Internal URL, e.g. `http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}` |
+
+### Setup guides
+
+- [Neon branches (staging + production)](infra/neon/README.md)
+- [Railway services and domains](infra/railway/README.md)
+
+### Docker (local or CI)
+
+```sh
+docker build -f Dockerfile.web-server -t tips-web-server .
+docker build -f Dockerfile.web-app -t tips-web-app .
+```
+
+### CI/CD
+
+- **CI** (`.github/workflows/ci.yml`) — lint, test, build, e2e on every PR/push
+- **Deploy** (`.github/workflows/deploy.yml`) — runs `prisma migrate deploy` after CI passes on `staging` or `main`; Railway auto-deploys via GitHub integration
+
+Create a `staging` git branch for pre-production deploys. Configure GitHub environments `staging` and `production` with secrets `DATABASE_URL_STAGING`, `DATABASE_URL_PRODUCTION`, and optional `STAGING_URL` / `PRODUCTION_URL` for smoke tests.
+
 ## Development Commands
 
 ```sh

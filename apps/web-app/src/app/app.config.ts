@@ -1,3 +1,4 @@
+import { isPlatformServer } from '@angular/common';
 import {
   HttpHeaders,
   provideHttpClient,
@@ -7,6 +8,7 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   inject,
+  PLATFORM_ID,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { DialogModule } from '@angular/cdk/dialog';
@@ -31,6 +33,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes, withComponentInputBinding()),
     provideApollo(() => {
       const httpLink = inject(HttpLink);
+      const platformId = inject(PLATFORM_ID);
+      const apiBase = isPlatformServer(platformId)
+        ? (process.env['API_URL'] ?? 'http://localhost:3000')
+        : '';
+      const graphqlUri = apiBase
+        ? `${apiBase.replace(/\/$/, '')}/api/graphql`
+        : '/api/graphql';
+
       const headers = new SetContextLink(() => ({
         headers: new HttpHeaders({
           Accept: 'application/json, charset=utf-8',
@@ -41,7 +51,7 @@ export const appConfig: ApplicationConfig = {
         link: ApolloLink.from([
           headers,
           httpLink.create({
-            uri: '/api/graphql',
+            uri: graphqlUri,
             withCredentials: true,
           }),
         ]),

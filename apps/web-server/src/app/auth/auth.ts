@@ -11,13 +11,22 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
+function parseTrustedOrigins(): string[] {
+  const raw = process.env['TRUSTED_ORIGINS'];
+  if (raw) {
+    return raw.split(',').map((o) => o.trim()).filter(Boolean);
+  }
+  return ['http://localhost:4200'];
+}
+
 export const auth = betterAuth({
   basePath: '/api/auth',
+  baseURL: process.env['BETTER_AUTH_URL'],
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
   emailAndPassword: {
     enabled: true,
   },
-  trustedOrigins: ['http://localhost:4200'],
+  trustedOrigins: parseTrustedOrigins(),
 });
