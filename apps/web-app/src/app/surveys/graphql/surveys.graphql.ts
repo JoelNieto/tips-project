@@ -34,6 +34,11 @@ export const SURVEY_QUERY = gql`
         name
         hasCategories
         hasSubcategories
+        categoryName
+        subcategoryName
+        visibleCategories
+        visibleSubcategories
+        randomizeQuestions
       }
       createdBy {
         id
@@ -60,6 +65,19 @@ export const SURVEY_QUERY = gql`
           weightOverride
           isReversedOverride
           isMultiAnswerOverride
+          answerOverrides {
+            id
+            valueOverride
+            reverseValueOverride
+            orderOverride
+            answer {
+              id
+              text
+              sortOrder
+              value
+              reverseValue
+            }
+          }
           question {
             id
             title
@@ -96,13 +114,30 @@ export const SURVEY_QUERY = gql`
             weightOverride
             isReversedOverride
             isMultiAnswerOverride
+            answerOverrides {
+              id
+              valueOverride
+              reverseValueOverride
+              orderOverride
+              answer {
+                id
+                text
+                sortOrder
+                value
+                reverseValue
+              }
+            }
             question {
               id
               title
               text
+              weight
+              isReversed
+              isMultiAnswer
               answers {
                 id
                 text
+                sortOrder
                 value
                 reverseValue
               }

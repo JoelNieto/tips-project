@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -23,6 +24,9 @@ import {
 } from './graphql/surveys.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 import CategoryFormDialogComponent from './category-form-dialog';
+import SurveyFillViewComponent from './fill/survey-fill-view';
+import type { FillDimension, SurveyFillData } from './fill/survey-fill.types';
+import { toSurveyFillData } from './fill/survey-fill.utils';
 
 interface SurveyFormModel {
   title: string;
@@ -30,17 +34,7 @@ interface SurveyFormModel {
   description: string;
 }
 
-interface Dimension {
-  id: string;
-  title: string;
-  description?: string | null;
-  mainQuestionText?: string | null;
-  dimensionQuestions: {
-    id: string;
-    question: { id: string; title: string };
-  }[];
-  subdimensions?: Dimension[];
-}
+type BuilderDimension = FillDimension;
 
 interface SurveyTypeOption {
   id: string;
@@ -58,7 +52,7 @@ const emptyModel: SurveyFormModel = {
 @Component({
   selector: 'app-survey-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, SurveyFillViewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -76,10 +70,52 @@ const emptyModel: SurveyFormModel = {
         </div>
       </div>
 
+      @if (isEditMode()) {
+        <div
+          class="flex gap-1 rounded-lg border border-slate-200 bg-slate-100 p-1 w-fit"
+          role="tablist"
+        >
+          <button
+            type="button"
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'builder'"
+            (click)="setActiveTab('builder')"
+            class="rounded-md px-4 py-2 text-sm font-medium transition"
+            [class.bg-white]="activeTab() === 'builder'"
+            [class.text-indigo-700]="activeTab() === 'builder'"
+            [class.shadow-sm]="activeTab() === 'builder'"
+            [class.text-slate-600]="activeTab() !== 'builder'"
+          >
+            Builder
+          </button>
+          <button
+            type="button"
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'preview'"
+            (click)="setActiveTab('preview')"
+            class="rounded-md px-4 py-2 text-sm font-medium transition"
+            [class.bg-white]="activeTab() === 'preview'"
+            [class.text-indigo-700]="activeTab() === 'preview'"
+            [class.shadow-sm]="activeTab() === 'preview'"
+            [class.text-slate-600]="activeTab() !== 'preview'"
+          >
+            Preview
+          </button>
+        </div>
+      }
+
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
           Loading...
         </div>
+      } @else if (isEditMode() && activeTab() === 'preview') {
+        @if (surveyFillData(); as fillData) {
+          <app-survey-fill-view [survey]="fillData" [previewMode]="true" />
+        } @else {
+          <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            Save the survey first to preview.
+          </div>
+        }
       } @else {
         <form (submit)="onSubmit($event)" class="space-y-6">
           <div class="rounded-xl border border-slate-200 bg-white p-6">
@@ -250,11 +286,8 @@ export default class SurveyFormComponent {
   readonly id = input<string | undefined>(undefined);
 
   protected readonly surveyModel = signal<SurveyFormModel>({ ...emptyModel });
-  protected readonly survey = signal<{
-    id: string;
-    surveyType: SurveyTypeOption;
-    dimensions: Dimension[];
-  } | null>(null);
+  protected readonly survey = signal<SurveyFillData | null>(null);
+  protected readonly activeTab = signal<'builder' | 'preview'>('builder');
   protected readonly surveyTypes = signal<SurveyTypeOption[]>([]);
 
   protected readonly surveyForm = form(this.surveyModel, (schemaPath) => {
@@ -267,6 +300,17 @@ export default class SurveyFormComponent {
   protected readonly submitError = signal<string | null>(null);
 
   protected readonly isEditMode = () => !!this.id() && this.id() !== 'new';
+
+  protected readonly surveyFillData = computed((): SurveyFillData | null => {
+    const s = this.survey();
+    if (!s) return null;
+    const model = this.surveyModel();
+    return {
+      ...s,
+      title: model.title || s.title,
+      description: model.description || s.description,
+    };
+  });
 
   protected readonly dimensionsToShow = () => {
     const s = this.survey();
@@ -289,6 +333,7 @@ export default class SurveyFormComponent {
   constructor() {
     effect(() => {
       const surveyId = this.id();
+      this.activeTab.set('builder');
       if (surveyId && surveyId !== 'new') {
         this.loadSurvey(surveyId);
       } else {
@@ -336,11 +381,10 @@ export default class SurveyFormComponent {
               surveyTypeId: (st?.id as string) ?? '',
               description: (s['description'] as string) ?? '',
             });
-            this.survey.set({
-              id: (s['id'] as string) ?? '',
-              surveyType: st ?? { id: '', name: '', hasCategories: false, hasSubcategories: false },
-              dimensions: (s['dimensions'] as Dimension[]) ?? [],
-            });
+            const fillData = toSurveyFillData(s);
+            if (fillData) {
+              this.survey.set(fillData);
+            }
           }
         },
         error: (err) => {
@@ -423,7 +467,11 @@ export default class SurveyFormComponent {
     });
   }
 
-  protected editCategory(dim: Dimension): void {
+  protected setActiveTab(tab: 'builder' | 'preview'): void {
+    this.activeTab.set(tab);
+  }
+
+  protected editCategory(dim: BuilderDimension): void {
     const s = this.survey();
     if (!s || !this.canAddDimension()) return;
     const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
