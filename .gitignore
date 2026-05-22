@@ -51,3 +51,4 @@ __screenshots__/
 .claude/worktrees
 .nx/polygraph
 .nx/self-healing
+.claude/settings.local.json
