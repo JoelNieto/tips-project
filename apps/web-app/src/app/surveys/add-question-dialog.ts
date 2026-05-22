@@ -134,8 +134,14 @@ export interface AddQuestionDialogResult {
                 <div class="flex gap-3 items-start rounded-lg border border-slate-200 p-3">
                   <div class="flex-1 grid gap-3 sm:grid-cols-3">
                     <div class="sm:col-span-2">
-                      <label class="block text-xs font-medium text-slate-500">Text</label>
+                      <label
+                        [attr.for]="'add-q-a-' + i + '-text'"
+                        class="block text-xs font-medium text-slate-500"
+                      >
+                        Text
+                      </label>
                       <input
+                        [id]="'add-q-a-' + i + '-text'"
                         type="text"
                         [value]="a.text"
                         (input)="updateAnswer(i, 'text', $event)"
@@ -143,8 +149,14 @@ export interface AddQuestionDialogResult {
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-slate-500">Value</label>
+                      <label
+                        [attr.for]="'add-q-a-' + i + '-value'"
+                        class="block text-xs font-medium text-slate-500"
+                      >
+                        Value
+                      </label>
                       <input
+                        [id]="'add-q-a-' + i + '-value'"
                         type="number"
                         step="any"
                         [value]="a.value"
@@ -153,8 +165,14 @@ export interface AddQuestionDialogResult {
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                      <label
+                        [attr.for]="'add-q-a-' + i + '-reverse'"
+                        class="block text-xs font-medium text-slate-500"
+                      >
+                        Reverse value
+                      </label>
                       <input
+                        [id]="'add-q-a-' + i + '-reverse'"
                         type="number"
                         step="any"
                         [value]="a.reverseValue"
