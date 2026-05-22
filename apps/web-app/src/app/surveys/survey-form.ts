@@ -482,6 +482,7 @@ export default class SurveyFormComponent {
           title: dim.title,
           description: dim.description,
           mainQuestionText: dim.mainQuestionText,
+          mainQuestionAnswers: dim.mainQuestionAnswers ?? [],
           dimensionQuestions: dim.dimensionQuestions ?? [],
         },
       },

@@ -247,8 +247,29 @@ export const CREATE_MAIN_QUESTION_ANSWER_MUTATION = gql`
     createMainQuestionAnswer(input: $input) {
       id
       text
+      sortOrder
       value
       reverseValue
+    }
+  }
+`;
+
+export const UPDATE_MAIN_QUESTION_ANSWER_MUTATION = gql`
+  mutation UpdateMainQuestionAnswer($id: ID!, $input: UpdateMainQuestionAnswerInput!) {
+    updateMainQuestionAnswer(id: $id, input: $input) {
+      id
+      text
+      sortOrder
+      value
+      reverseValue
+    }
+  }
+`;
+
+export const DELETE_MAIN_QUESTION_ANSWER_MUTATION = gql`
+  mutation DeleteMainQuestionAnswer($id: ID!) {
+    deleteMainQuestionAnswer(id: $id) {
+      id
     }
   }
 `;

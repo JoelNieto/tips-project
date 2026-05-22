@@ -11,6 +11,9 @@ import {
   CREATE_DIMENSION_MUTATION,
   UPDATE_DIMENSION_MUTATION,
   ADD_QUESTION_TO_DIMENSION_MUTATION,
+  CREATE_MAIN_QUESTION_ANSWER_MUTATION,
+  UPDATE_MAIN_QUESTION_ANSWER_MUTATION,
+  DELETE_MAIN_QUESTION_ANSWER_MUTATION,
 } from './graphql/surveys.graphql';
 import {
   CREATE_QUESTION_MUTATION,
@@ -18,6 +21,7 @@ import {
 } from '../question-bank/graphql/questions.graphql';
 
 interface AnswerRow {
+  id?: string;
   text: string;
   value: string;
   reverseValue: string;
@@ -39,7 +43,18 @@ type SelectedQuestion =
 export interface CategoryFormDialogData {
   surveyId: string;
   dimensionId?: string;
-  dimension?: { title: string; description?: string | null; mainQuestionText?: string | null; dimensionQuestions: { id: string; question: { id: string; title: string } }[] };
+  dimension?: {
+    title: string;
+    description?: string | null;
+    mainQuestionText?: string | null;
+    mainQuestionAnswers?: {
+      id: string;
+      text: string;
+      value: number;
+      reverseValue?: number | null;
+    }[];
+    dimensionQuestions: { id: string; question: { id: string; title: string } }[];
+  };
 }
 
 export interface CategoryFormDialogResult {
@@ -103,6 +118,66 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 [formField]="dimensionForm.mainQuestionText"
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
+            </div>
+            <div class="rounded-lg border border-slate-200 p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h4 class="text-sm font-medium text-slate-900">Main question answers</h4>
+                  <p class="text-xs text-slate-500">Answer options shown with the main question in the survey.</p>
+                </div>
+                <button
+                  type="button"
+                  (click)="addMainQuestionAnswer()"
+                  class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                >
+                  + Add answer
+                </button>
+              </div>
+              <div class="space-y-3">
+                @for (a of mainQuestionAnswers(); track $index; let i = $index) {
+                  <div class="flex gap-3 items-start rounded-lg border border-slate-200 p-3 bg-white">
+                    <div class="flex-1 grid gap-3 sm:grid-cols-3">
+                      <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-500">Text</label>
+                        <input
+                          type="text"
+                          [value]="a.text"
+                          (input)="updateMainQuestionAnswer(i, 'text', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-500">Value</label>
+                        <input
+                          type="number"
+                          step="any"
+                          [value]="a.value"
+                          (input)="updateMainQuestionAnswer(i, 'value', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                        <input
+                          type="number"
+                          step="any"
+                          [value]="a.reverseValue"
+                          (input)="updateMainQuestionAnswer(i, 'reverseValue', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="removeMainQuestionAnswer(i)"
+                      class="text-red-600 hover:text-red-800 p-1"
+                      aria-label="Remove answer"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
           </div>
 
@@ -180,6 +255,93 @@ const emptyInlineQuestion: InlineQuestionModel = {
                       class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
                     ></textarea>
                   </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-600">Weight</label>
+                    <input
+                      type="number"
+                      step="any"
+                      [value]="inlineModel().weight"
+                      (input)="updateInline('weight', $event)"
+                      class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                  <div class="flex flex-wrap gap-4 pt-6">
+                    <label class="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        [checked]="inlineModel().isReversed"
+                        (change)="updateInlineCheckbox('isReversed', $event)"
+                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span class="text-xs font-medium text-slate-600">Reversed scale</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        [checked]="inlineModel().isMultiAnswer"
+                        (change)="updateInlineCheckbox('isMultiAnswer', $event)"
+                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span class="text-xs font-medium text-slate-600">Multi-answer</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="border-t border-slate-200 pt-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-medium text-slate-700">Answer options</h4>
+                    <button
+                      type="button"
+                      (click)="addInlineAnswer()"
+                      class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                    >
+                      + Add answer
+                    </button>
+                  </div>
+                  <div class="space-y-2">
+                    @for (a of inlineModel().answers; track $index; let i = $index) {
+                      <div class="flex gap-2 items-start rounded border border-slate-200 p-2 bg-white">
+                        <div class="flex-1 grid gap-2 sm:grid-cols-3">
+                          <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-500">Text</label>
+                            <input
+                              type="text"
+                              [value]="a.text"
+                              (input)="updateInlineAnswer(i, 'text', $event)"
+                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label class="block text-xs font-medium text-slate-500">Value</label>
+                            <input
+                              type="number"
+                              step="any"
+                              [value]="a.value"
+                              (input)="updateInlineAnswer(i, 'value', $event)"
+                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                            <input
+                              type="number"
+                              step="any"
+                              [value]="a.reverseValue"
+                              (input)="updateInlineAnswer(i, 'reverseValue', $event)"
+                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="removeInlineAnswer(i)"
+                          class="text-red-600 hover:text-red-800 p-1"
+                          aria-label="Remove answer"
+                        >
+                          <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    }
+                  </div>
                 </div>
                 <div class="flex gap-2 items-center flex-wrap">
                   <button
@@ -247,6 +409,8 @@ export default class CategoryFormDialogComponent {
   protected readonly selectedBankId = signal('');
   protected readonly showInlineForm = signal(false);
   protected readonly inlineModel = signal<InlineQuestionModel>({ ...emptyInlineQuestion, answers: [] });
+  protected readonly mainQuestionAnswers = signal<AnswerRow[]>([]);
+  private readonly originalMainQuestionAnswerIds = signal<Set<string>>(new Set());
 
   protected readonly submitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
@@ -261,6 +425,14 @@ export default class CategoryFormDialogComponent {
         description: d.description ?? '',
         mainQuestionText: d.mainQuestionText ?? '',
       });
+      const mainAnswers = (d.mainQuestionAnswers ?? []).map((a) => ({
+        id: a.id,
+        text: a.text,
+        value: String(a.value),
+        reverseValue: a.reverseValue != null ? String(a.reverseValue) : '',
+      }));
+      this.mainQuestionAnswers.set(mainAnswers);
+      this.originalMainQuestionAnswerIds.set(new Set(mainAnswers.map((a) => a.id!).filter(Boolean)));
       this.selectedQuestions.set(
         d.dimensionQuestions.map((dq) => ({
           type: 'bank' as const,
@@ -302,6 +474,57 @@ export default class CategoryFormDialogComponent {
   protected updateInline(field: keyof InlineQuestionModel, event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
     this.inlineModel.update((m) => ({ ...m, [field]: value }));
+  }
+
+  protected updateInlineCheckbox(field: 'isReversed' | 'isMultiAnswer', event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.inlineModel.update((m) => ({ ...m, [field]: checked }));
+  }
+
+  protected addInlineAnswer(): void {
+    this.inlineModel.update((m) => ({
+      ...m,
+      answers: [...m.answers, { text: '', value: '0', reverseValue: '0' }],
+    }));
+  }
+
+  protected removeInlineAnswer(index: number): void {
+    this.inlineModel.update((m) => ({
+      ...m,
+      answers: m.answers.filter((_, i) => i !== index),
+    }));
+  }
+
+  protected updateInlineAnswer(index: number, field: keyof AnswerRow, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.inlineModel.update((m) => ({
+      ...m,
+      answers: m.answers.map((a, i) =>
+        i === index ? { ...a, [field]: value } : a
+      ),
+    }));
+  }
+
+  protected addMainQuestionAnswer(): void {
+    this.mainQuestionAnswers.update((list) => [
+      ...list,
+      { text: '', value: '0', reverseValue: '0' },
+    ]);
+  }
+
+  protected removeMainQuestionAnswer(index: number): void {
+    this.mainQuestionAnswers.update((list) => list.filter((_, i) => i !== index));
+  }
+
+  protected updateMainQuestionAnswer(
+    index: number,
+    field: keyof AnswerRow,
+    event: Event
+  ): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.mainQuestionAnswers.update((list) =>
+      list.map((a, i) => (i === index ? { ...a, [field]: value } : a))
+    );
   }
 
   protected addInlineQuestion(): void {
@@ -348,7 +571,7 @@ export default class CategoryFormDialogComponent {
         })
         .subscribe({
           next: () => {
-            this.addQuestionsToDimension(this.data.dimensionId!);
+            this.finalizeDimensionSave(this.data.dimensionId!);
           },
           error: (err) => {
             this.submitting.set(false);
@@ -373,7 +596,7 @@ export default class CategoryFormDialogComponent {
               this.submitting.set(false);
               return;
             }
-            this.addQuestionsToDimension(dimensionId);
+            this.finalizeDimensionSave(dimensionId);
           },
           error: (err) => {
             this.submitting.set(false);
@@ -383,7 +606,7 @@ export default class CategoryFormDialogComponent {
     }
   }
 
-  private addQuestionsToDimension(dimensionId: string): void {
+  private finalizeDimensionSave(dimensionId: string): void {
     const existingIds = new Set(
       this.data.dimension?.dimensionQuestions?.map((dq) => dq.question.id) ?? []
     );
@@ -396,15 +619,16 @@ export default class CategoryFormDialogComponent {
         q.type === 'new'
     );
 
-    if (bankQuestions.length === 0 && newQuestions.length === 0) {
+    const mainAnswerOps = this.buildMainQuestionAnswerOps(dimensionId);
+    const total = mainAnswerOps.length + bankQuestions.length + newQuestions.length;
+
+    if (total === 0) {
       this.dialogRef.close({ dimensionId });
       this.submitting.set(false);
       return;
     }
 
     let completed = 0;
-    const total = bankQuestions.length + newQuestions.length;
-
     const checkDone = (): void => {
       completed++;
       if (completed >= total) {
@@ -412,6 +636,13 @@ export default class CategoryFormDialogComponent {
         this.submitting.set(false);
       }
     };
+
+    const onError = (message: string): void => {
+      this.submitError.set(message);
+      this.submitting.set(false);
+    };
+
+    mainAnswerOps.forEach((op) => op(checkDone, onError));
 
     const addOne = (questionId: string): void => {
       this.apollo
@@ -422,19 +653,11 @@ export default class CategoryFormDialogComponent {
         })
         .subscribe({
           next: () => checkDone(),
-          error: (err) => {
-            this.submitError.set(err.message ?? 'Failed to add question');
-            this.submitting.set(false);
-          },
+          error: (err) => onError(err.message ?? 'Failed to add question'),
         });
     };
 
     bankQuestions.forEach((q) => addOne(q.id));
-
-    if (newQuestions.length === 0) {
-      if (bankQuestions.length === 0) checkDone();
-      return;
-    }
 
     newQuestions.forEach((q) => {
       const answers = q.model.answers
@@ -465,11 +688,76 @@ export default class CategoryFormDialogComponent {
             if (id) addOne(id);
             else checkDone();
           },
-          error: (err) => {
-            this.submitError.set(err.message ?? 'Failed to create question');
-            this.submitting.set(false);
-          },
+          error: (err) => onError(err.message ?? 'Failed to create question'),
         });
     });
+  }
+
+  private buildMainQuestionAnswerOps(
+    dimensionId: string
+  ): Array<(onDone: () => void, onError: (message: string) => void) => void> {
+    const answers = this.mainQuestionAnswers()
+      .filter((a) => a.text.trim())
+      .map((a, i) => ({
+        ...a,
+        text: a.text.trim(),
+        sortOrder: i,
+      }));
+    const originalIds = this.originalMainQuestionAnswerIds();
+    const currentIds = new Set(answers.filter((a) => a.id).map((a) => a.id!));
+    const ops: Array<(onDone: () => void, onError: (message: string) => void) => void> = [];
+
+    for (const id of originalIds) {
+      if (!currentIds.has(id)) {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: DELETE_MAIN_QUESTION_ANSWER_MUTATION,
+              variables: { id },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to delete main question answer'),
+            });
+        });
+      }
+    }
+
+    for (const answer of answers) {
+      const input = {
+        text: answer.text,
+        sortOrder: answer.sortOrder,
+        value: parseFloat(answer.value) || 0,
+        reverseValue: answer.reverseValue ? parseFloat(answer.reverseValue) : undefined,
+      };
+
+      if (answer.id) {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: UPDATE_MAIN_QUESTION_ANSWER_MUTATION,
+              variables: { id: answer.id, input },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to update main question answer'),
+            });
+        });
+      } else {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: CREATE_MAIN_QUESTION_ANSWER_MUTATION,
+              variables: { input: { dimensionId, ...input } },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to create main question answer'),
+            });
+        });
+      }
+    }
+
+    return ops;
   }
 }

@@ -19,10 +19,14 @@ import {
   CREATE_QUESTION_MUTATION,
   DELETE_QUESTION_MUTATION,
   UPDATE_QUESTION_MUTATION,
+  CREATE_ANSWER_MUTATION,
+  UPDATE_ANSWER_MUTATION,
+  DELETE_ANSWER_MUTATION,
 } from './graphql/questions.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 
 interface AnswerRow {
+  id?: string;
   text: string;
   value: string;
   reverseValue: string;
@@ -180,81 +184,66 @@ const emptyModel: QuestionFormModel = {
             </div>
           </div>
 
-          @if (!isEditMode()) {
-            <div class="border-t border-slate-200 pt-6">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-slate-900">Answers</h3>
-                <button
-                  type="button"
-                  (click)="addAnswer()"
-                  class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-                >
-                  + Add answer
-                </button>
-              </div>
-              <div class="space-y-4">
-                @for (a of questionModel().answers; track $index; let i = $index) {
-                  <div class="flex gap-4 items-start rounded-lg border border-slate-200 p-4">
-                    <div class="flex-1 grid gap-4 sm:grid-cols-3">
-                      <div class="sm:col-span-2">
-                        <label class="block text-xs font-medium text-slate-500">Text</label>
-                        <input
-                          type="text"
-                          [value]="a.text"
-                          (input)="updateAnswer(i, 'text', $event)"
-                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label class="block text-xs font-medium text-slate-500">Value</label>
-                        <input
-                          type="number"
-                          step="any"
-                          [value]="a.value"
-                          (input)="updateAnswer(i, 'value', $event)"
-                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label class="block text-xs font-medium text-slate-500">Reverse value</label>
-                        <input
-                          type="number"
-                          step="any"
-                          [value]="a.reverseValue"
-                          (input)="updateAnswer(i, 'reverseValue', $event)"
-                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      (click)="removeAnswer(i)"
-                      class="text-red-600 hover:text-red-800 p-1"
-                      aria-label="Remove answer"
-                    >
-                      <span class="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-                }
-              </div>
+          <div class="border-t border-slate-200 pt-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-slate-900">Answers</h3>
+              <button
+                type="button"
+                (click)="addAnswer()"
+                class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+              >
+                + Add answer
+              </button>
             </div>
-          } @else {
-            <div class="border-t border-slate-200 pt-6">
-              <h3 class="text-lg font-medium text-slate-900 mb-4">Answers</h3>
-              @if (existingAnswers().length === 0) {
-                <p class="text-sm text-slate-500">No answers. Delete and recreate to add answers.</p>
-              } @else {
-                <ul class="space-y-2">
-                  @for (a of existingAnswers(); track a.id) {
-                    <li class="flex gap-2 text-sm">
-                      <span class="font-medium">{{ a.text }}</span>
-                      <span class="text-slate-500">(value: {{ a.value }})</span>
-                    </li>
-                  }
-                </ul>
+            @if (questionModel().answers.length === 0) {
+              <p class="text-sm text-slate-500">No answer options yet. Add at least one for respondents to choose from.</p>
+            }
+            <div class="space-y-4">
+              @for (a of questionModel().answers; track $index; let i = $index) {
+                <div class="flex gap-4 items-start rounded-lg border border-slate-200 p-4">
+                  <div class="flex-1 grid gap-4 sm:grid-cols-3">
+                    <div class="sm:col-span-2">
+                      <label class="block text-xs font-medium text-slate-500">Text</label>
+                      <input
+                        type="text"
+                        [value]="a.text"
+                        (input)="updateAnswer(i, 'text', $event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-500">Value</label>
+                      <input
+                        type="number"
+                        step="any"
+                        [value]="a.value"
+                        (input)="updateAnswer(i, 'value', $event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                      <input
+                        type="number"
+                        step="any"
+                        [value]="a.reverseValue"
+                        (input)="updateAnswer(i, 'reverseValue', $event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="removeAnswer(i)"
+                    class="text-red-600 hover:text-red-800 p-1"
+                    aria-label="Remove answer"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                  </button>
+                </div>
               }
             </div>
-          }
+          </div>
 
           <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6">
             <button
@@ -300,8 +289,8 @@ export default class QuestionFormComponent {
   readonly id = input<string | undefined>(undefined);
 
   protected readonly questionModel = signal<QuestionFormModel>({ ...emptyModel });
-  protected readonly existingAnswers = signal<{ id: string; text: string; value: number }[]>([]);
   protected readonly surveyUsages = signal<SurveyUsage[]>([]);
+  private readonly originalAnswerIds = signal<Set<string>>(new Set());
 
   protected readonly questionForm = form(this.questionModel, (schemaPath) => {
     required(schemaPath.title, { message: 'Title is required' });
@@ -325,7 +314,7 @@ export default class QuestionFormComponent {
       } else {
         this.loading.set(false);
         this.questionModel.set({ ...emptyModel, answers: [] });
-        this.existingAnswers.set([]);
+        this.originalAnswerIds.set(new Set());
         this.surveyUsages.set([]);
       }
     });
@@ -344,16 +333,26 @@ export default class QuestionFormComponent {
           this.loading.set(result.loading);
           const q = result.data?.question;
           if (q && typeof q === 'object') {
-            const answers = (q['answers'] as { id: string; text: string; value: number }[]) ?? [];
+            const answers = (q['answers'] as {
+              id: string;
+              text: string;
+              value: number;
+              reverseValue?: number | null;
+            }[]) ?? [];
             this.questionModel.set({
               title: (q['title'] as string) ?? '',
               text: (q['text'] as string) ?? '',
               weight: (q['weight'] as number) != null ? String(q['weight']) : '',
               isReversed: (q['isReversed'] as boolean) ?? false,
               isMultiAnswer: (q['isMultiAnswer'] as boolean) ?? false,
-              answers: [],
+              answers: answers.map((a) => ({
+                id: a.id,
+                text: a.text,
+                value: String(a.value),
+                reverseValue: a.reverseValue != null ? String(a.reverseValue) : '',
+              })),
             });
-            this.existingAnswers.set(answers);
+            this.originalAnswerIds.set(new Set(answers.map((a) => a.id)));
           }
         },
         error: (err) => {
@@ -430,8 +429,13 @@ export default class QuestionFormComponent {
         })
         .subscribe({
           next: () => {
-            this.submitting.set(false);
-            this.router.navigate(['/dashboard/question-bank']);
+            this.syncAnswers(this.id()!, () => {
+              this.submitting.set(false);
+              this.router.navigate(['/dashboard/question-bank']);
+            }, (message) => {
+              this.submitting.set(false);
+              this.submitError.set(message);
+            });
           },
           error: (err) => {
             this.submitting.set(false);
@@ -475,6 +479,89 @@ export default class QuestionFormComponent {
           },
         });
     }
+  }
+
+  private syncAnswers(
+    questionId: string,
+    onDone: () => void,
+    onError: (message: string) => void
+  ): void {
+    const answers = this.questionModel()
+      .answers.filter((a) => a.text.trim())
+      .map((a, i) => ({
+        ...a,
+        text: a.text.trim(),
+        sortOrder: i,
+      }));
+    const originalIds = this.originalAnswerIds();
+    const currentIds = new Set(answers.filter((a) => a.id).map((a) => a.id!));
+    const ops: Array<(done: () => void) => void> = [];
+
+    for (const id of originalIds) {
+      if (!currentIds.has(id)) {
+        ops.push((done) => {
+          this.apollo
+            .mutate({
+              mutation: DELETE_ANSWER_MUTATION,
+              variables: { id },
+            })
+            .subscribe({
+              next: () => done(),
+              error: (err) => onError(err.message ?? 'Failed to delete answer'),
+            });
+        });
+      }
+    }
+
+    for (const answer of answers) {
+      const input = {
+        text: answer.text,
+        sortOrder: answer.sortOrder,
+        value: parseFloat(answer.value) || 0,
+        reverseValue: answer.reverseValue ? parseFloat(answer.reverseValue) : undefined,
+      };
+
+      if (answer.id) {
+        ops.push((done) => {
+          this.apollo
+            .mutate({
+              mutation: UPDATE_ANSWER_MUTATION,
+              variables: { id: answer.id, input },
+            })
+            .subscribe({
+              next: () => done(),
+              error: (err) => onError(err.message ?? 'Failed to update answer'),
+            });
+        });
+      } else {
+        ops.push((done) => {
+          this.apollo
+            .mutate({
+              mutation: CREATE_ANSWER_MUTATION,
+              variables: { input: { questionId, ...input } },
+            })
+            .subscribe({
+              next: () => done(),
+              error: (err) => onError(err.message ?? 'Failed to create answer'),
+            });
+        });
+      }
+    }
+
+    if (ops.length === 0) {
+      onDone();
+      return;
+    }
+
+    let completed = 0;
+    const checkDone = (): void => {
+      completed++;
+      if (completed >= ops.length) {
+        onDone();
+      }
+    };
+
+    ops.forEach((op) => op(checkDone));
   }
 
   protected onDelete(): void {
