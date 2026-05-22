@@ -192,8 +192,9 @@ export const ADD_QUESTION_TO_DIMENSION_MUTATION = gql`
   mutation AddQuestionToDimension($input: AddQuestionToDimensionInput!) {
     addQuestionToDimension(input: $input) {
       id
-      dimensionId
-      questionId
+      question {
+        id
+      }
     }
   }
 `;
