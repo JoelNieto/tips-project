@@ -13,6 +13,8 @@ import { MainQuestionAnswerResolver } from './main-question-answer.resolver';
 import { MainQuestionAnswerService } from './main-question-answer.service';
 import { AnswerResolver } from './answer.resolver';
 import { AnswerService } from './answer.service';
+import { SurveyAssignationResolver } from './survey-assignation.resolver';
+import { SurveyAssignationService } from './survey-assignation.service';
 import { PrismaModule } from '../prisma.module';
 
 @Module({
@@ -32,6 +34,8 @@ import { PrismaModule } from '../prisma.module';
     MainQuestionAnswerService,
     AnswerResolver,
     AnswerService,
+    SurveyAssignationResolver,
+    SurveyAssignationService,
   ],
   exports: [
     SurveyTypeService,
@@ -41,6 +45,7 @@ import { PrismaModule } from '../prisma.module';
     DimensionQuestionService,
     MainQuestionAnswerService,
     AnswerService,
+    SurveyAssignationService,
   ],
 })
 export class SurveyModule {}

@@ -34,6 +34,7 @@ model Company {
   updatedAt   DateTime @updatedAt
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  surveyAssignations SurveyAssignation[]
 
   @@map("companies")
 }
@@ -71,8 +72,41 @@ model Survey {
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
   dimensions  Dimension[]
+  assignations SurveyAssignation[]
 
   @@map("surveys")
+}
+
+model SurveyAssignation {
+  id               String   @id @default(uuid())
+  surveyId         String
+  survey           Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  welcomeMessage   String?
+  startDate        DateTime
+  expirationDate   DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdById      String
+  createdBy        User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  invitees         SurveyInvitee[]
+
+  @@map("survey_assignations")
+}
+
+model SurveyInvitee {
+  id            String   @id @default(uuid())
+  assignationId String
+  assignation   SurveyAssignation @relation(fields: [assignationId], references: [id], onDelete: Cascade)
+  email         String
+  name          String?
+  token         String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([token])
+  @@map("survey_invitees")
 }
 
 model Dimension {
@@ -188,6 +222,7 @@ model User {
   surveyTypesCreated SurveyType[]
   surveysCreated     Survey[]
   questionsCreated   Question[]
+  surveyAssignationsCreated SurveyAssignation[]
 
   @@map("users")
 }

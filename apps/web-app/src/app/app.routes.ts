@@ -9,6 +9,10 @@ export const appRoutes: Route[] = [
     canActivate: [publicGuard],
   },
   {
+    path: 'survey/invite/:token',
+    loadComponent: () => import('./survey-invite/survey-invite'),
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./dashboard/dashboard-shell'),
     canActivate: [authGuard],

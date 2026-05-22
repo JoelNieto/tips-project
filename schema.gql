@@ -103,10 +103,24 @@ input CreateQuestionInput {
   weight: Float
 }
 
+input CreateSurveyAssignationInput {
+  companyId: ID!
+  expirationDate: DateTime!
+  invitees: [CreateSurveyInviteeInput!]!
+  startDate: DateTime!
+  surveyId: ID!
+  welcomeMessage: String
+}
+
 input CreateSurveyInput {
   description: String
   surveyTypeId: String!
   title: String!
+}
+
+input CreateSurveyInviteeInput {
+  email: String!
+  name: String
 }
 
 input CreateSurveyTypeInput {
@@ -182,6 +196,7 @@ type Mutation {
   createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
   createQuestion(input: CreateQuestionInput!): QuestionEntity!
   createSurvey(input: CreateSurveyInput!): SurveyEntity!
+  createSurveyAssignation(input: CreateSurveyAssignationInput!): SurveyAssignationEntity!
   createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
   deleteAnswer(id: ID!): AnswerEntity!
   deleteCompany(id: ID!): CompanyEntity!
@@ -189,6 +204,7 @@ type Mutation {
   deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
   deleteQuestion(id: ID!): QuestionEntity!
   deleteSurvey(id: ID!): SurveyEntity!
+  deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
   deleteSurveyType(id: ID!): SurveyTypeEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
   updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
@@ -210,6 +226,9 @@ type Query {
   question(id: ID!): QuestionEntity
   questions: [QuestionEntity!]!
   survey(id: ID!): SurveyEntity
+  surveyAssignation(id: ID!): SurveyAssignationEntity
+  surveyAssignations(surveyId: ID!): [SurveyAssignationEntity!]!
+  surveyInviteByToken(token: String!): SurveyInviteContextEntity
   surveyType(id: ID!): SurveyTypeEntity
   surveyTypes: [SurveyTypeEntity!]!
   surveys: [SurveyEntity!]!
@@ -229,6 +248,26 @@ type QuestionEntity {
   weight: Float
 }
 
+type SurveyAssignationEntity {
+  company: CompanyEntity!
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  expirationDate: DateTime!
+  id: ID!
+  inviteeCount: Int
+  invitees: [SurveyInviteeEntity!]!
+  startDate: DateTime!
+  survey: SurveyAssignationSurveySummaryEntity
+  surveyId: ID!
+  updatedAt: DateTime!
+  welcomeMessage: String
+}
+
+type SurveyAssignationSurveySummaryEntity {
+  id: ID!
+  title: String!
+}
+
 type SurveyEntity {
   createdAt: DateTime!
   createdBy: UserEntity!
@@ -237,6 +276,26 @@ type SurveyEntity {
   id: ID!
   surveyType: SurveyTypeEntity!
   title: String!
+  updatedAt: DateTime!
+}
+
+type SurveyInviteContextEntity {
+  companyName: String
+  email: String!
+  expirationDate: DateTime!
+  name: String
+  startDate: DateTime!
+  survey: SurveyEntity!
+  token: String!
+  welcomeMessage: String
+}
+
+type SurveyInviteeEntity {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String
+  token: String!
   updatedAt: DateTime!
 }
 

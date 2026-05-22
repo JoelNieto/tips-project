@@ -116,7 +116,13 @@ interface SurveyListItem {
                   <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                     {{ survey.createdBy?.name ?? '—' }}
                   </td>
-                  <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
+                  <td class="whitespace-nowrap px-6 py-4 text-right text-sm space-x-3">
+                    <a
+                      [routerLink]="['/dashboard/surveys', survey.id, 'assignations']"
+                      class="text-indigo-600 hover:text-indigo-800"
+                    >
+                      Assign
+                    </a>
                     <a
                       [routerLink]="['/dashboard/surveys', survey.id]"
                       class="text-indigo-600 hover:text-indigo-800"

@@ -101,6 +101,13 @@ const emptyModel: SurveyFormModel = {
           >
             Preview
           </button>
+          <a
+            role="tab"
+            [routerLink]="['/dashboard/surveys', id(), 'assignations']"
+            class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition hover:text-indigo-700"
+          >
+            Assignations
+          </a>
         </div>
       }
 
