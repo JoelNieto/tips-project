@@ -19,14 +19,10 @@ import {
   CREATE_SURVEY_MUTATION,
   DELETE_SURVEY_MUTATION,
   UPDATE_SURVEY_MUTATION,
-  CREATE_DIMENSION_MUTATION,
-  UPDATE_DIMENSION_MUTATION,
-  DELETE_DIMENSION_MUTATION,
-  ADD_QUESTION_TO_DIMENSION_MUTATION,
   REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
 } from './graphql/surveys.graphql';
-import { QUESTIONS_QUERY } from '../question-bank/graphql/questions.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
+import CategoryFormDialogComponent from './category-form-dialog';
 
 interface SurveyFormModel {
   title: string;
@@ -141,7 +137,7 @@ const emptyModel: SurveyFormModel = {
             <div class="rounded-xl border border-slate-200 bg-white p-6">
               <h3 class="text-lg font-medium text-slate-900 mb-4">Dimensions</h3>
               @if (dimensionsToShow().length === 0) {
-                <p class="text-sm text-slate-500">No dimensions yet.</p>
+                <p class="text-sm text-slate-500 mb-3">No categories yet. Add your first category.</p>
               } @else {
                 <div class="space-y-4">
                   @for (dim of dimensionsToShow(); track dim.id) {
@@ -149,12 +145,13 @@ const emptyModel: SurveyFormModel = {
                       <div class="flex items-center justify-between">
                         <h4 class="font-medium text-slate-900">{{ dim.title }}</h4>
                         @if (canAddDimension()) {
-                          <a
-                            [routerLink]="['/dashboard/surveys', survey()?.id]"
+                          <button
+                            type="button"
+                            (click)="editCategory(dim)"
                             class="text-sm text-indigo-600 hover:text-indigo-800"
                           >
                             Edit
-                          </a>
+                          </button>
                         }
                       </div>
                       @if (dim.description) {
@@ -165,59 +162,25 @@ const emptyModel: SurveyFormModel = {
                       }
                       <div class="mt-3">
                         <p class="text-xs font-medium text-slate-500">Questions ({{ dim.dimensionQuestions?.length ?? 0 }})</p>
-                            @if (dim.dimensionQuestions?.length) {
+                        @if (dim.dimensionQuestions?.length) {
                           <ul class="mt-1 space-y-1">
                             @for (dq of dim.dimensionQuestions; track dq.id) {
                               <li class="flex items-center gap-2 text-sm">
                                 <span>{{ dq.question?.title ?? 'Question' }}</span>
-                                <button
-                                  type="button"
-                                  (click)="removeQuestion(dq.id)"
-                                  class="text-red-600 hover:text-red-800"
-                                  aria-label="Remove question"
-                                >
-                                  <span class="material-symbols-outlined text-[16px]">close</span>
-                                </button>
+                                @if (canAddDimension()) {
+                                  <button
+                                    type="button"
+                                    (click)="removeQuestion(dq.id)"
+                                    class="text-red-600 hover:text-red-800"
+                                    aria-label="Remove question"
+                                  >
+                                    <span class="material-symbols-outlined text-[16px]">close</span>
+                                  </button>
+                                }
                               </li>
                             }
                           </ul>
                         }
-                        @if (addingToDimension() === dim.id) {
-                            <div class="mt-2 flex gap-2 items-center flex-wrap">
-                              <select
-                                (change)="selectedQuestionId.set($any($event.target).value)"
-                                class="rounded border border-slate-300 px-2 py-1 text-sm"
-                              >
-                                <option value="">Select question...</option>
-                                @for (q of availableQuestions(); track q.id) {
-                                  <option [value]="q.id">{{ q.title }}</option>
-                                }
-                              </select>
-                              <button
-                                type="button"
-                                (click)="confirmAddQuestion()"
-                                [disabled]="!selectedQuestionId()"
-                                class="rounded bg-indigo-600 px-2 py-1 text-sm text-white disabled:opacity-50"
-                              >
-                                Add
-                              </button>
-                              <button
-                                type="button"
-                                (click)="cancelAddQuestion()"
-                                class="rounded border border-slate-300 px-2 py-1 text-sm"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          } @else {
-                            <button
-                              type="button"
-                              (click)="openAddQuestionDialog(dim.id)"
-                              class="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
-                            >
-                              + Add question from bank
-                            </button>
-                          }
                       </div>
                       @if (canAddSubdimension() && dim.subdimensions?.length) {
                         <div class="mt-4 pl-4 border-l-2 border-slate-200">
@@ -231,7 +194,7 @@ const emptyModel: SurveyFormModel = {
                   }
                 </div>
               }
-              @if (canAddDimension() && dimensionsToShow().length > 0) {
+              @if (canAddDimension()) {
                 <button
                   type="button"
                   (click)="addDimension()"
@@ -446,81 +409,44 @@ export default class SurveyFormComponent {
   protected addDimension(): void {
     const s = this.survey();
     if (!s || !this.canAddDimension()) return;
-    const title = prompt('Dimension title:');
-    if (!title?.trim()) return;
-    this.submitting.set(true);
-    this.apollo
-      .mutate({
-        mutation: CREATE_DIMENSION_MUTATION,
-        variables: {
-          input: { surveyId: s.id, title: title.trim() },
-        },
-        refetchQueries: [{ query: SURVEY_QUERY, variables: { id: s.id } }],
-      })
-      .subscribe({
-        next: () => {
-          this.submitting.set(false);
-          this.loadSurvey(s.id);
-        },
-        error: (err) => {
-          this.submitting.set(false);
-          this.submitError.set(err.message ?? 'Failed to add dimension');
-        },
-      });
+    const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
+      data: { surveyId: s.id },
+      width: '700px',
+      role: 'dialog',
+      ariaLabel: 'Add category',
+    });
+    dialogRef.closed.subscribe((result) => {
+      if (result) {
+        this.submitError.set(null);
+        this.loadSurvey(s.id);
+      }
+    });
   }
 
-  protected openAddQuestionDialog(dimensionId: string): void {
-    this.apollo
-      .query<{ questions: { id: string; title: string }[] }>({
-        query: QUESTIONS_QUERY,
-      })
-      .subscribe({
-        next: (result) => {
-          const questions = result.data?.questions ?? [];
-          if (questions.length === 0) {
-            this.submitError.set('No questions in bank. Create questions first.');
-            return;
-          }
-          this.addingToDimension.set(dimensionId);
-          this.availableQuestions.set(questions);
+  protected editCategory(dim: Dimension): void {
+    const s = this.survey();
+    if (!s || !this.canAddDimension()) return;
+    const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
+      data: {
+        surveyId: s.id,
+        dimensionId: dim.id,
+        dimension: {
+          title: dim.title,
+          description: dim.description,
+          mainQuestionText: dim.mainQuestionText,
+          dimensionQuestions: dim.dimensionQuestions ?? [],
         },
-      });
-  }
-
-  protected addingToDimension = signal<string | null>(null);
-  protected availableQuestions = signal<{ id: string; title: string }[]>([]);
-  protected selectedQuestionId = signal<string>('');
-
-  protected confirmAddQuestion(): void {
-    const dimId = this.addingToDimension();
-    const qId = this.selectedQuestionId();
-    if (!dimId || !qId) return;
-    this.addingToDimension.set(null);
-    this.availableQuestions.set([]);
-    this.selectedQuestionId.set('');
-    this.submitting.set(true);
-    this.apollo
-      .mutate({
-        mutation: ADD_QUESTION_TO_DIMENSION_MUTATION,
-        variables: { input: { dimensionId: dimId, questionId: qId } },
-        refetchQueries: [{ query: SURVEY_QUERY, variables: { id: this.id() } }],
-      })
-      .subscribe({
-        next: () => {
-          this.submitting.set(false);
-          this.loadSurvey(this.id()!);
-        },
-        error: (err) => {
-          this.submitting.set(false);
-          this.submitError.set(err.message ?? 'Failed to add question');
-        },
-      });
-  }
-
-  protected cancelAddQuestion(): void {
-    this.addingToDimension.set(null);
-    this.availableQuestions.set([]);
-    this.selectedQuestionId.set('');
+      },
+      width: '700px',
+      role: 'dialog',
+      ariaLabel: 'Edit category',
+    });
+    dialogRef.closed.subscribe((result) => {
+      if (result) {
+        this.submitError.set(null);
+        this.loadSurvey(s.id);
+      }
+    });
   }
 
   protected removeQuestion(dimensionQuestionId: string): void {
