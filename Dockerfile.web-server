@@ -25,10 +25,12 @@ COPY --from=build /app/dist/apps/web-server ./
 COPY --from=build /app/generated ./generated
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/prisma.config.mjs ./prisma.config.mjs
-COPY --from=build /app/package.json ./package.json
 
-# Local Prisma CLI (global install cannot resolve prisma.config imports)
-RUN npm install prisma@7.4.1 --omit=dev --no-package-lock
+# Minimal install — do not copy monorepo package.json (npm would resolve the full tree)
+RUN printf '%s\n' \
+  '{"name":"tips-web-server-migrate","private":true,"dependencies":{"prisma":"7.4.1"}}' \
+  > package.json \
+  && npm install --omit=dev --no-package-lock
 
 COPY docker/web-server-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
