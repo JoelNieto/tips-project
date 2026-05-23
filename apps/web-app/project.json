@@ -50,6 +50,15 @@
       },
       "defaultConfiguration": "production"
     },
+    "build:deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run web-app:build:production",
+        "env": {
+          "NG_BUILD_PARTIAL_SSR": "1"
+        }
+      }
+    },
     "serve": {
       "continuous": true,
       "executor": "@angular/build:dev-server",

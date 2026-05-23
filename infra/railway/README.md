@@ -9,6 +9,8 @@ Each environment has two **services**:
 | `web-server` | `Dockerfile.web-server` | No | `/api/health` |
 | `web-app` | `Dockerfile.web-app` | Yes | `/health` |
 
+The web-app Docker build uses `NG_BUILD_PARTIAL_SSR=1` (via `nx run web-app:build:deploy`) to skip build-time route extraction. All app routes use client rendering, so extraction is unnecessary and often fails in CI with an opaque `undefined` error.
+
 ## Staging environment
 
 ### 1. Create services
