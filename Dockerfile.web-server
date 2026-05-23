@@ -9,6 +9,9 @@ FROM oven/bun:1 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# generate does not need a real DB; prisma.config.ts uses a placeholder if unset
+ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build?schema=public
+ENV DATABASE_URL=${DATABASE_URL}
 RUN bunx prisma generate
 RUN bunx nx build web-server
 

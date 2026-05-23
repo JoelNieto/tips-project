@@ -69,13 +69,18 @@ Optional per-service root in Railway dashboard (paste from repo):
 
 ## GitHub secrets (for CI migrations)
 
-| Secret | Used for |
-|--------|----------|
-| `DATABASE_URL_STAGING` | `prisma migrate deploy` on `staging` branch |
-| `DATABASE_URL_PRODUCTION` | `prisma migrate deploy` on `main` branch |
-| `STAGING_URL` | Post-deploy smoke tests (optional) |
-| `PRODUCTION_URL` | Post-deploy smoke tests (optional) |
-| `RAILWAY_TOKEN` | Optional Railway CLI deploy (if not using GitHub integration) |
+Add these under **Settings → Environments** (recommended), not only repo-level secrets:
+
+| Environment | Secret name | Value |
+|-------------|-------------|-------|
+| `staging` | `DATABASE_URL` | Neon **staging** branch connection string |
+| `production` | `DATABASE_URL` | Neon **main** branch connection string |
+
+Optional per environment: `STAGING_URL` / `PRODUCTION_URL` for deploy smoke tests.
+
+Repo-level aliases `DATABASE_URL_STAGING` and `DATABASE_URL_PRODUCTION` are also supported by the deploy workflow.
+
+**Railway build note:** `DATABASE_URL` is only required on the **web-server** service at **runtime** (migrations on start). Docker build uses a placeholder for `prisma generate`; you do not need `DATABASE_URL` as a Railway build variable unless you customize the Dockerfile.
 
 ## Smoke test checklist
 
