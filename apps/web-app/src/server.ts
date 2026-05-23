@@ -5,6 +5,7 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express, { type Express, type RequestHandler } from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { setDefaultResultOrder } from 'node:dns';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,20 +23,23 @@ function getApiTarget(): string {
   return (process.env['API_URL'] ?? 'http://localhost:3000').replace(/\/$/, '');
 }
 
-async function getApiProxy(): Promise<RequestHandler> {
+function getApiProxy(): RequestHandler {
   if (!apiProxy) {
-    const { createProxyMiddleware } = await import('http-proxy-middleware');
     const target = getApiTarget();
     console.log(`[web-app] Proxy /api -> ${target}`);
     apiProxy = createProxyMiddleware({
       target,
       changeOrigin: true,
-      // Do not mount at `/api` in Express — that strips the prefix and Nest sees `/health` not `/api/health`.
-      pathFilter: (pathname) => pathname.startsWith('/api'),
+      pathFilter: '/api',
       on: {
         error: (err, _req, res) => {
           console.error('[web-app] API proxy error:', err.message);
-          if ('writeHead' in res && typeof res.writeHead === 'function') {
+          if (
+            res &&
+            'writeHead' in res &&
+            !res.headersSent &&
+            typeof res.writeHead === 'function'
+          ) {
             res.writeHead(502, { 'Content-Type': 'application/json' });
             res.end(
               JSON.stringify({
@@ -61,13 +65,7 @@ function buildApp(): Express {
   });
 
   expressApp.use((req, res, next) => {
-    if (!req.path.startsWith('/api')) {
-      next();
-      return;
-    }
-    void getApiProxy()
-      .then((proxy) => proxy(req, res, next))
-      .catch(next);
+    Promise.resolve(getApiProxy()(req, res, next)).catch(next);
   });
 
   expressApp.use(
@@ -121,9 +119,11 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
   lazyApp.listen(port, host, () => {
     console.log(`Node Express server listening on http://${host}:${port}`);
     console.log(`[web-app] API proxy target: ${getApiTarget()}`);
-    void getApiProxy().catch((err: unknown) => {
+    try {
+      getApiProxy();
+    } catch (err: unknown) {
       console.error('[web-app] Failed to initialize API proxy:', err);
-    });
+    }
   });
 }
 
