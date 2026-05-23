@@ -83,7 +83,7 @@ Production uses a **single public URL** per environment: the Angular SSR app pro
 | `BETTER_AUTH_SECRET` | web-server | Random secret (`openssl rand -base64 32`) |
 | `BETTER_AUTH_URL` | web-server | Public app URL (e.g. `https://staging.example.com`) |
 | `TRUSTED_ORIGINS` | web-server | Same URL as `BETTER_AUTH_URL` (comma-separated if multiple) |
-| `API_URL` | web-app | Internal URL, e.g. `http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}` |
+| `API_URL` | web-app | `http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}` — set `PORT=3000` on **web-server** first (`PORT` is not auto-available for references) |
 
 ### Setup guides
 

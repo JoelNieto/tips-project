@@ -33,18 +33,27 @@ BETTER_AUTH_SECRET=<openssl rand -base64 32>
 BETTER_AUTH_URL=https://<staging-public-domain>
 TRUSTED_ORIGINS=https://<staging-public-domain>
 NODE_ENV=production
+PORT=3000
 ```
+
+Set **`PORT=3000` explicitly** on `web-server`. Railway injects a runtime `PORT` inside the container, but that value is **not** available in the dashboard reference picker (`${{web-server.PORT}}` will be empty unless you define it yourself). This app listens on `process.env.PORT || 3000`, so use `3000`.
 
 ### 3. web-app variables (staging)
 
-Link to `web-server` service, then set:
+On **web-app**, set:
 
 ```env
 API_URL=http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}
 NODE_ENV=production
 ```
 
-`PORT` is injected by Railway on each service.
+After `PORT=3000` exists on `web-server`, the reference resolves. Alternative without a reference:
+
+```env
+API_URL=http://web-server.railway.internal:3000
+```
+
+Use your service’s private hostname from **web-server → Settings → Networking** if the name differs.
 
 ### 4. Deploy triggers
 
