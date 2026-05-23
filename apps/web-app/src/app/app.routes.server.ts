@@ -1,5 +1,6 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
+/** All app routes are client-rendered; avoids prerender params for :id segments. */
 export const serverRoutes: ServerRoute[] = [
   {
     path: 'login',
@@ -14,8 +15,6 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    // Prerender on `**` breaks route extraction (redirects + dynamic :id routes).
-    // SSR shell still serves these via Express; pages render in the browser.
     path: '**',
     renderMode: RenderMode.Client,
   },

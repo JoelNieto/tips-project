@@ -9,6 +9,8 @@ FROM oven/bun:1 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Route-extraction worker bootstraps the server bundle; API_URL avoids proxy edge cases.
+ENV API_URL=http://127.0.0.1:3000
 RUN bunx nx build web-app
 
 FROM node:22-alpine AS runner
