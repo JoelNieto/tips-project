@@ -16,9 +16,15 @@ RUN bunx prisma generate
 RUN bunx nx build web-server
 
 # Webpack externalizes Nest/Apollo deps — install them from the generated package.json
+# generatePackageJson omits some runtime peers (e.g. @as-integrations/express5, pg)
 WORKDIR /app/dist/apps/web-server
 RUN bun install --production \
-  && bun add prisma@7.4.1 --production
+  && bun add \
+    prisma@7.4.1 \
+    @as-integrations/express5@1.1.2 \
+    express@5 \
+    pg@8.18.0 \
+    --production
 
 FROM node:22-alpine AS runner
 WORKDIR /app
