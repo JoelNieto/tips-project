@@ -40,20 +40,30 @@ Set **`PORT=3000` explicitly** on `web-server`. Railway injects a runtime `PORT`
 
 ### 3. web-app variables (staging)
 
-On **web-app**, set:
+On **web-app**, set (must be `http://`, not `https://`):
 
 ```env
-API_URL=http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:${{web-server.PORT}}
+API_URL=http://${{web-server.RAILWAY_PRIVATE_DOMAIN}}:3000
 NODE_ENV=production
 ```
 
-After `PORT=3000` exists on `web-server`, the reference resolves. Alternative without a reference:
+Use a **literal `:3000`** (not `${{web-server.PORT}}`) unless you defined `PORT=3000` on web-server and the reference resolves in the dashboard preview. Wrong or empty port produces `http://….railway.internal:` and the proxy returns 500.
+
+**Verify after deploy:** open **web-app → Deploy logs** and look for:
+
+```text
+[web-app] API proxy target: http://...
+```
+
+If `/api/health` returns 502 JSON with `"error":"Bad Gateway"`, the target is wrong or **web-server** is not reachable — check **web-server** is running and listening (deploy log should show `Application is running on: http://0.0.0.0:3000/api`).
+
+Alternative without references:
 
 ```env
 API_URL=http://web-server.railway.internal:3000
 ```
 
-Use your service’s private hostname from **web-server → Settings → Networking** if the name differs.
+Use the private hostname from **web-server → Settings → Networking** (service name + `.railway.internal`).
 
 ### 4. Deploy triggers
 
