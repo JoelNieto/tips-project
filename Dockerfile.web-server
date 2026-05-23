@@ -15,11 +15,10 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN bunx prisma generate
 RUN bunx nx build web-server
 
-# Standalone Prisma CLI for migrations (isolated from monorepo deps)
-RUN mkdir -p /prisma-cli \
-  && cd /prisma-cli \
-  && printf '%s\n' '{"private":true,"dependencies":{"prisma":"7.4.1"}}' > package.json \
-  && bun install --production
+# Webpack externalizes Nest/Apollo deps — install them from the generated package.json
+WORKDIR /app/dist/apps/web-server
+RUN bun install --production \
+  && bun add prisma@7.4.1 --production
 
 FROM node:22-alpine AS runner
 WORKDIR /app
@@ -27,11 +26,11 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache libc6-compat
 
+# main.js, package.json, and production node_modules (app + prisma CLI)
 COPY --from=build /app/dist/apps/web-server ./
 COPY --from=build /app/generated ./generated
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/prisma.config.mjs ./prisma.config.mjs
-COPY --from=build /prisma-cli/node_modules ./node_modules
 
 COPY docker/web-server-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
