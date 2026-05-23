@@ -7,14 +7,16 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'survey/invite/**',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Client,
   },
   {
     path: 'dashboard/**',
     renderMode: RenderMode.Client,
   },
   {
+    // Prerender on `**` breaks route extraction (redirects + dynamic :id routes).
+    // SSR shell still serves these via Express; pages render in the browser.
     path: '**',
-    renderMode: RenderMode.Prerender,
+    renderMode: RenderMode.Client,
   },
 ];
