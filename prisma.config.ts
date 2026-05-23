@@ -1,5 +1,7 @@
-import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
+
+// Prisma CLI loads `.env` from the project root automatically (local dev).
+// Railway / GitHub inject DATABASE_URL directly — no dotenv import (not in Docker image).
 
 /**
  * `prisma generate` does not connect to the database. Docker/Railway builds often
