@@ -15,6 +15,12 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN bunx prisma generate
 RUN bunx nx build web-server
 
+# Standalone Prisma CLI for migrations (isolated from monorepo deps)
+RUN mkdir -p /prisma-cli \
+  && cd /prisma-cli \
+  && printf '%s\n' '{"private":true,"dependencies":{"prisma":"7.4.1"}}' > package.json \
+  && bun install --production
+
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -25,12 +31,7 @@ COPY --from=build /app/dist/apps/web-server ./
 COPY --from=build /app/generated ./generated
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/prisma.config.mjs ./prisma.config.mjs
-
-# Minimal install — do not copy monorepo package.json (npm would resolve the full tree)
-RUN printf '%s\n' \
-  '{"name":"tips-web-server-migrate","private":true,"dependencies":{"prisma":"7.4.1"}}' \
-  > package.json \
-  && npm install --omit=dev --no-package-lock
+COPY --from=build /prisma-cli/node_modules ./node_modules
 
 COPY docker/web-server-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
