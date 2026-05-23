@@ -8,6 +8,6 @@ if [ -z "${DATABASE_URL}" ]; then
 fi
 
 echo "Running database migrations..."
-prisma migrate deploy
+./node_modules/.bin/prisma migrate deploy
 
 exec node main.js

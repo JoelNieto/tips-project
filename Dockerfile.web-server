@@ -9,7 +9,7 @@ FROM oven/bun:1 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# generate does not need a real DB; prisma.config.ts uses a placeholder if unset
+# generate does not need a real DB; prisma.config.mjs uses a placeholder if unset
 ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build?schema=public
 ENV DATABASE_URL=${DATABASE_URL}
 RUN bunx prisma generate
@@ -19,12 +19,16 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache libc6-compat && npm install -g prisma@7.4.1
+RUN apk add --no-cache libc6-compat
 
 COPY --from=build /app/dist/apps/web-server ./
 COPY --from=build /app/generated ./generated
 COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+COPY --from=build /app/prisma.config.mjs ./prisma.config.mjs
+COPY --from=build /app/package.json ./package.json
+
+# Local Prisma CLI (global install cannot resolve prisma.config imports)
+RUN npm install prisma@7.4.1 --omit=dev --no-package-lock
 
 COPY docker/web-server-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
