@@ -116,7 +116,7 @@ lazyApp.use((req, res, next) => {
 });
 
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
-  const port = process.env['PORT'] || 4000;
+  const port = Number(process.env['PORT']) || 4000;
   const host = process.env['HOST'] ?? '0.0.0.0';
   lazyApp.listen(port, host, () => {
     console.log(`Node Express server listening on http://${host}:${port}`);
