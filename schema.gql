@@ -86,6 +86,20 @@ input CreateDimensionInput {
   weighting: Float
 }
 
+input CreateEmployeeInput {
+  birthdate: String
+  companyId: ID!
+  documentId: String!
+  email: String!
+  enrollmentDate: String!
+  firstName: String!
+  gender: Gender!
+  lastName: String!
+  offDate: String
+  positionId: ID
+  status: EmployeeStatus!
+}
+
 input CreateMainQuestionAnswerInput {
   dimensionId: String!
   reverseValue: Float
@@ -185,6 +199,38 @@ type DimensionQuestionEntity {
   weightOverride: Float
 }
 
+type EmployeeEntity {
+  birthdate: DateTime
+  companyId: ID!
+  createdAt: DateTime!
+  documentId: String!
+  email: String!
+  enrollmentDate: DateTime!
+  firstName: String!
+  gender: Gender!
+  id: ID!
+  lastName: String!
+  offDate: DateTime
+  position: PositionEntity
+  positionId: ID
+  status: EmployeeStatus!
+  updatedAt: DateTime!
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
 type MainQuestionAnswerEntity {
   createdAt: DateTime!
   id: ID!
@@ -200,6 +246,7 @@ type Mutation {
   createAnswer(input: CreateAnswerInput!): AnswerEntity!
   createCompany(input: CreateCompanyInput!): CompanyEntity!
   createDimension(input: CreateDimensionInput!): DimensionEntity!
+  createEmployee(input: CreateEmployeeInput!): EmployeeEntity!
   createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
   createPosition(input: CreatePositionInput!): PositionEntity!
   createQuestion(input: CreateQuestionInput!): QuestionEntity!
@@ -209,6 +256,7 @@ type Mutation {
   deleteAnswer(id: ID!): AnswerEntity!
   deleteCompany(id: ID!): CompanyEntity!
   deleteDimension(id: ID!): DimensionEntity!
+  deleteEmployee(id: ID!): EmployeeEntity!
   deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
   deletePosition(id: ID!): PositionEntity!
   deleteQuestion(id: ID!): QuestionEntity!
@@ -220,6 +268,7 @@ type Mutation {
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
   updateDimension(id: ID!, input: UpdateDimensionInput!): DimensionEntity!
   updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
+  updateEmployee(id: ID!, input: UpdateEmployeeInput!): EmployeeEntity!
   updateMainQuestionAnswer(id: ID!, input: UpdateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
   updatePosition(id: ID!, input: UpdatePositionInput!): PositionEntity!
   updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
@@ -242,6 +291,8 @@ type Query {
   company(id: ID!): CompanyEntity
   dimension(id: ID!): DimensionEntity
   dimensions(surveyId: ID!): [DimensionEntity!]!
+  employee(id: ID!): EmployeeEntity
+  employees(companyId: ID!): [EmployeeEntity!]!
   hello: String!
   position(id: ID!): PositionEntity
   positions(companyId: ID!): [PositionEntity!]!
@@ -385,6 +436,19 @@ input UpdateDimensionQuestionOverridesInput {
   isReversedOverride: Boolean
   order: Float
   weightOverride: Float
+}
+
+input UpdateEmployeeInput {
+  birthdate: String
+  documentId: String
+  email: String
+  enrollmentDate: String
+  firstName: String
+  gender: Gender
+  lastName: String
+  offDate: String
+  positionId: ID
+  status: EmployeeStatus
 }
 
 input UpdateMainQuestionAnswerInput {
