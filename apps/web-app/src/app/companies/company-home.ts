@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
+import CompanyPositionsComponent from './company-positions';
 import { COMPANY_QUERY } from './graphql/companies.graphql';
 
 interface CompanyDetail {
@@ -37,7 +38,7 @@ interface CompanyDetail {
 @Component({
   selector: 'app-company-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, CompanyPositionsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -62,6 +63,35 @@ interface CompanyDetail {
         </a>
       </div>
 
+      <div class="border-b border-slate-200">
+        <nav class="-mb-px flex gap-6" aria-label="Company sections">
+          <button
+            type="button"
+            class="border-b-2 px-1 py-3 text-sm font-medium transition"
+            [class.border-indigo-600]="activeTab() === 'info'"
+            [class.text-indigo-600]="activeTab() === 'info'"
+            [class.border-transparent]="activeTab() !== 'info'"
+            [class.text-slate-500]="activeTab() !== 'info'"
+            [class.hover:text-slate-700]="activeTab() !== 'info'"
+            (click)="activeTab.set('info')"
+          >
+            Info
+          </button>
+          <button
+            type="button"
+            class="border-b-2 px-1 py-3 text-sm font-medium transition"
+            [class.border-indigo-600]="activeTab() === 'hierarchy'"
+            [class.text-indigo-600]="activeTab() === 'hierarchy'"
+            [class.border-transparent]="activeTab() !== 'hierarchy'"
+            [class.text-slate-500]="activeTab() !== 'hierarchy'"
+            [class.hover:text-slate-700]="activeTab() !== 'hierarchy'"
+            (click)="activeTab.set('hierarchy')"
+          >
+            Hierarchy
+          </button>
+        </nav>
+      </div>
+
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
           Loading company...
@@ -72,6 +102,7 @@ interface CompanyDetail {
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (company(); as c) {
+        @if (activeTab() === 'info') {
         <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-6">
           @if (c.logo) {
             <img
@@ -162,6 +193,9 @@ interface CompanyDetail {
             </div>
           </dl>
         </div>
+        } @else {
+          <app-company-positions [companyId]="id()" />
+        }
       } @else {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
           Company not found.
@@ -184,6 +218,7 @@ export default class CompanyHomeComponent {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly company = signal<CompanyDetail | null>(null);
+  protected readonly activeTab = signal<'info' | 'hierarchy'>('info');
 
   constructor() {
     effect(() => {

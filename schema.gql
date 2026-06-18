@@ -94,6 +94,13 @@ input CreateMainQuestionAnswerInput {
   value: Float!
 }
 
+input CreatePositionInput {
+  code: String!
+  companyId: ID!
+  name: String!
+  parentPositionId: ID
+}
+
 input CreateQuestionInput {
   answers: [AnswerNestedInput!]
   isMultiAnswer: Boolean = false
@@ -194,6 +201,7 @@ type Mutation {
   createCompany(input: CreateCompanyInput!): CompanyEntity!
   createDimension(input: CreateDimensionInput!): DimensionEntity!
   createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  createPosition(input: CreatePositionInput!): PositionEntity!
   createQuestion(input: CreateQuestionInput!): QuestionEntity!
   createSurvey(input: CreateSurveyInput!): SurveyEntity!
   createSurveyAssignation(input: CreateSurveyAssignationInput!): SurveyAssignationEntity!
@@ -202,6 +210,7 @@ type Mutation {
   deleteCompany(id: ID!): CompanyEntity!
   deleteDimension(id: ID!): DimensionEntity!
   deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
+  deletePosition(id: ID!): PositionEntity!
   deleteQuestion(id: ID!): QuestionEntity!
   deleteSurvey(id: ID!): SurveyEntity!
   deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
@@ -212,9 +221,20 @@ type Mutation {
   updateDimension(id: ID!, input: UpdateDimensionInput!): DimensionEntity!
   updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
   updateMainQuestionAnswer(id: ID!, input: UpdateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  updatePosition(id: ID!, input: UpdatePositionInput!): PositionEntity!
   updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
   updateSurvey(id: ID!, input: UpdateSurveyInput!): SurveyEntity!
   updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
+}
+
+type PositionEntity {
+  code: String!
+  companyId: ID!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  parentPositionId: ID
+  updatedAt: DateTime!
 }
 
 type Query {
@@ -223,6 +243,8 @@ type Query {
   dimension(id: ID!): DimensionEntity
   dimensions(surveyId: ID!): [DimensionEntity!]!
   hello: String!
+  position(id: ID!): PositionEntity
+  positions(companyId: ID!): [PositionEntity!]!
   question(id: ID!): QuestionEntity
   questions: [QuestionEntity!]!
   survey(id: ID!): SurveyEntity
@@ -370,6 +392,12 @@ input UpdateMainQuestionAnswerInput {
   sortOrder: Float
   text: String
   value: Float
+}
+
+input UpdatePositionInput {
+  code: String
+  name: String
+  parentPositionId: ID
 }
 
 input UpdateQuestionInput {
