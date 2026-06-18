@@ -10,8 +10,16 @@ export const dashboardRoutes: Routes = [
     loadComponent: () => import('../companies/companies-list'),
   },
   {
-    path: 'companies/:id',
+    path: 'companies/new',
     loadComponent: () => import('../companies/company-form'),
+  },
+  {
+    path: 'companies/:id/edit',
+    loadComponent: () => import('../companies/company-form'),
+  },
+  {
+    path: 'companies/:id',
+    loadComponent: () => import('../companies/company-home'),
   },
   {
     path: 'survey-types',
@@ -35,15 +43,18 @@ export const dashboardRoutes: Routes = [
   },
   {
     path: 'surveys/:surveyId/assignations/new',
-    loadComponent: () => import('../survey-assignations/survey-assignation-form'),
+    loadComponent: () =>
+      import('../survey-assignations/survey-assignation-form'),
   },
   {
     path: 'surveys/:surveyId/assignations/:id',
-    loadComponent: () => import('../survey-assignations/survey-assignation-detail'),
+    loadComponent: () =>
+      import('../survey-assignations/survey-assignation-detail'),
   },
   {
     path: 'surveys/:surveyId/assignations',
-    loadComponent: () => import('../survey-assignations/survey-assignations-list'),
+    loadComponent: () =>
+      import('../survey-assignations/survey-assignations-list'),
   },
   {
     path: 'surveys/:id',
