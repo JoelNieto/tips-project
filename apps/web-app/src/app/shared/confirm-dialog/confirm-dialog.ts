@@ -1,5 +1,6 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface ConfirmDialogData {
   title: string;
@@ -12,6 +13,7 @@ export interface ConfirmDialogData {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-6 bg-white rounded-lg shadow-lg">
@@ -30,7 +32,7 @@ export interface ConfirmDialogData {
           (click)="dialogRef.close(false)"
           class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
         >
-          {{ data.cancelLabel ?? 'Cancel' }}
+          {{ data.cancelLabel ?? ('common.cancel' | translate) }}
         </button>
         <button
           type="button"
@@ -41,7 +43,7 @@ export interface ConfirmDialogData {
               : 'rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition'
           "
         >
-          {{ data.confirmLabel ?? 'Confirm' }}
+          {{ data.confirmLabel ?? ('common.confirm' | translate) }}
         </button>
       </div>
     </div>
@@ -53,11 +55,6 @@ export interface ConfirmDialogData {
   `,
 })
 export default class ConfirmDialogComponent {
+  protected readonly data = inject<ConfirmDialogData>(DIALOG_DATA);
   protected readonly dialogRef = inject(DialogRef<boolean>);
-  protected readonly data: ConfirmDialogData = inject(DIALOG_DATA, {
-    optional: true,
-  }) ?? {
-    title: 'Confirm',
-    message: 'Are you sure?',
-  };
 }

@@ -1,0 +1,83 @@
+{
+  "common": {
+    "appName": "Tips App",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "required": "Obligatorio",
+    "dashboard": "Panel",
+    "closeMenu": "Cerrar menú"
+  },
+  "nav": {
+    "home": "Inicio",
+    "companies": "Empresas",
+    "surveyTypes": "Tipos de encuesta",
+    "questionBank": "Banco de preguntas",
+    "surveys": "Encuestas",
+    "tips": "Propinas",
+    "reports": "Informes",
+    "profile": "Perfil",
+    "signOut": "Cerrar sesión"
+  },
+  "auth": {
+    "signInFailed": "Error al iniciar sesión. Inténtalo de nuevo.",
+    "signUpFailed": "Error al registrarse. Inténtalo de nuevo.",
+    "login": {
+      "welcomeBack": "Bienvenido de nuevo",
+      "createAccount": "Crea tu cuenta",
+      "signInSubtitle": "Inicia sesión en tu cuenta",
+      "signUpSubtitle": "Empieza con Tips App",
+      "fullName": "Nombre completo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "signingIn": "Iniciando sesión…",
+      "creatingAccount": "Creando cuenta…",
+      "signIn": "Iniciar sesión",
+      "createAccountButton": "Crear cuenta",
+      "alreadyHaveAccount": "¿Ya tienes cuenta?",
+      "dontHaveAccount": "¿No tienes cuenta?",
+      "getStarted": "Regístrate"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Administra la configuración de tu cuenta",
+    "information": "Información del perfil",
+    "updatedSuccess": "Perfil actualizado correctamente.",
+    "name": "Nombre",
+    "nameRequired": "El nombre es obligatorio",
+    "email": "Correo electrónico",
+    "emailReadonly": "El correo no se puede cambiar aquí.",
+    "avatarUrl": "URL del avatar",
+    "language": "Idioma",
+    "saveProfile": "Guardar perfil",
+    "saving": "Guardando...",
+    "changePassword": "Cambiar contraseña",
+    "passwordChangedSuccess": "Contraseña cambiada correctamente.",
+    "currentPassword": "Contraseña actual",
+    "currentPasswordRequired": "La contraseña actual es obligatoria",
+    "newPassword": "Nueva contraseña",
+    "newPasswordRequired": "La nueva contraseña es obligatoria",
+    "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "confirmPasswordRequired": "Confirma tu nueva contraseña",
+    "passwordsMustMatch": "Las contraseñas deben coincidir",
+    "revokeOtherSessions": "Revocar todas las demás sesiones",
+    "changingPassword": "Cambiando...",
+    "changePasswordButton": "Cambiar contraseña",
+    "updateFailed": "Error al actualizar el perfil",
+    "passwordChangeFailed": "Error al cambiar la contraseña"
+  },
+  "home": {
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "overview": "Aquí tienes un resumen de tu actividad de propinas.",
+    "totalTips": "Propinas totales",
+    "transactions": "Transacciones",
+    "activeStaff": "Personal activo",
+    "changeFromLastMonth": "+0% respecto al mes pasado",
+    "noChange": "Sin cambios",
+    "recentActivity": "Actividad reciente",
+    "noRecentActivity": "No hay actividad reciente.",
+    "guestName": "ahí"
+  }
+}

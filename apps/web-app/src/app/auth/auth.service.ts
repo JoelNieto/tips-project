@@ -1,14 +1,15 @@
 import { isPlatformBrowser } from '@angular/common';
-import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { computed, inject, Injectable, Injector, PLATFORM_ID, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { getAuthClient } from './auth-client';
+import { getAuthClient, updateAuthUser } from './auth-client';
 
 export interface User {
   id: string;
   email: string;
   name: string;
   image?: string | null;
+  locale?: string | null;
   emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,12 +19,14 @@ export interface AuthCredentials {
   email: string;
   password: string;
   name?: string;
+  locale?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private injector = inject(Injector);
 
   private _user = signal<User | null>(null);
   private _loading = signal(false);
@@ -61,14 +64,15 @@ export class AuthService {
       });
 
       if (error) {
-        this._error.set(error.message ?? 'Sign in failed. Please try again.');
+        this._error.set(error.message ?? 'auth.signInFailed');
         return false;
       }
 
       this._user.set(data.user as User);
+      await this.syncLocaleFromUser();
       return true;
     } catch {
-      this._error.set('Sign in failed. Please try again.');
+      this._error.set('auth.signInFailed');
       return false;
     } finally {
       this._loading.set(false);
@@ -87,14 +91,24 @@ export class AuthService {
       });
 
       if (error) {
-        this._error.set(error.message ?? 'Sign up failed. Please try again.');
+        this._error.set(error.message ?? 'auth.signUpFailed');
         return false;
       }
 
       this._user.set(data.user as User);
+
+      if (credentials.locale) {
+        await updateAuthUser({ locale: credentials.locale });
+        const { data: sessionData } = await getAuthClient().getSession();
+        if (sessionData?.user) {
+          this._user.set(sessionData.user as User);
+        }
+      }
+
+      await this.syncLocaleFromUser();
       return true;
     } catch {
-      this._error.set('Sign up failed. Please try again.');
+      this._error.set('auth.signUpFailed');
       return false;
     } finally {
       this._loading.set(false);
@@ -104,13 +118,18 @@ export class AuthService {
   async logout(): Promise<void> {
     await getAuthClient().signOut();
     this._user.set(null);
+    await this.syncLocaleFromUser();
     this.router.navigate(['/login']);
   }
 
-  async updateUser(data: { name?: string; image?: string | null }): Promise<{ success: boolean; error?: string }> {
+  async updateUser(data: {
+    name?: string;
+    image?: string | null;
+    locale?: string;
+  }): Promise<{ success: boolean; error?: string }> {
     this._error.set(null);
     try {
-      const { data: result, error } = await getAuthClient().updateUser(data);
+      const { data: result, error } = await updateAuthUser(data);
       if (error) {
         return { success: false, error: error.message ?? 'Failed to update profile' };
       }
@@ -118,6 +137,7 @@ export class AuthService {
         const { data: sessionData } = await getAuthClient().getSession();
         if (sessionData?.user) {
           this._user.set(sessionData.user as User);
+          await this.syncLocaleFromUser();
         }
       }
       return { success: true };
@@ -145,6 +165,11 @@ export class AuthService {
     } catch {
       return { success: false, error: 'Failed to change password' };
     }
+  }
+
+  private async syncLocaleFromUser(): Promise<void> {
+    const { LocaleService } = await import('../i18n/locale.service');
+    await this.injector.get(LocaleService).init();
   }
 
   private async loadSession(): Promise<void> {

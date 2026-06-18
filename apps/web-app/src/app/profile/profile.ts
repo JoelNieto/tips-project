@@ -12,12 +12,21 @@ import {
   required,
 } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../auth/auth.service';
+import { LocaleService } from '../i18n/locale.service';
+import {
+  type AppLocale,
+  LOCALE_LABELS,
+  normalizeLocale,
+  SUPPORTED_LOCALES,
+} from '../i18n/supported-locales';
 
 interface ProfileFormModel {
   name: string;
   image: string;
+  locale: AppLocale;
 }
 
 interface ChangePasswordFormModel {
@@ -30,7 +39,7 @@ interface ChangePasswordFormModel {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -42,22 +51,21 @@ interface ChangePasswordFormModel {
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Profile</h2>
-          <p class="mt-1 text-slate-500">Manage your account settings</p>
+          <h2 class="text-2xl font-bold text-slate-900">{{ 'profile.title' | translate }}</h2>
+          <p class="mt-1 text-slate-500">{{ 'profile.subtitle' | translate }}</p>
         </div>
       </div>
 
       @if (auth.user(); as user) {
-        <!-- Profile information -->
         <form
           (submit)="onProfileSubmit($event)"
           class="space-y-6 rounded-xl border border-slate-200 bg-white p-6"
         >
-          <h3 class="text-lg font-medium text-slate-900">Profile information</h3>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'profile.information' | translate }}</h3>
 
           @if (profileSuccess()) {
             <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700 text-sm">
-              Profile updated successfully.
+              {{ 'profile.updatedSuccess' | translate }}
             </div>
           }
           @if (profileError()) {
@@ -68,7 +76,7 @@ interface ChangePasswordFormModel {
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <label for="profile-name" class="block text-sm font-medium text-slate-700">Name *</label>
+              <label for="profile-name" class="block text-sm font-medium text-slate-700">{{ 'profile.name' | translate }} *</label>
               <input
                 id="profile-name"
                 type="text"
@@ -77,13 +85,13 @@ interface ChangePasswordFormModel {
               />
               @if (profileForm.name().touched() && profileForm.name().invalid()) {
                 <p class="mt-1 text-sm text-red-600">
-                  {{ profileForm.name().errors()[0]?.message ?? 'Name is required' }}
+                  {{ (profileForm.name().errors()[0]?.message ?? 'profile.nameRequired') | translate }}
                 </p>
               }
             </div>
 
             <div>
-              <label for="profile-email" class="block text-sm font-medium text-slate-700">Email</label>
+              <label for="profile-email" class="block text-sm font-medium text-slate-700">{{ 'profile.email' | translate }}</label>
               <input
                 id="profile-email"
                 type="email"
@@ -91,12 +99,28 @@ interface ChangePasswordFormModel {
                 readonly
                 class="mt-1 block w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600 sm:text-sm"
               />
-              <p class="mt-1 text-xs text-slate-500">Email cannot be changed here.</p>
+              <p class="mt-1 text-xs text-slate-500">{{ 'profile.emailReadonly' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="profile-locale" class="block text-sm font-medium text-slate-700">{{ 'profile.language' | translate }}</label>
+              <select
+                id="profile-locale"
+                [formField]="profileForm.locale"
+                (change)="onLocaleChange()"
+                class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              >
+                @for (loc of supportedLocales; track loc) {
+                  <option [value]="loc">{{ localeLabels[loc] }}</option>
+                }
+              </select>
             </div>
           </div>
 
           <div>
-            <label for="profile-image" class="block text-sm font-medium text-slate-700">Avatar URL</label>
+            <label for="profile-image" class="block text-sm font-medium text-slate-700">{{ 'profile.avatarUrl' | translate }}</label>
             <input
               id="profile-image"
               type="url"
@@ -112,21 +136,24 @@ interface ChangePasswordFormModel {
               [disabled]="profileForm().invalid() || profileSubmitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ profileSubmitting() ? 'Saving...' : 'Save profile' }}
+              {{
+                profileSubmitting()
+                  ? ('profile.saving' | translate)
+                  : ('profile.saveProfile' | translate)
+              }}
             </button>
           </div>
         </form>
 
-        <!-- Change password -->
         <form
           (submit)="onPasswordSubmit($event)"
           class="space-y-6 rounded-xl border border-slate-200 bg-white p-6"
         >
-          <h3 class="text-lg font-medium text-slate-900">Change password</h3>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'profile.changePassword' | translate }}</h3>
 
           @if (passwordSuccess()) {
             <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700 text-sm">
-              Password changed successfully.
+              {{ 'profile.passwordChangedSuccess' | translate }}
             </div>
           }
           @if (passwordError()) {
@@ -137,7 +164,7 @@ interface ChangePasswordFormModel {
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <label for="current-password" class="block text-sm font-medium text-slate-700">Current password *</label>
+              <label for="current-password" class="block text-sm font-medium text-slate-700">{{ 'profile.currentPassword' | translate }} *</label>
               <input
                 id="current-password"
                 type="password"
@@ -147,7 +174,7 @@ interface ChangePasswordFormModel {
               />
               @if (passwordForm.currentPassword().touched() && passwordForm.currentPassword().invalid()) {
                 <p class="mt-1 text-sm text-red-600">
-                  {{ passwordForm.currentPassword().errors()[0]?.message ?? 'Current password is required' }}
+                  {{ (passwordForm.currentPassword().errors()[0]?.message ?? 'profile.currentPasswordRequired') | translate }}
                 </p>
               }
             </div>
@@ -155,7 +182,7 @@ interface ChangePasswordFormModel {
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <label for="new-password" class="block text-sm font-medium text-slate-700">New password *</label>
+              <label for="new-password" class="block text-sm font-medium text-slate-700">{{ 'profile.newPassword' | translate }} *</label>
               <input
                 id="new-password"
                 type="password"
@@ -165,13 +192,13 @@ interface ChangePasswordFormModel {
               />
               @if (passwordForm.newPassword().touched() && passwordForm.newPassword().invalid()) {
                 <p class="mt-1 text-sm text-red-600">
-                  {{ passwordForm.newPassword().errors()[0]?.message ?? 'At least 8 characters required' }}
+                  {{ (passwordForm.newPassword().errors()[0]?.message ?? 'profile.passwordMinLength') | translate }}
                 </p>
               }
             </div>
 
             <div>
-              <label for="confirm-password" class="block text-sm font-medium text-slate-700">Confirm new password *</label>
+              <label for="confirm-password" class="block text-sm font-medium text-slate-700">{{ 'profile.confirmPassword' | translate }} *</label>
               <input
                 id="confirm-password"
                 type="password"
@@ -180,7 +207,7 @@ interface ChangePasswordFormModel {
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
               @if (passwordForm.confirmPassword().touched() && confirmPasswordMismatch()) {
-                <p class="mt-1 text-sm text-red-600">Passwords must match</p>
+                <p class="mt-1 text-sm text-red-600">{{ 'profile.passwordsMustMatch' | translate }}</p>
               }
             </div>
           </div>
@@ -193,7 +220,7 @@ interface ChangePasswordFormModel {
               class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label for="revoke-sessions" class="text-sm font-medium text-slate-700">
-              Revoke all other sessions
+              {{ 'profile.revokeOtherSessions' | translate }}
             </label>
           </div>
 
@@ -203,7 +230,11 @@ interface ChangePasswordFormModel {
               [disabled]="passwordForm().invalid() || passwordSubmitting() || confirmPasswordMismatch()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ passwordSubmitting() ? 'Changing...' : 'Change password' }}
+              {{
+                passwordSubmitting()
+                  ? ('profile.changingPassword' | translate)
+                  : ('profile.changePasswordButton' | translate)
+              }}
             </button>
           </div>
         </form>
@@ -218,10 +249,19 @@ interface ChangePasswordFormModel {
 })
 export default class ProfileComponent {
   protected readonly auth = inject(AuthService);
+  private readonly localeService = inject(LocaleService);
+  private readonly translate = inject(TranslateService);
 
-  protected readonly profileModel = signal<ProfileFormModel>({ name: '', image: '' });
+  protected readonly supportedLocales = SUPPORTED_LOCALES;
+  protected readonly localeLabels = LOCALE_LABELS;
+
+  protected readonly profileModel = signal<ProfileFormModel>({
+    name: '',
+    image: '',
+    locale: 'en',
+  });
   protected readonly profileForm = form(this.profileModel, (schemaPath) => {
-    required(schemaPath.name, { message: 'Name is required' });
+    required(schemaPath.name, { message: 'profile.nameRequired' });
   });
 
   protected readonly passwordModel = signal<ChangePasswordFormModel>({
@@ -231,11 +271,11 @@ export default class ProfileComponent {
     revokeOtherSessions: false,
   });
   protected readonly passwordForm = form(this.passwordModel, (schemaPath) => {
-    required(schemaPath.currentPassword, { message: 'Current password is required' });
-    required(schemaPath.newPassword, { message: 'New password is required' });
-    minLength(schemaPath.newPassword, 8, { message: 'Password must be at least 8 characters' });
-    required(schemaPath.confirmPassword, { message: 'Please confirm your new password' });
-    minLength(schemaPath.confirmPassword, 8, { message: 'Password must be at least 8 characters' });
+    required(schemaPath.currentPassword, { message: 'profile.currentPasswordRequired' });
+    required(schemaPath.newPassword, { message: 'profile.newPasswordRequired' });
+    minLength(schemaPath.newPassword, 8, { message: 'profile.passwordMinLength' });
+    required(schemaPath.confirmPassword, { message: 'profile.confirmPasswordRequired' });
+    minLength(schemaPath.confirmPassword, 8, { message: 'profile.passwordMinLength' });
   });
 
   protected readonly profileSubmitting = signal(false);
@@ -258,9 +298,14 @@ export default class ProfileComponent {
         this.profileModel.set({
           name: user.name ?? '',
           image: user.image ?? '',
+          locale: normalizeLocale(user.locale),
         });
       }
     });
+  }
+
+  protected async onLocaleChange(): Promise<void> {
+    await this.localeService.setLocale(this.profileModel().locale);
   }
 
   protected async onProfileSubmit(event: Event): Promise<void> {
@@ -269,19 +314,22 @@ export default class ProfileComponent {
     this.profileError.set(null);
     if (!this.profileForm().valid()) return;
 
-    const { name, image } = this.profileModel();
+    const { name, image, locale } = this.profileModel();
     this.profileSubmitting.set(true);
 
     const result = await this.auth.updateUser({
       name,
       image: image || null,
+      locale,
     });
 
     this.profileSubmitting.set(false);
     if (result.success) {
       this.profileSuccess.set(true);
     } else {
-      this.profileError.set(result.error ?? 'Failed to update profile');
+      this.profileError.set(
+        result.error ?? this.translate.instant('profile.updateFailed')
+      );
     }
   }
 
@@ -310,7 +358,9 @@ export default class ProfileComponent {
         revokeOtherSessions: false,
       });
     } else {
-      this.passwordError.set(result.error ?? 'Failed to change password');
+      this.passwordError.set(
+        result.error ?? this.translate.instant('profile.passwordChangeFailed')
+      );
     }
   }
 }

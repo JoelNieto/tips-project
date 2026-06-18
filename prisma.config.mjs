@@ -1,6 +1,8 @@
+import 'dotenv/config';
+
 /**
  * Plain JS config so `prisma migrate deploy` works in Docker without node_modules
- * for `prisma/config` or TypeScript. Prisma CLI loads `.env` locally automatically.
+ * for `prisma/config` or TypeScript.
  */
 const databaseUrl =
   process.env.DATABASE_URL ??

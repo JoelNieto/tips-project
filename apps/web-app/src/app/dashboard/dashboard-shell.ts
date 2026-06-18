@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-dashboard-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen flex bg-slate-50">
@@ -21,7 +22,7 @@ import { AuthService } from '../auth/auth.service';
           >
             T
           </div>
-          <span class="font-semibold text-slate-900">Tips App</span>
+          <span class="font-semibold text-slate-900">{{ 'common.appName' | translate }}</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
@@ -33,7 +34,7 @@ import { AuthService } from '../auth/auth.service';
               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
             >
               <span class="material-symbols-outlined shrink-0 text-[20px] leading-none" [attr.aria-hidden]="true">{{ item.icon }}</span>
-              {{ item.label }}
+              {{ item.labelKey | translate }}
             </a>
           }
         </nav>
@@ -53,7 +54,7 @@ import { AuthService } from '../auth/auth.service';
             class="mt-2 w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-700 transition"
           >
             <span class="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>
-            Sign out
+            {{ 'nav.signOut' | translate }}
           </button>
         </div>
       </aside>
@@ -63,7 +64,7 @@ import { AuthService } from '../auth/auth.service';
         <button
           type="button"
           class="fixed inset-0 z-20 block w-full bg-black/30 lg:hidden"
-          aria-label="Close menu"
+          [attr.aria-label]="'common.closeMenu' | translate"
           (click)="sidebarOpen.set(false)"
         ></button>
       }
@@ -77,7 +78,7 @@ import { AuthService } from '../auth/auth.service';
           >
             <span class="material-symbols-outlined text-2xl" aria-hidden="true">menu</span>
           </button>
-          <h1 class="text-lg font-semibold text-slate-900">Dashboard</h1>
+          <h1 class="text-lg font-semibold text-slate-900">{{ 'common.dashboard' | translate }}</h1>
         </header>
 
         <main class="flex-1 p-6">
@@ -97,14 +98,14 @@ export default class DashboardShellComponent {
   protected sidebarOpen = signal(false);
 
   protected readonly navItems = [
-    { path: '/dashboard', label: 'Home', exact: true, icon: 'home' },
-    { path: '/dashboard/companies', label: 'Companies', exact: false, icon: 'business' },
-    { path: '/dashboard/survey-types', label: 'Survey Types', exact: false, icon: 'poll' },
-    { path: '/dashboard/question-bank', label: 'Question Bank', exact: false, icon: 'quiz' },
-    { path: '/dashboard/surveys', label: 'Surveys', exact: false, icon: 'poll' },
-    { path: '/dashboard/tips', label: 'Tips', exact: false, icon: 'payments' },
-    { path: '/dashboard/reports', label: 'Reports', exact: false, icon: 'bar_chart' },
-    { path: '/dashboard/profile', label: 'Profile', exact: false, icon: 'person' },
+    { path: '/dashboard', labelKey: 'nav.home', exact: true, icon: 'home' },
+    { path: '/dashboard/companies', labelKey: 'nav.companies', exact: false, icon: 'business' },
+    { path: '/dashboard/survey-types', labelKey: 'nav.surveyTypes', exact: false, icon: 'poll' },
+    { path: '/dashboard/question-bank', labelKey: 'nav.questionBank', exact: false, icon: 'quiz' },
+    { path: '/dashboard/surveys', labelKey: 'nav.surveys', exact: false, icon: 'poll' },
+    { path: '/dashboard/tips', labelKey: 'nav.tips', exact: false, icon: 'payments' },
+    { path: '/dashboard/reports', labelKey: 'nav.reports', exact: false, icon: 'bar_chart' },
+    { path: '/dashboard/profile', labelKey: 'nav.profile', exact: false, icon: 'person' },
   ];
 
   protected toggleSidebar(): void {

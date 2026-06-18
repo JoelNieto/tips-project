@@ -29,4 +29,14 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: parseTrustedOrigins(),
+  user: {
+    additionalFields: {
+      locale: {
+        type: 'string',
+        required: false,
+        defaultValue: 'en',
+        input: true,
+      },
+    },
+  },
 });

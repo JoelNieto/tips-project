@@ -1,0 +1,83 @@
+{
+  "common": {
+    "appName": "Tips App",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "required": "Required",
+    "dashboard": "Dashboard",
+    "closeMenu": "Close menu"
+  },
+  "nav": {
+    "home": "Home",
+    "companies": "Companies",
+    "surveyTypes": "Survey Types",
+    "questionBank": "Question Bank",
+    "surveys": "Surveys",
+    "tips": "Tips",
+    "reports": "Reports",
+    "profile": "Profile",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "signInFailed": "Sign in failed. Please try again.",
+    "signUpFailed": "Sign up failed. Please try again.",
+    "login": {
+      "welcomeBack": "Welcome back",
+      "createAccount": "Create your account",
+      "signInSubtitle": "Sign in to your account",
+      "signUpSubtitle": "Get started with Tips App",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "signingIn": "Signing in…",
+      "creatingAccount": "Creating account…",
+      "signIn": "Sign in",
+      "createAccountButton": "Create account",
+      "alreadyHaveAccount": "Already have an account?",
+      "dontHaveAccount": "Don't have an account?",
+      "getStarted": "Get started"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account settings",
+    "information": "Profile information",
+    "updatedSuccess": "Profile updated successfully.",
+    "name": "Name",
+    "nameRequired": "Name is required",
+    "email": "Email",
+    "emailReadonly": "Email cannot be changed here.",
+    "avatarUrl": "Avatar URL",
+    "language": "Language",
+    "saveProfile": "Save profile",
+    "saving": "Saving...",
+    "changePassword": "Change password",
+    "passwordChangedSuccess": "Password changed successfully.",
+    "currentPassword": "Current password",
+    "currentPasswordRequired": "Current password is required",
+    "newPassword": "New password",
+    "newPasswordRequired": "New password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "confirmPassword": "Confirm new password",
+    "confirmPasswordRequired": "Please confirm your new password",
+    "passwordsMustMatch": "Passwords must match",
+    "revokeOtherSessions": "Revoke all other sessions",
+    "changingPassword": "Changing...",
+    "changePasswordButton": "Change password",
+    "updateFailed": "Failed to update profile",
+    "passwordChangeFailed": "Failed to change password"
+  },
+  "home": {
+    "welcome": "Welcome back, {{name}}",
+    "overview": "Here's an overview of your tips activity.",
+    "totalTips": "Total Tips",
+    "transactions": "Transactions",
+    "activeStaff": "Active Staff",
+    "changeFromLastMonth": "+0% from last month",
+    "noChange": "No change",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity to display.",
+    "guestName": "there"
+  }
+}

@@ -7,12 +7,14 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
+import { LocaleService } from '../i18n/locale.service';
 import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -26,24 +28,28 @@ import { AuthService } from './auth.service';
             T
           </div>
           <h1 class="text-2xl font-bold text-slate-900">
-            {{ isSignUp() ? 'Create your account' : 'Welcome back' }}
+            {{
+              isSignUp()
+                ? ('auth.login.createAccount' | translate)
+                : ('auth.login.welcomeBack' | translate)
+            }}
           </h1>
           <p class="text-slate-500 mt-1">
             {{
               isSignUp()
-                ? 'Get started with Tips App'
-                : 'Sign in to your account'
+                ? ('auth.login.signUpSubtitle' | translate)
+                : ('auth.login.signInSubtitle' | translate)
             }}
           </p>
         </div>
 
         <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8">
-          @if (auth.error()) {
+          @if (auth.error(); as err) {
             <div
               class="mb-6 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
               role="alert"
             >
-              {{ auth.error() }}
+              {{ isAuthErrorKey(err) ? (err | translate) : err }}
             </div>
           }
 
@@ -54,7 +60,7 @@ import { AuthService } from './auth.service';
                   for="name"
                   class="block text-sm font-medium text-slate-700 mb-1.5"
                 >
-                  Full name
+                  {{ 'auth.login.fullName' | translate }}
                 </label>
                 <input
                   id="name"
@@ -74,7 +80,7 @@ import { AuthService } from './auth.service';
                 for="email"
                 class="block text-sm font-medium text-slate-700 mb-1.5"
               >
-                Email
+                {{ 'auth.login.email' | translate }}
               </label>
               <input
                 id="email"
@@ -93,7 +99,7 @@ import { AuthService } from './auth.service';
                 for="password"
                 class="block text-sm font-medium text-slate-700 mb-1.5"
               >
-                Password
+                {{ 'auth.login.password' | translate }}
               </label>
               <input
                 id="password"
@@ -121,10 +127,18 @@ import { AuthService } from './auth.service';
                     aria-hidden="true"
                     >progress_activity</span
                   >
-                  {{ isSignUp() ? 'Creating account…' : 'Signing in…' }}
+                  {{
+                    isSignUp()
+                      ? ('auth.login.creatingAccount' | translate)
+                      : ('auth.login.signingIn' | translate)
+                  }}
                 </span>
               } @else {
-                {{ isSignUp() ? 'Create account' : 'Sign in' }}
+                {{
+                  isSignUp()
+                    ? ('auth.login.createAccountButton' | translate)
+                    : ('auth.login.signIn' | translate)
+                }}
               }
             </button>
           </form>
@@ -132,20 +146,20 @@ import { AuthService } from './auth.service';
 
         <p class="text-center text-sm text-slate-500 mt-6">
           @if (isSignUp()) {
-            Already have an account?
+            {{ 'auth.login.alreadyHaveAccount' | translate }}
             <button
               (click)="isSignUp.set(false)"
               class="text-indigo-600 font-medium hover:text-indigo-500"
             >
-              Sign in
+              {{ 'auth.login.signIn' | translate }}
             </button>
           } @else {
-            Don't have an account?
+            {{ 'auth.login.dontHaveAccount' | translate }}
             <button
               (click)="isSignUp.set(true)"
               class="text-indigo-600 font-medium hover:text-indigo-500"
             >
-              Get started
+              {{ 'auth.login.getStarted' | translate }}
             </button>
           }
         </p>
@@ -161,6 +175,7 @@ import { AuthService } from './auth.service';
 export default class LoginComponent {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly localeService = inject(LocaleService);
 
   returnUrl = input<string>('/dashboard');
 
@@ -168,6 +183,10 @@ export default class LoginComponent {
   protected password = signal('');
   protected name = signal('');
   protected isSignUp = signal(false);
+
+  protected isAuthErrorKey(error: string): boolean {
+    return error.startsWith('auth.');
+  }
 
   async onSubmit() {
     let success: boolean;
@@ -177,6 +196,7 @@ export default class LoginComponent {
         email: this.email(),
         password: this.password(),
         name: this.name(),
+        locale: this.localeService.getActiveLocale(),
       });
     } else {
       success = await this.auth.signIn({
