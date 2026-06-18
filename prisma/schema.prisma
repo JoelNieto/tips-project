@@ -13,6 +13,20 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
 model Company {
   id          String   @id @default(uuid())
   name        String
@@ -36,6 +50,7 @@ model Company {
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
   surveyAssignations SurveyAssignation[]
   positions          Position[]
+  employees          Employee[]
 
   @@map("companies")
 }
@@ -49,10 +64,32 @@ model Position {
   parentPositionId String?
   parentPosition   Position?  @relation("PositionHierarchy", fields: [parentPositionId], references: [id], onDelete: Restrict)
   childPositions   Position[] @relation("PositionHierarchy")
+  employees        Employee[]
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
   @@map("positions")
+}
+
+model Employee {
+  id             String         @id @default(uuid())
+  firstName      String
+  lastName       String
+  documentId     String
+  gender         Gender
+  email          String
+  birthdate      DateTime?
+  enrollmentDate DateTime
+  offDate        DateTime?
+  status         EmployeeStatus @default(ACTIVE)
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  positionId     String?
+  position       Position?      @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("employees")
 }
 
 model SurveyType {

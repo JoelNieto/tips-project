@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
+import CompanyEmployeesComponent from './company-employees';
 import CompanyPositionsComponent from './company-positions';
 import { COMPANY_QUERY } from './graphql/companies.graphql';
 
@@ -38,7 +39,7 @@ interface CompanyDetail {
 @Component({
   selector: 'app-company-home',
   standalone: true,
-  imports: [RouterLink, CompanyPositionsComponent],
+  imports: [RouterLink, CompanyPositionsComponent, CompanyEmployeesComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -76,6 +77,18 @@ interface CompanyDetail {
             (click)="activeTab.set('info')"
           >
             Info
+          </button>
+          <button
+            type="button"
+            class="border-b-2 px-1 py-3 text-sm font-medium transition"
+            [class.border-indigo-600]="activeTab() === 'employees'"
+            [class.text-indigo-600]="activeTab() === 'employees'"
+            [class.border-transparent]="activeTab() !== 'employees'"
+            [class.text-slate-500]="activeTab() !== 'employees'"
+            [class.hover:text-slate-700]="activeTab() !== 'employees'"
+            (click)="activeTab.set('employees')"
+          >
+            Employees
           </button>
           <button
             type="button"
@@ -193,6 +206,8 @@ interface CompanyDetail {
             </div>
           </dl>
         </div>
+        } @else if (activeTab() === 'employees') {
+          <app-company-employees [companyId]="id()" />
         } @else {
           <app-company-positions [companyId]="id()" />
         }
@@ -218,7 +233,7 @@ export default class CompanyHomeComponent {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly company = signal<CompanyDetail | null>(null);
-  protected readonly activeTab = signal<'info' | 'hierarchy'>('info');
+  protected readonly activeTab = signal<'info' | 'employees' | 'hierarchy'>('info');
 
   constructor() {
     effect(() => {

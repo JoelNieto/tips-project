@@ -18,6 +18,18 @@ export const dashboardRoutes: Routes = [
     loadComponent: () => import('../companies/company-form'),
   },
   {
+    path: 'companies/:id/employees/new',
+    loadComponent: () => import('../companies/employee-form'),
+  },
+  {
+    path: 'companies/:id/employees/:employeeId/edit',
+    loadComponent: () => import('../companies/employee-form'),
+  },
+  {
+    path: 'companies/:id/employees/:employeeId',
+    loadComponent: () => import('../companies/employee-home'),
+  },
+  {
     path: 'companies/:id',
     loadComponent: () => import('../companies/company-home'),
   },

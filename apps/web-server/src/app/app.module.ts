@@ -10,6 +10,7 @@ import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { auth } from './auth/auth';
 import { CompanyModule } from './company/company.module';
+import { EmployeeModule } from './employee/employee.module';
 import { PositionModule } from './position/position.module';
 import { PrismaModule } from './prisma.module';
 import { SurveyModule } from './survey/survey.module';
@@ -32,6 +33,7 @@ import { SurveyModule } from './survey/survey.module';
     PrismaModule,
     CompanyModule,
     PositionModule,
+    EmployeeModule,
     SurveyModule,
   ],
   controllers: [AppController],
