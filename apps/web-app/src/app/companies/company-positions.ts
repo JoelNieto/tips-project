@@ -19,6 +19,7 @@ import {
   CREATE_POSITION_MUTATION,
   DELETE_POSITION_MUTATION,
   POSITIONS_QUERY,
+  UPDATE_POSITION_MUTATION,
 } from './graphql/positions.graphql';
 
 interface Position {
@@ -48,7 +49,7 @@ interface Position {
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
-          (click)="toggleForm()"
+          (click)="openCreateForm()"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
           Add position
@@ -60,6 +61,10 @@ interface Position {
           (submit)="onSubmit($event)"
           class="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
         >
+          <h4 class="text-base font-medium text-slate-900">
+            {{ isEditMode() ? 'Edit position' : 'Add position' }}
+          </h4>
+
           @if (submitError()) {
             <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
               {{ submitError() }}
@@ -105,7 +110,7 @@ interface Position {
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             >
               <option value="">None (top level)</option>
-              @for (position of positions(); track position.id) {
+              @for (position of parentOptions(); track position.id) {
                 <option [value]="position.id">
                   {{ position.name }} ({{ position.code }})
                 </option>
@@ -126,7 +131,7 @@ interface Position {
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               [disabled]="submitting() || !formName().trim() || !formCode().trim()"
             >
-              {{ submitting() ? 'Saving...' : 'Save position' }}
+              {{ submitting() ? 'Saving...' : isEditMode() ? 'Update position' : 'Save position' }}
             </button>
           </div>
         </form>
@@ -152,6 +157,7 @@ interface Position {
               [node]="node"
               [expandedIds]="expandedIds()"
               (toggleExpanded)="toggleNode($event)"
+              (editPosition)="openEditForm($event)"
               (deletePosition)="confirmDelete($event)"
             />
           }
@@ -177,11 +183,26 @@ export default class CompanyPositionsComponent {
   protected readonly positions = signal<Position[]>([]);
   protected readonly expandedIds = signal<Set<string>>(new Set());
   protected readonly showForm = signal(false);
+  protected readonly editingPositionId = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
   protected readonly formName = signal('');
   protected readonly formCode = signal('');
   protected readonly formParentId = signal('');
+
+  protected readonly isEditMode = computed(() => this.editingPositionId() !== null);
+
+  protected readonly parentOptions = computed(() => {
+    const editingId = this.editingPositionId();
+    if (!editingId) {
+      return this.positions();
+    }
+
+    const excludedIds = collectDescendantIds(editingId, this.positions());
+    excludedIds.add(editingId);
+
+    return this.positions().filter((position) => !excludedIds.has(position.id));
+  });
 
   protected readonly positionTree = computed(() =>
     buildPositionTree(this.positions())
@@ -196,11 +217,24 @@ export default class CompanyPositionsComponent {
     });
   }
 
-  protected toggleForm(): void {
-    this.showForm.update((value) => !value);
-    if (!this.showForm()) {
-      this.resetForm();
+  protected openCreateForm(): void {
+    this.resetForm();
+    this.editingPositionId.set(null);
+    this.showForm.set(true);
+  }
+
+  protected openEditForm(id: string): void {
+    const position = this.positions().find((item) => item.id === id);
+    if (!position) {
+      return;
     }
+
+    this.editingPositionId.set(id);
+    this.formName.set(position.name);
+    this.formCode.set(position.code);
+    this.formParentId.set(position.parentPositionId ?? '');
+    this.submitError.set(null);
+    this.showForm.set(true);
   }
 
   protected cancelForm(): void {
@@ -225,7 +259,8 @@ export default class CompanyPositionsComponent {
 
     const name = this.formName().trim();
     const code = this.formCode().trim();
-    const parentPositionId = this.formParentId() || undefined;
+    const parentPositionId = this.formParentId() || null;
+    const editingId = this.editingPositionId();
 
     if (!name || !code) {
       return;
@@ -233,6 +268,40 @@ export default class CompanyPositionsComponent {
 
     this.submitting.set(true);
     this.submitError.set(null);
+
+    if (editingId) {
+      this.apollo
+        .mutate<{ updatePosition: Position }>({
+          mutation: UPDATE_POSITION_MUTATION,
+          variables: {
+            id: editingId,
+            input: {
+              name,
+              code,
+              parentPositionId,
+            },
+          },
+          refetchQueries: [
+            {
+              query: POSITIONS_QUERY,
+              variables: { companyId: this.companyId() },
+            },
+          ],
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.submitting.set(false);
+            this.showForm.set(false);
+            this.resetForm();
+          },
+          error: (err: Error) => {
+            this.submitting.set(false);
+            this.submitError.set(err.message ?? 'Failed to update position');
+          },
+        });
+      return;
+    }
 
     this.apollo
       .mutate<{ createPosition: Position }>({
@@ -242,7 +311,7 @@ export default class CompanyPositionsComponent {
             name,
             code,
             companyId: this.companyId(),
-            parentPositionId,
+            parentPositionId: parentPositionId ?? undefined,
           },
         },
         refetchQueries: [
@@ -259,7 +328,7 @@ export default class CompanyPositionsComponent {
           this.showForm.set(false);
           this.resetForm();
         },
-        error: (err) => {
+        error: (err: Error) => {
           this.submitting.set(false);
           this.submitError.set(err.message ?? 'Failed to create position');
         },
@@ -333,11 +402,37 @@ export default class CompanyPositionsComponent {
   }
 
   private resetForm(): void {
+    this.editingPositionId.set(null);
     this.formName.set('');
     this.formCode.set('');
     this.formParentId.set('');
     this.submitError.set(null);
   }
+}
+
+function collectDescendantIds(positionId: string, positions: Position[]): Set<string> {
+  const childrenByParent = new Map<string, string[]>();
+
+  for (const position of positions) {
+    if (!position.parentPositionId) {
+      continue;
+    }
+
+    const siblings = childrenByParent.get(position.parentPositionId) ?? [];
+    siblings.push(position.id);
+    childrenByParent.set(position.parentPositionId, siblings);
+  }
+
+  const descendants = new Set<string>();
+  const queue = [...(childrenByParent.get(positionId) ?? [])];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    descendants.add(currentId);
+    queue.push(...(childrenByParent.get(currentId) ?? []));
+  }
+
+  return descendants;
 }
 
 function buildPositionTree(positions: Position[]): PositionNode[] {

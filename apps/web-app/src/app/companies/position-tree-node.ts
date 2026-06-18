@@ -54,6 +54,15 @@ export interface PositionNode {
 
         <button
           type="button"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-indigo-50 hover:text-indigo-600"
+          (click)="editPosition.emit(node().id)"
+          aria-label="Edit position"
+        >
+          <span class="material-symbols-outlined text-[18px]">edit</span>
+        </button>
+
+        <button
+          type="button"
           class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600"
           (click)="deletePosition.emit(node().id)"
           aria-label="Delete position"
@@ -70,6 +79,7 @@ export interface PositionNode {
               [depth]="depth() + 1"
               [expandedIds]="expandedIds()"
               (toggleExpanded)="toggleExpanded.emit($event)"
+              (editPosition)="editPosition.emit($event)"
               (deletePosition)="deletePosition.emit($event)"
             />
           }
@@ -84,6 +94,7 @@ export default class PositionTreeNodeComponent {
   readonly expandedIds = input.required<Set<string>>();
 
   readonly toggleExpanded = output<string>();
+  readonly editPosition = output<string>();
   readonly deletePosition = output<string>();
 
   protected readonly expanded = computed(() =>
