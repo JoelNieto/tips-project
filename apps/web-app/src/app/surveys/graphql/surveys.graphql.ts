@@ -85,12 +85,16 @@ export const SURVEY_QUERY = gql`
             weight
             isReversed
             isMultiAnswer
-            answers {
+            answerSet {
               id
-              text
-              sortOrder
-              value
-              reverseValue
+              name
+              answers {
+                id
+                text
+                sortOrder
+                value
+                reverseValue
+              }
             }
           }
         }
@@ -134,12 +138,16 @@ export const SURVEY_QUERY = gql`
               weight
               isReversed
               isMultiAnswer
-              answers {
+              answerSet {
                 id
-                text
-                sortOrder
-                value
-                reverseValue
+                name
+                answers {
+                  id
+                  text
+                  sortOrder
+                  value
+                  reverseValue
+                }
               }
             }
           }

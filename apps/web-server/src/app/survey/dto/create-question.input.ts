@@ -1,6 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
-  IsArray,
   IsBoolean,
   IsNumber,
   IsOptional,
@@ -10,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AnswerNestedInput } from './answer-nested.input';
+import { NewAnswerSetNestedInput } from './new-answer-set-nested.input';
 
 @InputType()
 export class CreateQuestionInput {
@@ -40,10 +39,14 @@ export class CreateQuestionInput {
   @IsBoolean()
   isMultiAnswer?: boolean;
 
-  @Field(() => [AnswerNestedInput], { nullable: true })
+  @Field({ nullable: true })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AnswerNestedInput)
-  answers?: AnswerNestedInput[];
+  @IsString()
+  answerSetId?: string;
+
+  @Field(() => NewAnswerSetNestedInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => NewAnswerSetNestedInput)
+  newAnswerSet?: NewAnswerSetNestedInput;
 }

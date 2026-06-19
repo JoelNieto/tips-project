@@ -50,6 +50,14 @@ export const dashboardRoutes: Routes = [
     loadComponent: () => import('../question-bank/question-form'),
   },
   {
+    path: 'answer-sets',
+    loadComponent: () => import('../answer-sets/answer-set-list'),
+  },
+  {
+    path: 'answer-sets/:id',
+    loadComponent: () => import('../answer-sets/answer-set-form'),
+  },
+  {
     path: 'surveys',
     loadComponent: () => import('../surveys/surveys-list'),
   },

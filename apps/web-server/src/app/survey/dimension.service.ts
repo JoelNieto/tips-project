@@ -19,7 +19,7 @@ export class DimensionService {
         mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
         dimensionQuestions: {
           include: {
-            question: { include: { answers: { orderBy: { sortOrder: 'asc' } } } },
+            question: { include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } } },
             answerOverrides: true,
           },
           orderBy: { order: 'asc' },
@@ -30,7 +30,7 @@ export class DimensionService {
             dimensionQuestions: {
               include: {
                 question: {
-                  include: { answers: { orderBy: { sortOrder: 'asc' } } },
+                  include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
                 },
                 answerOverrides: true,
               },
@@ -52,7 +52,7 @@ export class DimensionService {
         mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
         dimensionQuestions: {
           include: {
-            question: { include: { answers: { orderBy: { sortOrder: 'asc' } } } },
+            question: { include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } } },
             answerOverrides: true,
           },
           orderBy: { order: 'asc' },
@@ -63,7 +63,7 @@ export class DimensionService {
             dimensionQuestions: {
               include: {
                 question: {
-                  include: { answers: { orderBy: { sortOrder: 'asc' } } },
+                  include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
                 },
                 answerOverrides: true,
               },

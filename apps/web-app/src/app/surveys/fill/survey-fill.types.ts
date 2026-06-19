@@ -14,6 +14,12 @@ export interface FillAnswerOverride {
   answer: FillAnswerOption;
 }
 
+export interface FillAnswerSet {
+  id: string;
+  name: string;
+  answers: FillAnswerOption[];
+}
+
 export interface FillBankQuestion {
   id: string;
   title: string;
@@ -21,7 +27,7 @@ export interface FillBankQuestion {
   weight?: number | null;
   isReversed: boolean;
   isMultiAnswer: boolean;
-  answers: FillAnswerOption[];
+  answerSet?: FillAnswerSet | null;
 }
 
 export interface FillDimensionQuestion {

@@ -1,16 +1,28 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import type { Question, Prisma, User } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
+import { AnswerSetService, answerSetInclude } from './answer-set.service';
 import type { CreateQuestionInput } from './dto/create-question.input';
 import type { UpdateQuestionInput } from './dto/update-question.input';
 
+const questionInclude = {
+  createdBy: true,
+  answerSet: {
+    include: answerSetInclude,
+  },
+} satisfies Prisma.QuestionInclude;
+
 @Injectable()
 export class QuestionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly answerSetService: AnswerSetService
+  ) {}
 
   async findAll(createdById?: string): Promise<Question[]> {
     const where: Prisma.QuestionWhereInput = {};
@@ -19,10 +31,7 @@ export class QuestionService {
     }
     return this.prisma.question.findMany({
       where,
-      include: {
-        createdBy: true,
-        answers: { orderBy: { sortOrder: 'asc' } },
-      },
+      include: questionInclude,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -30,14 +39,13 @@ export class QuestionService {
   async findOne(id: string): Promise<Question & { createdBy: User } | null> {
     return this.prisma.question.findUnique({
       where: { id },
-      include: {
-        createdBy: true,
-        answers: { orderBy: { sortOrder: 'asc' } },
-      },
+      include: questionInclude,
     });
   }
 
   async create(input: CreateQuestionInput, createdById: string): Promise<Question> {
+    const answerSetId = await this.resolveAnswerSetId(input, createdById);
+
     return this.prisma.question.create({
       data: {
         title: input.title,
@@ -46,21 +54,9 @@ export class QuestionService {
         isReversed: input.isReversed ?? false,
         isMultiAnswer: input.isMultiAnswer ?? false,
         createdById,
-        answers: input.answers?.length
-          ? {
-              create: input.answers.map((a, i) => ({
-                text: a.text,
-                sortOrder: a.sortOrder ?? i,
-                value: a.value,
-                reverseValue: a.reverseValue ?? undefined,
-              })),
-            }
-          : undefined,
+        answerSetId: answerSetId ?? undefined,
       },
-      include: {
-        createdBy: true,
-        answers: { orderBy: { sortOrder: 'asc' } },
-      },
+      include: questionInclude,
     });
   }
 
@@ -78,6 +74,33 @@ export class QuestionService {
     if (existing.createdById !== userId) {
       throw new ForbiddenException('Only the creator can update this question');
     }
+
+    let answerSetId: string | null | undefined;
+    if (input.newAnswerSet) {
+      if (input.answerSetId !== undefined) {
+        throw new BadRequestException(
+          'Cannot specify both answerSetId and newAnswerSet'
+        );
+      }
+      const created = await this.answerSetService.createFromNested(
+        input.newAnswerSet,
+        userId
+      );
+      answerSetId = created.id;
+    } else if (input.answerSetId !== undefined) {
+      if (input.answerSetId) {
+        const answerSet = await this.prisma.answerSet.findUnique({
+          where: { id: input.answerSetId },
+        });
+        if (!answerSet) {
+          throw new NotFoundException(
+            `Answer set with id ${input.answerSetId} not found`
+          );
+        }
+      }
+      answerSetId = input.answerSetId;
+    }
+
     return this.prisma.question.update({
       where: { id },
       data: {
@@ -88,11 +111,9 @@ export class QuestionService {
         ...(input.isMultiAnswer !== undefined && {
           isMultiAnswer: input.isMultiAnswer,
         }),
+        ...(answerSetId !== undefined && { answerSetId }),
       },
-      include: {
-        createdBy: true,
-        answers: { orderBy: { sortOrder: 'asc' } },
-      },
+      include: questionInclude,
     });
   }
 
@@ -128,5 +149,38 @@ export class QuestionService {
       dimensionId: uq.dimension.id,
       dimensionTitle: uq.dimension.title,
     }));
+  }
+
+  private async resolveAnswerSetId(
+    input: CreateQuestionInput,
+    createdById: string
+  ): Promise<string | undefined> {
+    if (input.answerSetId && input.newAnswerSet) {
+      throw new BadRequestException(
+        'Cannot specify both answerSetId and newAnswerSet'
+      );
+    }
+
+    if (input.newAnswerSet) {
+      const created = await this.answerSetService.createFromNested(
+        input.newAnswerSet,
+        createdById
+      );
+      return created.id;
+    }
+
+    if (input.answerSetId) {
+      const answerSet = await this.prisma.answerSet.findUnique({
+        where: { id: input.answerSetId },
+      });
+      if (!answerSet) {
+        throw new NotFoundException(
+          `Answer set with id ${input.answerSetId} not found`
+        );
+      }
+      return input.answerSetId;
+    }
+
+    return undefined;
   }
 }

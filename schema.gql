@@ -28,6 +28,16 @@ input AnswerNestedInput {
   value: Float!
 }
 
+type AnswerSetEntity {
+  answers: [AnswerEntity!]!
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  description: String
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
 type CompanyEntity {
   city: String
   country: String
@@ -51,11 +61,17 @@ type CompanyEntity {
 }
 
 input CreateAnswerInput {
-  questionId: String!
+  answerSetId: String!
   reverseValue: Float
   sortOrder: Float
   text: String!
   value: Float!
+}
+
+input CreateAnswerSetInput {
+  answers: [AnswerNestedInput!]
+  description: String
+  name: String!
 }
 
 input CreateCompanyInput {
@@ -116,9 +132,10 @@ input CreatePositionInput {
 }
 
 input CreateQuestionInput {
-  answers: [AnswerNestedInput!]
+  answerSetId: String
   isMultiAnswer: Boolean = false
   isReversed: Boolean = false
+  newAnswerSet: NewAnswerSetNestedInput
   text: String!
   title: String!
   weight: Float
@@ -244,6 +261,7 @@ type MainQuestionAnswerEntity {
 type Mutation {
   addQuestionToDimension(input: AddQuestionToDimensionInput!): DimensionQuestionEntity!
   createAnswer(input: CreateAnswerInput!): AnswerEntity!
+  createAnswerSet(input: CreateAnswerSetInput!): AnswerSetEntity!
   createCompany(input: CreateCompanyInput!): CompanyEntity!
   createDimension(input: CreateDimensionInput!): DimensionEntity!
   createEmployee(input: CreateEmployeeInput!): EmployeeEntity!
@@ -254,6 +272,7 @@ type Mutation {
   createSurveyAssignation(input: CreateSurveyAssignationInput!): SurveyAssignationEntity!
   createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
   deleteAnswer(id: ID!): AnswerEntity!
+  deleteAnswerSet(id: ID!): AnswerSetEntity!
   deleteCompany(id: ID!): CompanyEntity!
   deleteDimension(id: ID!): DimensionEntity!
   deleteEmployee(id: ID!): EmployeeEntity!
@@ -265,6 +284,7 @@ type Mutation {
   deleteSurveyType(id: ID!): SurveyTypeEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
   updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
+  updateAnswerSet(id: ID!, input: UpdateAnswerSetInput!): AnswerSetEntity!
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
   updateDimension(id: ID!, input: UpdateDimensionInput!): DimensionEntity!
   updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
@@ -274,6 +294,12 @@ type Mutation {
   updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
   updateSurvey(id: ID!, input: UpdateSurveyInput!): SurveyEntity!
   updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
+}
+
+input NewAnswerSetNestedInput {
+  answers: [AnswerNestedInput!]!
+  description: String
+  name: String!
 }
 
 type PositionEntity {
@@ -287,6 +313,8 @@ type PositionEntity {
 }
 
 type Query {
+  answerSet(id: ID!): AnswerSetEntity
+  answerSets: [AnswerSetEntity!]!
   companies: [CompanyEntity!]!
   company(id: ID!): CompanyEntity
   dimension(id: ID!): DimensionEntity
@@ -309,7 +337,7 @@ type Query {
 }
 
 type QuestionEntity {
-  answers: [AnswerEntity!]!
+  answerSet: AnswerSetEntity
   createdAt: DateTime!
   createdBy: UserEntity!
   id: ID!
@@ -404,6 +432,12 @@ input UpdateAnswerInput {
   value: Float
 }
 
+input UpdateAnswerSetInput {
+  answers: [AnswerNestedInput!]
+  description: String
+  name: String
+}
+
 input UpdateCompanyInput {
   city: String
   country: String
@@ -465,8 +499,10 @@ input UpdatePositionInput {
 }
 
 input UpdateQuestionInput {
+  answerSetId: String
   isMultiAnswer: Boolean
   isReversed: Boolean
+  newAnswerSet: NewAnswerSetNestedInput
   text: String
   title: String
   weight: Float

@@ -1,26 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserEntity } from '../../company/dto/user.entity';
-import { AnswerSetEntity } from './answer-set.entity';
+import { AnswerEntity } from './answer.entity';
 
 @ObjectType()
-export class QuestionEntity {
+export class AnswerSetEntity {
   @Field(() => ID)
   id!: string;
 
   @Field()
-  title!: string;
-
-  @Field()
-  text!: string;
+  name!: string;
 
   @Field({ nullable: true })
-  weight?: number | null;
-
-  @Field()
-  isReversed!: boolean;
-
-  @Field()
-  isMultiAnswer!: boolean;
+  description?: string | null;
 
   @Field()
   createdAt!: Date;
@@ -31,6 +22,6 @@ export class QuestionEntity {
   @Field(() => UserEntity)
   createdBy!: UserEntity;
 
-  @Field(() => AnswerSetEntity, { nullable: true })
-  answerSet?: AnswerSetEntity | null;
+  @Field(() => [AnswerEntity])
+  answers!: AnswerEntity[];
 }

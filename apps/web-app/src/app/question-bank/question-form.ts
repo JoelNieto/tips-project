@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -13,23 +14,28 @@ import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import {
+  ANSWER_SETS_QUERY,
   QUESTIONS_QUERY,
   QUESTION_QUERY,
   SURVEYS_USING_QUESTION_QUERY,
   CREATE_QUESTION_MUTATION,
   DELETE_QUESTION_MUTATION,
   UPDATE_QUESTION_MUTATION,
-  CREATE_ANSWER_MUTATION,
-  UPDATE_ANSWER_MUTATION,
-  DELETE_ANSWER_MUTATION,
 } from './graphql/questions.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 
+type AnswerSetMode = 'none' | 'existing' | 'new';
+
 interface AnswerRow {
-  id?: string;
   text: string;
   value: string;
   reverseValue: string;
+}
+
+interface AnswerSetOption {
+  id: string;
+  name: string;
+  answers: AnswerRow[];
 }
 
 interface QuestionFormModel {
@@ -38,6 +44,9 @@ interface QuestionFormModel {
   weight: string;
   isReversed: boolean;
   isMultiAnswer: boolean;
+  answerSetMode: AnswerSetMode;
+  selectedAnswerSetId: string;
+  newAnswerSetName: string;
   answers: AnswerRow[];
 }
 
@@ -54,6 +63,9 @@ const emptyModel: QuestionFormModel = {
   weight: '',
   isReversed: false,
   isMultiAnswer: false,
+  answerSetMode: 'none',
+  selectedAnswerSetId: '',
+  newAnswerSetName: '',
   answers: [],
 };
 
@@ -102,14 +114,10 @@ const emptyModel: QuestionFormModel = {
 
           @if (isEditMode() && surveyUsages().length > 0) {
             <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <p class="text-sm font-medium text-slate-700">
-                Used in:
-              </p>
+              <p class="text-sm font-medium text-slate-700">Used in:</p>
               <ul class="mt-2 space-y-1 text-sm text-slate-600">
                 @for (u of surveyUsages(); track u.surveyId + u.dimensionId) {
-                  <li>
-                    {{ u.surveyTitle }} ({{ u.dimensionTitle }})
-                  </li>
+                  <li>{{ u.surveyTitle }} ({{ u.dimensionTitle }})</li>
                 }
               </ul>
             </div>
@@ -184,65 +192,164 @@ const emptyModel: QuestionFormModel = {
             </div>
           </div>
 
-          <div class="border-t border-slate-200 pt-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-slate-900">Answers</h3>
-              <button
-                type="button"
-                (click)="addAnswer()"
-                class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-              >
-                + Add answer
-              </button>
+          <div class="border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-lg font-medium text-slate-900">Answer set</h3>
+            <div class="flex flex-wrap gap-4">
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="radio"
+                  name="answerSetMode"
+                  value="none"
+                  [checked]="questionModel().answerSetMode === 'none'"
+                  (change)="setAnswerSetMode('none')"
+                  class="text-indigo-600 focus:ring-indigo-500"
+                />
+                No answers
+              </label>
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="radio"
+                  name="answerSetMode"
+                  value="existing"
+                  [checked]="questionModel().answerSetMode === 'existing'"
+                  (change)="setAnswerSetMode('existing')"
+                  class="text-indigo-600 focus:ring-indigo-500"
+                />
+                Use existing answer set
+              </label>
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="radio"
+                  name="answerSetMode"
+                  value="new"
+                  [checked]="questionModel().answerSetMode === 'new'"
+                  (change)="setAnswerSetMode('new')"
+                  class="text-indigo-600 focus:ring-indigo-500"
+                />
+                Create new answer set
+              </label>
             </div>
-            @if (questionModel().answers.length === 0) {
-              <p class="text-sm text-slate-500">No answer options yet. Add at least one for respondents to choose from.</p>
-            }
-            <div class="space-y-4">
-              @for (a of questionModel().answers; track $index; let i = $index) {
-                <div class="flex gap-4 items-start rounded-lg border border-slate-200 p-4">
-                  <div class="flex-1 grid gap-4 sm:grid-cols-3">
-                    <div class="sm:col-span-2">
-                      <label class="block text-xs font-medium text-slate-500">Text</label>
-                      <input
-                        type="text"
-                        [value]="a.text"
-                        (input)="updateAnswer(i, 'text', $event)"
-                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-slate-500">Value</label>
-                      <input
-                        type="number"
-                        step="any"
-                        [value]="a.value"
-                        (input)="updateAnswer(i, 'value', $event)"
-                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-slate-500">Reverse value</label>
-                      <input
-                        type="number"
-                        step="any"
-                        [value]="a.reverseValue"
-                        (input)="updateAnswer(i, 'reverseValue', $event)"
-                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    (click)="removeAnswer(i)"
-                    class="text-red-600 hover:text-red-800 p-1"
-                    aria-label="Remove answer"
-                  >
-                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                  </button>
+
+            @if (questionModel().answerSetMode === 'existing') {
+              <div>
+                <label
+                  for="answerSetSelect"
+                  class="block text-sm font-medium text-slate-700"
+                  >Answer set</label
+                >
+                <select
+                  id="answerSetSelect"
+                  [value]="questionModel().selectedAnswerSetId"
+                  (change)="onAnswerSetSelect($event)"
+                  class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                >
+                  <option value="">Select an answer set...</option>
+                  @for (set of answerSets(); track set.id) {
+                    <option [value]="set.id">
+                      {{ set.name }} ({{ set.answers.length }} answers)
+                    </option>
+                  }
+                </select>
+              </div>
+              @if (selectedAnswerSetPreview().length > 0) {
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p class="text-sm font-medium text-slate-700 mb-2">Preview</p>
+                  <ul class="space-y-1 text-sm text-slate-600">
+                    @for (a of selectedAnswerSetPreview(); track $index) {
+                      <li>{{ a.text }} (value: {{ a.value }})</li>
+                    }
+                  </ul>
                 </div>
               }
-            </div>
+            }
+
+            @if (questionModel().answerSetMode === 'new') {
+              <div>
+                <label
+                  for="newAnswerSetName"
+                  class="block text-sm font-medium text-slate-700"
+                  >Answer set name</label
+                >
+                <input
+                  id="newAnswerSetName"
+                  type="text"
+                  [value]="questionModel().newAnswerSetName"
+                  (input)="updateNewAnswerSetName($event)"
+                  placeholder="Defaults to question title"
+                  class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div class="flex items-center justify-between">
+                <p class="text-sm text-slate-600">Answer options</p>
+                <button
+                  type="button"
+                  (click)="addAnswer()"
+                  class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                >
+                  + Add answer
+                </button>
+              </div>
+              @if (questionModel().answers.length === 0) {
+                <p class="text-sm text-slate-500">
+                  Add at least one answer option for respondents to choose from.
+                </p>
+              }
+              <div class="space-y-4">
+                @for (a of questionModel().answers; track $index; let i = $index) {
+                  <div
+                    class="flex gap-4 items-start rounded-lg border border-slate-200 p-4"
+                  >
+                    <div class="flex-1 grid gap-4 sm:grid-cols-3">
+                      <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-500"
+                          >Text</label
+                        >
+                        <input
+                          type="text"
+                          [value]="a.text"
+                          (input)="updateAnswer(i, 'text', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-500"
+                          >Value</label
+                        >
+                        <input
+                          type="number"
+                          step="any"
+                          [value]="a.value"
+                          (input)="updateAnswer(i, 'value', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-slate-500"
+                          >Reverse value</label
+                        >
+                        <input
+                          type="number"
+                          step="any"
+                          [value]="a.reverseValue"
+                          (input)="updateAnswer(i, 'reverseValue', $event)"
+                          class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="removeAnswer(i)"
+                      class="text-red-600 hover:text-red-800 p-1"
+                      aria-label="Remove answer"
+                    >
+                      <span class="material-symbols-outlined text-[20px]"
+                        >delete</span
+                      >
+                    </button>
+                  </div>
+                }
+              </div>
+            }
           </div>
 
           <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6">
@@ -289,8 +396,14 @@ export default class QuestionFormComponent {
   readonly id = input<string | undefined>(undefined);
 
   protected readonly questionModel = signal<QuestionFormModel>({ ...emptyModel });
+  protected readonly answerSets = signal<AnswerSetOption[]>([]);
   protected readonly surveyUsages = signal<SurveyUsage[]>([]);
-  private readonly originalAnswerIds = signal<Set<string>>(new Set());
+
+  protected readonly selectedAnswerSetPreview = computed(() => {
+    const selectedId = this.questionModel().selectedAnswerSetId;
+    if (!selectedId) return [];
+    return this.answerSets().find((s) => s.id === selectedId)?.answers ?? [];
+  });
 
   protected readonly questionForm = form(this.questionModel, (schemaPath) => {
     required(schemaPath.title, { message: 'Title is required' });
@@ -302,22 +415,49 @@ export default class QuestionFormComponent {
   protected readonly submitError = signal<string | null>(null);
 
   protected readonly isEditMode = () => {
-    const id = this.id();
-    return !!id && id !== 'new';
+    const questionId = this.id();
+    return !!questionId && questionId !== 'new';
   };
 
   constructor() {
+    this.loadAnswerSets();
+
     effect(() => {
       const questionId = this.id();
       if (questionId && questionId !== 'new') {
         this.loadQuestion(questionId);
       } else {
         this.loading.set(false);
-        this.questionModel.set({ ...emptyModel, answers: [] });
-        this.originalAnswerIds.set(new Set());
+        this.questionModel.set({ ...emptyModel });
         this.surveyUsages.set([]);
       }
     });
+  }
+
+  private loadAnswerSets(): void {
+    this.apollo
+      .watchQuery<{ answerSets: AnswerSetOption[] }>({
+        query: ANSWER_SETS_QUERY,
+      })
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          if (result.data?.answerSets) {
+            this.answerSets.set(
+              result.data.answerSets.map((set) => ({
+                id: set.id ?? '',
+                name: set.name ?? '',
+                answers: (set.answers ?? []).map((a) => ({
+                  text: a.text ?? '',
+                  value: a.value != null ? String(a.value) : '0',
+                  reverseValue:
+                    a.reverseValue != null ? String(a.reverseValue) : '',
+                })),
+              }))
+            );
+          }
+        },
+      });
   }
 
   private loadQuestion(id: string): void {
@@ -333,26 +473,31 @@ export default class QuestionFormComponent {
           this.loading.set(result.loading);
           const q = result.data?.question;
           if (q && typeof q === 'object') {
-            const answers = (q['answers'] as {
+            const answerSet = q['answerSet'] as {
               id: string;
-              text: string;
-              value: number;
-              reverseValue?: number | null;
-            }[]) ?? [];
+              name: string;
+              answers: {
+                text: string;
+                value: number;
+                reverseValue?: number | null;
+              }[];
+            } | null;
+            const answers = answerSet?.answers ?? [];
             this.questionModel.set({
               title: (q['title'] as string) ?? '',
               text: (q['text'] as string) ?? '',
               weight: (q['weight'] as number) != null ? String(q['weight']) : '',
               isReversed: (q['isReversed'] as boolean) ?? false,
               isMultiAnswer: (q['isMultiAnswer'] as boolean) ?? false,
+              answerSetMode: answerSet ? 'existing' : 'none',
+              selectedAnswerSetId: answerSet?.id ?? '',
+              newAnswerSetName: answerSet?.name ?? '',
               answers: answers.map((a) => ({
-                id: a.id,
                 text: a.text,
-                value: String(a.value),
+                value: a.value != null ? String(a.value) : '0',
                 reverseValue: a.reverseValue != null ? String(a.reverseValue) : '',
               })),
             });
-            this.originalAnswerIds.set(new Set(answers.map((a) => a.id)));
           }
         },
         error: (err) => {
@@ -375,6 +520,29 @@ export default class QuestionFormComponent {
           }
         },
       });
+  }
+
+  protected setAnswerSetMode(mode: AnswerSetMode): void {
+    this.questionModel.update((m) => {
+      const next = { ...m, answerSetMode: mode };
+      if (mode === 'new' && !next.newAnswerSetName && next.title) {
+        next.newAnswerSetName = next.title;
+      }
+      if (mode === 'new' && next.answers.length === 0) {
+        next.answers = [{ text: '', value: '0', reverseValue: '0' }];
+      }
+      return next;
+    });
+  }
+
+  protected onAnswerSetSelect(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.questionModel.update((m) => ({ ...m, selectedAnswerSetId: value }));
+  }
+
+  protected updateNewAnswerSetName(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.questionModel.update((m) => ({ ...m, newAnswerSetName: value }));
   }
 
   protected addAnswer(): void {
@@ -411,6 +579,15 @@ export default class QuestionFormComponent {
     if (!this.questionForm().valid()) return;
 
     const value = this.questionModel();
+    let answerSetInput: Record<string, unknown>;
+    try {
+      answerSetInput = this.buildAnswerSetInput(value);
+    } catch (err) {
+      this.submitError.set(
+        err instanceof Error ? err.message : 'Invalid answer set configuration'
+      );
+      return;
+    }
 
     if (this.isEditMode()) {
       const input = {
@@ -419,23 +596,19 @@ export default class QuestionFormComponent {
         weight: value.weight ? parseFloat(value.weight) : undefined,
         isReversed: value.isReversed,
         isMultiAnswer: value.isMultiAnswer,
+        ...answerSetInput,
       };
       this.submitting.set(true);
       this.apollo
         .mutate({
           mutation: UPDATE_QUESTION_MUTATION,
           variables: { id: this.id(), input },
-          refetchQueries: [{ query: QUESTIONS_QUERY }],
+          refetchQueries: [{ query: QUESTIONS_QUERY }, { query: ANSWER_SETS_QUERY }],
         })
         .subscribe({
           next: () => {
-            this.syncAnswers(this.id()!, () => {
-              this.submitting.set(false);
-              this.router.navigate(['/dashboard/question-bank']);
-            }, (message) => {
-              this.submitting.set(false);
-              this.submitError.set(message);
-            });
+            this.submitting.set(false);
+            this.router.navigate(['/dashboard/question-bank']);
           },
           error: (err) => {
             this.submitting.set(false);
@@ -443,30 +616,20 @@ export default class QuestionFormComponent {
           },
         });
     } else {
-      const answers = value.answers
-        .filter((a) => a.text.trim())
-        .map((a, i) => ({
-          text: a.text.trim(),
-          sortOrder: i,
-          value: parseFloat(a.value) || 0,
-          reverseValue: a.reverseValue
-            ? parseFloat(a.reverseValue)
-            : undefined,
-        }));
       const input = {
         title: value.title,
         text: value.text,
         weight: value.weight ? parseFloat(value.weight) : undefined,
         isReversed: value.isReversed,
         isMultiAnswer: value.isMultiAnswer,
-        answers: answers.length ? answers : undefined,
+        ...answerSetInput,
       };
       this.submitting.set(true);
       this.apollo
         .mutate({
           mutation: CREATE_QUESTION_MUTATION,
           variables: { input },
-          refetchQueries: [{ query: QUESTIONS_QUERY }],
+          refetchQueries: [{ query: QUESTIONS_QUERY }, { query: ANSWER_SETS_QUERY }],
         })
         .subscribe({
           next: () => {
@@ -481,87 +644,39 @@ export default class QuestionFormComponent {
     }
   }
 
-  private syncAnswers(
-    questionId: string,
-    onDone: () => void,
-    onError: (message: string) => void
-  ): void {
-    const answers = this.questionModel()
-      .answers.filter((a) => a.text.trim())
+  private buildAnswerSetInput(
+    value: QuestionFormModel
+  ): Record<string, unknown> {
+    if (value.answerSetMode === 'none') {
+      return this.isEditMode() ? { answerSetId: null } : {};
+    }
+
+    if (value.answerSetMode === 'existing') {
+      if (!value.selectedAnswerSetId) {
+        throw new Error('Please select an answer set');
+      }
+      return { answerSetId: value.selectedAnswerSetId };
+    }
+
+    const answers = value.answers
+      .filter((a) => a.text.trim())
       .map((a, i) => ({
-        ...a,
         text: a.text.trim(),
         sortOrder: i,
+        value: parseFloat(a.value) || 0,
+        reverseValue: a.reverseValue ? parseFloat(a.reverseValue) : undefined,
       }));
-    const originalIds = this.originalAnswerIds();
-    const currentIds = new Set(answers.filter((a) => a.id).map((a) => a.id!));
-    const ops: Array<(done: () => void) => void> = [];
 
-    for (const id of originalIds) {
-      if (!currentIds.has(id)) {
-        ops.push((done) => {
-          this.apollo
-            .mutate({
-              mutation: DELETE_ANSWER_MUTATION,
-              variables: { id },
-            })
-            .subscribe({
-              next: () => done(),
-              error: (err) => onError(err.message ?? 'Failed to delete answer'),
-            });
-        });
-      }
+    if (answers.length === 0) {
+      throw new Error('Add at least one answer to the new answer set');
     }
 
-    for (const answer of answers) {
-      const input = {
-        text: answer.text,
-        sortOrder: answer.sortOrder,
-        value: parseFloat(answer.value) || 0,
-        reverseValue: answer.reverseValue ? parseFloat(answer.reverseValue) : undefined,
-      };
-
-      if (answer.id) {
-        ops.push((done) => {
-          this.apollo
-            .mutate({
-              mutation: UPDATE_ANSWER_MUTATION,
-              variables: { id: answer.id, input },
-            })
-            .subscribe({
-              next: () => done(),
-              error: (err) => onError(err.message ?? 'Failed to update answer'),
-            });
-        });
-      } else {
-        ops.push((done) => {
-          this.apollo
-            .mutate({
-              mutation: CREATE_ANSWER_MUTATION,
-              variables: { input: { questionId, ...input } },
-            })
-            .subscribe({
-              next: () => done(),
-              error: (err) => onError(err.message ?? 'Failed to create answer'),
-            });
-        });
-      }
-    }
-
-    if (ops.length === 0) {
-      onDone();
-      return;
-    }
-
-    let completed = 0;
-    const checkDone = (): void => {
-      completed++;
-      if (completed >= ops.length) {
-        onDone();
-      }
+    return {
+      newAnswerSet: {
+        name: value.newAnswerSetName.trim() || value.title.trim(),
+        answers,
+      },
     };
-
-    ops.forEach((op) => op(checkDone));
   }
 
   protected onDelete(): void {

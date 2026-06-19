@@ -6,7 +6,10 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { NewAnswerSetNestedInput } from './new-answer-set-nested.input';
 
 @InputType()
 export class UpdateQuestionInput {
@@ -37,4 +40,15 @@ export class UpdateQuestionInput {
   @IsOptional()
   @IsBoolean()
   isMultiAnswer?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  answerSetId?: string | null;
+
+  @Field(() => NewAnswerSetNestedInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => NewAnswerSetNestedInput)
+  newAnswerSet?: NewAnswerSetNestedInput;
 }

@@ -50,7 +50,7 @@ export class DimensionQuestionService {
         isMultiAnswerOverride: input.isMultiAnswerOverride ?? undefined,
       },
       include: {
-        question: { include: { answers: true } },
+        question: { include: { answerSet: { include: { answers: true } } } },
         dimension: true,
       },
     });
@@ -64,7 +64,7 @@ export class DimensionQuestionService {
       where: { id: dimensionQuestionId },
       include: {
         dimension: { include: { survey: { select: { createdById: true } } } },
-        question: { include: { answers: true } },
+        question: { include: { answerSet: { include: { answers: true } } } },
         answerOverrides: true,
       },
     });
@@ -119,7 +119,7 @@ export class DimensionQuestionService {
         }),
       },
       include: {
-        question: { include: { answers: true } },
+        question: { include: { answerSet: { include: { answers: true } } } },
         answerOverrides: true,
       },
     });

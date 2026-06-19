@@ -668,14 +668,19 @@ export default class CategoryFormDialogComponent {
           value: parseFloat(a.value) || 0,
           reverseValue: a.reverseValue ? parseFloat(a.reverseValue) : undefined,
         }));
-      const input = {
+      const input: Record<string, unknown> = {
         title: q.model.title,
         text: q.model.text,
         weight: q.model.weight ? parseFloat(q.model.weight) : undefined,
         isReversed: q.model.isReversed,
         isMultiAnswer: q.model.isMultiAnswer,
-        answers: answers.length ? answers : undefined,
       };
+      if (answers.length) {
+        input['newAnswerSet'] = {
+          name: q.model.title.trim(),
+          answers,
+        };
+      }
       this.apollo
         .mutate<{ createQuestion: { id: string } }>({
           mutation: CREATE_QUESTION_MUTATION,

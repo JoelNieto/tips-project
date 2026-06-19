@@ -102,6 +102,7 @@ export default class DashboardShellComponent {
     { path: '/dashboard/companies', labelKey: 'nav.companies', exact: false, icon: 'business' },
     { path: '/dashboard/survey-types', labelKey: 'nav.surveyTypes', exact: false, icon: 'poll' },
     { path: '/dashboard/question-bank', labelKey: 'nav.questionBank', exact: false, icon: 'quiz' },
+    { path: '/dashboard/answer-sets', labelKey: 'nav.answerSets', exact: false, icon: 'list_alt' },
     { path: '/dashboard/surveys', labelKey: 'nav.surveys', exact: false, icon: 'poll' },
     { path: '/dashboard/tips', labelKey: 'nav.tips', exact: false, icon: 'payments' },
     { path: '/dashboard/reports', labelKey: 'nav.reports', exact: false, icon: 'bar_chart' },

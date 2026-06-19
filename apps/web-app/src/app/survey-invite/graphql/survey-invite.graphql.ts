@@ -65,12 +65,16 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
               weight
               isReversed
               isMultiAnswer
-              answers {
+              answerSet {
                 id
-                text
-                sortOrder
-                value
-                reverseValue
+                name
+                answers {
+                  id
+                  text
+                  sortOrder
+                  value
+                  reverseValue
+                }
               }
             }
           }
@@ -114,12 +118,16 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
                 weight
                 isReversed
                 isMultiAnswer
-                answers {
+                answerSet {
                   id
-                  text
-                  sortOrder
-                  value
-                  reverseValue
+                  name
+                  answers {
+                    id
+                    text
+                    sortOrder
+                    value
+                    reverseValue
+                  }
                 }
               }
             }

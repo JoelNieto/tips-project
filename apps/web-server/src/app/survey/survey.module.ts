@@ -13,6 +13,8 @@ import { MainQuestionAnswerResolver } from './main-question-answer.resolver';
 import { MainQuestionAnswerService } from './main-question-answer.service';
 import { AnswerResolver } from './answer.resolver';
 import { AnswerService } from './answer.service';
+import { AnswerSetResolver } from './answer-set.resolver';
+import { AnswerSetService } from './answer-set.service';
 import { SurveyAssignationResolver } from './survey-assignation.resolver';
 import { SurveyAssignationService } from './survey-assignation.service';
 import { PrismaModule } from '../prisma.module';
@@ -34,6 +36,8 @@ import { PrismaModule } from '../prisma.module';
     MainQuestionAnswerService,
     AnswerResolver,
     AnswerService,
+    AnswerSetResolver,
+    AnswerSetService,
     SurveyAssignationResolver,
     SurveyAssignationService,
   ],
@@ -45,6 +49,7 @@ import { PrismaModule } from '../prisma.module';
     DimensionQuestionService,
     MainQuestionAnswerService,
     AnswerService,
+    AnswerSetService,
     SurveyAssignationService,
   ],
 })

@@ -28,7 +28,7 @@ export function resolveAnswerOptions(dq: FillDimensionQuestion): FillAnswerOptio
       }))
       .sort(compareBySortOrder);
   }
-  return [...(dq.question.answers ?? [])].sort(compareBySortOrder);
+  return [...(dq.question.answerSet?.answers ?? [])].sort(compareBySortOrder);
 }
 
 export function orderAnswerOptions(

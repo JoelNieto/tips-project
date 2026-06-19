@@ -1,4 +1,11 @@
 import { gql } from 'apollo-angular';
+import {
+  ANSWER_SET_FRAGMENT,
+  ANSWER_SETS_QUERY,
+  ANSWER_SET_QUERY,
+} from '../../answer-sets/graphql/answer-sets.graphql';
+
+export { ANSWER_SETS_QUERY, ANSWER_SET_QUERY };
 
 export const QUESTIONS_QUERY = gql`
   query Questions {
@@ -16,12 +23,8 @@ export const QUESTIONS_QUERY = gql`
         name
         email
       }
-      answers {
-        id
-        text
-        sortOrder
-        value
-        reverseValue
+      answerSet {
+        ${ANSWER_SET_FRAGMENT}
       }
     }
   }
@@ -43,12 +46,8 @@ export const QUESTION_QUERY = gql`
         name
         email
       }
-      answers {
-        id
-        text
-        sortOrder
-        value
-        reverseValue
+      answerSet {
+        ${ANSWER_SET_FRAGMENT}
       }
     }
   }
@@ -81,12 +80,8 @@ export const CREATE_QUESTION_MUTATION = gql`
         name
         email
       }
-      answers {
-        id
-        text
-        sortOrder
-        value
-        reverseValue
+      answerSet {
+        ${ANSWER_SET_FRAGMENT}
       }
     }
   }
@@ -108,12 +103,8 @@ export const UPDATE_QUESTION_MUTATION = gql`
         name
         email
       }
-      answers {
-        id
-        text
-        sortOrder
-        value
-        reverseValue
+      answerSet {
+        ${ANSWER_SET_FRAGMENT}
       }
     }
   }

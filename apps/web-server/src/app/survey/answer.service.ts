@@ -13,20 +13,22 @@ export class AnswerService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreateAnswerInput, userId: string): Promise<Answer> {
-    const question = await this.prisma.question.findUnique({
-      where: { id: input.questionId },
+    const answerSet = await this.prisma.answerSet.findUnique({
+      where: { id: input.answerSetId },
     });
-    if (!question) {
-      throw new NotFoundException(`Question with id ${input.questionId} not found`);
+    if (!answerSet) {
+      throw new NotFoundException(
+        `Answer set with id ${input.answerSetId} not found`
+      );
     }
-    if (question.createdById !== userId) {
+    if (answerSet.createdById !== userId) {
       throw new ForbiddenException(
-        'Only the question creator can add answers'
+        'Only the answer set creator can add answers'
       );
     }
     return this.prisma.answer.create({
       data: {
-        questionId: input.questionId,
+        answerSetId: input.answerSetId,
         text: input.text,
         sortOrder: input.sortOrder ?? undefined,
         value: input.value,
@@ -42,14 +44,14 @@ export class AnswerService {
   ): Promise<Answer> {
     const existing = await this.prisma.answer.findUnique({
       where: { id },
-      include: { question: { select: { createdById: true } } },
+      include: { answerSet: { select: { createdById: true } } },
     });
     if (!existing) {
       throw new NotFoundException(`Answer with id ${id} not found`);
     }
-    if (existing.question.createdById !== userId) {
+    if (existing.answerSet.createdById !== userId) {
       throw new ForbiddenException(
-        'Only the question creator can update answers'
+        'Only the answer set creator can update answers'
       );
     }
     return this.prisma.answer.update({
@@ -68,14 +70,14 @@ export class AnswerService {
   async delete(id: string, userId: string): Promise<Answer> {
     const existing = await this.prisma.answer.findUnique({
       where: { id },
-      include: { question: { select: { createdById: true } } },
+      include: { answerSet: { select: { createdById: true } } },
     });
     if (!existing) {
       throw new NotFoundException(`Answer with id ${id} not found`);
     }
-    if (existing.question.createdById !== userId) {
+    if (existing.answerSet.createdById !== userId) {
       throw new ForbiddenException(
-        'Only the question creator can delete answers'
+        'Only the answer set creator can delete answers'
       );
     }
     return this.prisma.answer.delete({ where: { id } });

@@ -27,13 +27,13 @@ export class SurveyService {
           include: {
             mainQuestionAnswers: true,
             dimensionQuestions: {
-              include: { question: { include: { answers: true } }, answerOverrides: true },
+              include: { question: { include: { answerSet: { include: { answers: true } } } }, answerOverrides: true },
             },
             subdimensions: {
               include: {
                 mainQuestionAnswers: true,
                 dimensionQuestions: {
-                  include: { question: { include: { answers: true } }, answerOverrides: true },
+                  include: { question: { include: { answerSet: { include: { answers: true } } } }, answerOverrides: true },
                 },
               },
             },
@@ -60,7 +60,7 @@ export class SurveyService {
             dimensionQuestions: {
               include: {
                 question: {
-                  include: { answers: { orderBy: { sortOrder: 'asc' } } },
+                  include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
                 },
                 answerOverrides: true,
               },
@@ -72,7 +72,7 @@ export class SurveyService {
                 dimensionQuestions: {
                   include: {
                     question: {
-                      include: { answers: { orderBy: { sortOrder: 'asc' } } },
+                      include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
                     },
                     answerOverrides: true,
                   },

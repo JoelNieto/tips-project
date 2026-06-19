@@ -196,6 +196,20 @@ model MainQuestionAnswer {
   @@map("main_question_answers")
 }
 
+model AnswerSet {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String
+  createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  answers     Answer[]
+  questions   Question[]
+
+  @@map("answer_sets")
+}
+
 model Question {
   id                 String              @id @default(uuid())
   title              String
@@ -203,11 +217,12 @@ model Question {
   weight             Float?
   isReversed         Boolean             @default(false)
   isMultiAnswer      Boolean             @default(false)
+  answerSetId        String?
+  answerSet          AnswerSet?          @relation(fields: [answerSetId], references: [id], onDelete: Restrict)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   createdById        String
   createdBy          User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  answers            Answer[]
   dimensionQuestions DimensionQuestion[]
 
   @@map("questions")
@@ -215,8 +230,8 @@ model Question {
 
 model Answer {
   id                       String                    @id @default(uuid())
-  questionId               String
-  question                 Question                  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerSetId              String
+  answerSet                AnswerSet                 @relation(fields: [answerSetId], references: [id], onDelete: Cascade)
   text                     String
   sortOrder                Int?
   value                    Float
@@ -276,6 +291,7 @@ model User {
   surveyTypesCreated        SurveyType[]
   surveysCreated            Survey[]
   questionsCreated          Question[]
+  answerSetsCreated         AnswerSet[]
   surveyAssignationsCreated SurveyAssignation[]
 
   @@map("users")

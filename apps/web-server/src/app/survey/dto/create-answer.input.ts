@@ -5,7 +5,7 @@ import { IsInt, IsNumber, IsOptional, IsString, MinLength } from 'class-validato
 export class CreateAnswerInput {
   @Field()
   @IsString()
-  questionId!: string;
+  answerSetId!: string;
 
   @Field()
   @IsString()
