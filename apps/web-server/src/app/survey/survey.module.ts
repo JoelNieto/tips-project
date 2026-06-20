@@ -17,6 +17,8 @@ import { AnswerSetResolver } from './answer-set.resolver';
 import { AnswerSetService } from './answer-set.service';
 import { SurveyAssignationResolver } from './survey-assignation.resolver';
 import { SurveyAssignationService } from './survey-assignation.service';
+import { DashboardResolver } from './dashboard.resolver';
+import { DashboardService } from './dashboard.service';
 import { PrismaModule } from '../prisma.module';
 
 @Module({
@@ -40,6 +42,8 @@ import { PrismaModule } from '../prisma.module';
     AnswerSetService,
     SurveyAssignationResolver,
     SurveyAssignationService,
+    DashboardResolver,
+    DashboardService,
   ],
   exports: [
     SurveyTypeService,
@@ -51,6 +55,7 @@ import { PrismaModule } from '../prisma.module';
     AnswerService,
     AnswerSetService,
     SurveyAssignationService,
+    DashboardService,
   ],
 })
 export class SurveyModule {}

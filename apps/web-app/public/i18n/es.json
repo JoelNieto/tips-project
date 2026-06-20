@@ -71,14 +71,20 @@
   },
   "home": {
     "welcome": "Bienvenido de nuevo, {{name}}",
-    "overview": "Aquí tienes un resumen de tu actividad de propinas.",
-    "totalTips": "Propinas totales",
-    "transactions": "Transacciones",
-    "activeStaff": "Personal activo",
-    "changeFromLastMonth": "+0% respecto al mes pasado",
-    "noChange": "Sin cambios",
-    "recentActivity": "Actividad reciente",
-    "noRecentActivity": "No hay actividad reciente.",
-    "guestName": "ahí"
+    "overview": "Aquí tienes un resumen de tu actividad de encuestas.",
+    "guestName": "ahí",
+    "loading": "Cargando panel...",
+    "loadFailed": "Error al cargar el panel",
+    "companiesRegistered": "Empresas registradas",
+    "numberOfSurveys": "Encuestas",
+    "numberOfQuestions": "Preguntas",
+    "numberOfSurveyAssignations": "Asignaciones de encuesta",
+    "activeSurveys": "Encuestas activas",
+    "noActiveSurveys": "No hay encuestas activas en este momento.",
+    "survey": "Encuesta",
+    "company": "Empresa",
+    "dateRange": "Rango de fechas",
+    "invitees": "Invitados",
+    "view": "Ver"
   }
 }

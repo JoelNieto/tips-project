@@ -71,14 +71,20 @@
   },
   "home": {
     "welcome": "Welcome back, {{name}}",
-    "overview": "Here's an overview of your tips activity.",
-    "totalTips": "Total Tips",
-    "transactions": "Transactions",
-    "activeStaff": "Active Staff",
-    "changeFromLastMonth": "+0% from last month",
-    "noChange": "No change",
-    "recentActivity": "Recent Activity",
-    "noRecentActivity": "No recent activity to display.",
-    "guestName": "there"
+    "overview": "Here's an overview of your survey activity.",
+    "guestName": "there",
+    "loading": "Loading dashboard...",
+    "loadFailed": "Failed to load dashboard",
+    "companiesRegistered": "Companies registered",
+    "numberOfSurveys": "Surveys",
+    "numberOfQuestions": "Questions",
+    "numberOfSurveyAssignations": "Survey assignations",
+    "activeSurveys": "Active surveys",
+    "noActiveSurveys": "No surveys are currently active.",
+    "survey": "Survey",
+    "company": "Company",
+    "dateRange": "Date range",
+    "invitees": "Invitees",
+    "view": "View"
   }
 }
