@@ -17,6 +17,7 @@ import {
 } from './graphql/surveys.graphql';
 import {
   CREATE_QUESTION_MUTATION,
+  ANSWER_SETS_QUERY,
   QUESTIONS_QUERY,
 } from '../question-bank/graphql/questions.graphql';
 
@@ -33,6 +34,13 @@ interface InlineQuestionModel {
   weight: string;
   isReversed: boolean;
   isMultiAnswer: boolean;
+  selectedAnswerSetId: string;
+  answers: AnswerRow[];
+}
+
+interface AnswerSetOption {
+  id: string;
+  name: string;
   answers: AnswerRow[];
 }
 
@@ -67,6 +75,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
   weight: '',
   isReversed: false,
   isMultiAnswer: false,
+  selectedAnswerSetId: '',
   answers: [],
 };
 
@@ -287,61 +296,94 @@ const emptyInlineQuestion: InlineQuestionModel = {
                   </div>
                 </div>
                 <div class="border-t border-slate-200 pt-3">
+                  <div class="space-y-3 mb-3">
+                    <div>
+                      <label for="inline-answer-set" class="block text-xs font-medium text-slate-700">Answer set from bank</label>
+                      <select
+                        id="inline-answer-set"
+                        [value]="inlineModel().selectedAnswerSetId"
+                        (change)="onInlineAnswerSetSelect($event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      >
+                        <option value="">Use custom answers below...</option>
+                        @for (set of answerSets(); track set.id) {
+                          <option [value]="set.id">{{ set.name }} ({{ set.answers.length }} answers)</option>
+                        }
+                      </select>
+                    </div>
+                    @if (selectedInlineAnswerSetPreview().length > 0) {
+                      <div class="rounded border border-slate-200 bg-white p-3">
+                        <p class="text-xs font-medium text-slate-600 mb-1">Selected answers</p>
+                        <ul class="space-y-1 text-xs text-slate-500">
+                          @for (a of selectedInlineAnswerSetPreview(); track $index) {
+                            <li>{{ a.text }} (value: {{ a.value }})</li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                  </div>
                   <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-xs font-medium text-slate-700">Answer options</h4>
+                    <h4 class="text-xs font-medium text-slate-700">Custom answer options</h4>
                     <button
                       type="button"
                       (click)="addInlineAnswer()"
+                      [disabled]="!!inlineModel().selectedAnswerSetId"
                       class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                      [class.opacity-50]="!!inlineModel().selectedAnswerSetId"
+                      [class.cursor-not-allowed]="!!inlineModel().selectedAnswerSetId"
                     >
                       + Add answer
                     </button>
                   </div>
-                  <div class="space-y-2">
-                    @for (a of inlineModel().answers; track $index; let i = $index) {
-                      <div class="flex gap-2 items-start rounded border border-slate-200 p-2 bg-white">
-                        <div class="flex-1 grid gap-2 sm:grid-cols-3">
-                          <div class="sm:col-span-2">
-                            <label class="block text-xs font-medium text-slate-500">Text</label>
-                            <input
-                              type="text"
-                              [value]="a.text"
-                              (input)="updateInlineAnswer(i, 'text', $event)"
-                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
-                            />
+                  @if (inlineModel().selectedAnswerSetId) {
+                    <p class="text-xs text-slate-500">Clear the answer set selection to define custom answers.</p>
+                  } @else {
+                    <div class="space-y-2">
+                      @for (a of inlineModel().answers; track $index; let i = $index) {
+                        <div class="flex gap-2 items-start rounded border border-slate-200 p-2 bg-white">
+                          <div class="flex-1 grid gap-2 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                              <label class="block text-xs font-medium text-slate-500">Text</label>
+                              <input
+                                type="text"
+                                [value]="a.text"
+                                (input)="updateInlineAnswer(i, 'text', $event)"
+                                class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label class="block text-xs font-medium text-slate-500">Value</label>
+                              <input
+                                type="number"
+                                step="any"
+                                [value]="a.value"
+                                (input)="updateInlineAnswer(i, 'value', $event)"
+                                class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                              <input
+                                type="number"
+                                step="any"
+                                [value]="a.reverseValue"
+                                (input)="updateInlineAnswer(i, 'reverseValue', $event)"
+                                class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <label class="block text-xs font-medium text-slate-500">Value</label>
-                            <input
-                              type="number"
-                              step="any"
-                              [value]="a.value"
-                              (input)="updateInlineAnswer(i, 'value', $event)"
-                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label class="block text-xs font-medium text-slate-500">Reverse value</label>
-                            <input
-                              type="number"
-                              step="any"
-                              [value]="a.reverseValue"
-                              (input)="updateInlineAnswer(i, 'reverseValue', $event)"
-                              class="mt-0.5 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
-                            />
-                          </div>
+                          <button
+                            type="button"
+                            (click)="removeInlineAnswer(i)"
+                            class="text-red-600 hover:text-red-800 p-1"
+                            aria-label="Remove answer"
+                          >
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          (click)="removeInlineAnswer(i)"
-                          class="text-red-600 hover:text-red-800 p-1"
-                          aria-label="Remove answer"
-                        >
-                          <span class="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </div>
-                    }
-                  </div>
+                      }
+                    </div>
+                  }
                 </div>
                 <div class="flex gap-2 items-center flex-wrap">
                   <button
@@ -406,6 +448,7 @@ export default class CategoryFormDialogComponent {
 
   protected readonly selectedQuestions = signal<SelectedQuestion[]>([]);
   protected readonly bankQuestions = signal<{ id: string; title: string }[]>([]);
+  protected readonly answerSets = signal<AnswerSetOption[]>([]);
   protected readonly selectedBankId = signal('');
   protected readonly showInlineForm = signal(false);
   protected readonly inlineModel = signal<InlineQuestionModel>({ ...emptyInlineQuestion, answers: [] });
@@ -416,6 +459,12 @@ export default class CategoryFormDialogComponent {
   protected readonly submitError = signal<string | null>(null);
 
   protected readonly isEditMode = () => !!this.data.dimensionId;
+
+  protected readonly selectedInlineAnswerSetPreview = () => {
+    const selectedId = this.inlineModel().selectedAnswerSetId;
+    if (!selectedId) return [];
+    return this.answerSets().find((set) => set.id === selectedId)?.answers ?? [];
+  };
 
   constructor() {
     if (this.data.dimension) {
@@ -452,6 +501,25 @@ export default class CategoryFormDialogComponent {
           if (first) this.selectedBankId.set(first.id);
         },
       });
+    this.apollo
+      .query<{ answerSets: AnswerSetOption[] }>({
+        query: ANSWER_SETS_QUERY,
+      })
+      .subscribe({
+        next: (result) => {
+          this.answerSets.set(
+            (result.data?.answerSets ?? []).map((set) => ({
+              id: set.id ?? '',
+              name: set.name ?? '',
+              answers: (set.answers ?? []).map((a) => ({
+                text: a.text ?? '',
+                value: a.value != null ? String(a.value) : '0',
+                reverseValue: a.reverseValue != null ? String(a.reverseValue) : '',
+              })),
+            }))
+          );
+        },
+      });
   }
 
   protected trackQuestion(_i: number, q: SelectedQuestion): string {
@@ -481,7 +549,13 @@ export default class CategoryFormDialogComponent {
     this.inlineModel.update((m) => ({ ...m, [field]: checked }));
   }
 
+  protected onInlineAnswerSetSelect(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.inlineModel.update((m) => ({ ...m, selectedAnswerSetId: value }));
+  }
+
   protected addInlineAnswer(): void {
+    if (this.inlineModel().selectedAnswerSetId) return;
     this.inlineModel.update((m) => ({
       ...m,
       answers: [...m.answers, { text: '', value: '0', reverseValue: '0' }],
@@ -660,7 +734,9 @@ export default class CategoryFormDialogComponent {
     bankQuestions.forEach((q) => addOne(q.id));
 
     newQuestions.forEach((q) => {
-      const answers = q.model.answers
+      const answers = q.model.selectedAnswerSetId
+        ? []
+        : q.model.answers
         .filter((a) => a.text.trim())
         .map((a, i) => ({
           text: a.text.trim(),
@@ -675,7 +751,9 @@ export default class CategoryFormDialogComponent {
         isReversed: q.model.isReversed,
         isMultiAnswer: q.model.isMultiAnswer,
       };
-      if (answers.length) {
+      if (q.model.selectedAnswerSetId) {
+        input['answerSetId'] = q.model.selectedAnswerSetId;
+      } else if (answers.length) {
         input['newAnswerSet'] = {
           name: q.model.title.trim(),
           answers,

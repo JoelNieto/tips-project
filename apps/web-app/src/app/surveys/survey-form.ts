@@ -180,20 +180,20 @@ const emptyModel: SurveyFormModel = {
             <div class="rounded-xl border border-slate-200 bg-white p-6">
               <h3 class="text-lg font-medium text-slate-900 mb-4">Dimensions</h3>
               @if (dimensionsToShow().length === 0) {
-                <p class="text-sm text-slate-500 mb-3">No categories yet. Add your first category.</p>
+                <p class="text-sm text-slate-500 mb-3">{{ emptyDimensionsMessage() }}</p>
               } @else {
                 <div class="space-y-4">
                   @for (dim of dimensionsToShow(); track dim.id) {
                     <div class="rounded-lg border border-slate-200 p-4">
                       <div class="flex items-center justify-between">
                         <h4 class="font-medium text-slate-900">{{ dim.title }}</h4>
-                        @if (canAddDimension()) {
+                        @if (canManageDimensionQuestions()) {
                           <button
                             type="button"
                             (click)="editCategory(dim)"
                             class="text-sm text-indigo-600 hover:text-indigo-800"
                           >
-                            Edit
+                            {{ dimensionActionLabel() }}
                           </button>
                         }
                       </div>
@@ -204,13 +204,13 @@ const emptyModel: SurveyFormModel = {
                         <p class="mt-2 text-sm italic">{{ dim.mainQuestionText }}</p>
                       }
                       <div class="mt-3">
-                        <p class="text-xs font-medium text-slate-500">Questions ({{ dim.dimensionQuestions?.length ?? 0 }})</p>
-                        @if (dim.dimensionQuestions?.length) {
+                        <p class="text-xs font-medium text-slate-500">Questions ({{ dim.dimensionQuestions.length }})</p>
+                        @if (dim.dimensionQuestions.length) {
                           <ul class="mt-1 space-y-1">
                             @for (dq of dim.dimensionQuestions; track dq.id) {
                               <li class="flex items-center gap-2 text-sm">
-                                <span>{{ dq.question?.title ?? 'Question' }}</span>
-                                @if (canAddDimension()) {
+                                <span>{{ dq.question.title }}</span>
+                                @if (canManageDimensionQuestions()) {
                                   <button
                                     type="button"
                                     (click)="removeQuestion(dq.id)"
@@ -332,6 +332,20 @@ export default class SurveyFormComponent {
     return this.survey()?.surveyType?.hasSubcategories === true;
   };
 
+  protected readonly canManageDimensionQuestions = () => {
+    return !!this.survey();
+  };
+
+  protected readonly dimensionActionLabel = () => {
+    return this.canAddDimension() ? 'Edit' : 'Manage questions';
+  };
+
+  protected readonly emptyDimensionsMessage = () => {
+    return this.canAddDimension()
+      ? 'No categories yet. Add your first category.'
+      : 'No question group found for this survey.';
+  };
+
   protected readonly surveyTypeName = () => {
     const id = this.surveyModel().surveyTypeId;
     return this.surveyTypes().find((st) => st.id === id)?.name ?? '—';
@@ -414,17 +428,19 @@ export default class SurveyFormComponent {
     };
 
     if (this.isEditMode()) {
+      const surveyId = this.id();
+      if (!surveyId) return;
       this.submitting.set(true);
       this.apollo
         .mutate({
           mutation: UPDATE_SURVEY_MUTATION,
-          variables: { id: this.id(), input },
-          refetchQueries: [{ query: SURVEYS_QUERY }, { query: SURVEY_QUERY, variables: { id: this.id() } }],
+          variables: { id: surveyId, input },
+          refetchQueries: [{ query: SURVEYS_QUERY }, { query: SURVEY_QUERY, variables: { id: surveyId } }],
         })
         .subscribe({
           next: () => {
             this.submitting.set(false);
-            this.loadSurvey(this.id()!);
+            this.loadSurvey(surveyId);
           },
           error: (err) => {
             this.submitting.set(false);
@@ -480,7 +496,7 @@ export default class SurveyFormComponent {
 
   protected editCategory(dim: BuilderDimension): void {
     const s = this.survey();
-    if (!s || !this.canAddDimension()) return;
+    if (!s || !this.canManageDimensionQuestions()) return;
     const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
       data: {
         surveyId: s.id,
@@ -506,19 +522,21 @@ export default class SurveyFormComponent {
   }
 
   protected removeQuestion(dimensionQuestionId: string): void {
+    const surveyId = this.id();
+    if (!surveyId) return;
     this.submitting.set(true);
     this.apollo
       .mutate({
         mutation: REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
         variables: { dimensionQuestionId },
         refetchQueries: [
-          { query: SURVEY_QUERY, variables: { id: this.id() } },
+          { query: SURVEY_QUERY, variables: { id: surveyId } },
         ],
       })
       .subscribe({
         next: () => {
           this.submitting.set(false);
-          this.loadSurvey(this.id()!);
+          this.loadSurvey(surveyId);
         },
         error: (err) => {
           this.submitting.set(false);
