@@ -81,23 +81,39 @@ export const CREATE_SURVEY_ASSIGNATION_MUTATION = gql`
 export const SURVEY_ASSIGNATION_FILL_RESULTS_QUERY = gql`
   query SurveyAssignationFillResults($id: ID!) {
     surveyAssignationFillResults(id: $id) {
-      inviteeId
-      inviteeEmail
-      inviteeName
-      submittedAt
-      mainAnswers {
-        dimensionId
-        dimensionTitle
-        answerText
-        answerValue
+      surveyType {
+        hasCategories
+        hasSubcategories
+        categoryName
+        subcategoryName
+        visibleCategories
+        visibleSubcategories
       }
-      questionAnswers {
-        dimensionQuestionId
-        questionText
-        answers {
-          id
-          text
-          value
+      fills {
+        inviteeId
+        inviteeEmail
+        inviteeName
+        submittedAt
+        mainAnswers {
+          dimensionId
+          dimensionTitle
+          categoryId
+          categoryTitle
+          answerText
+          answerValue
+        }
+        questionAnswers {
+          dimensionQuestionId
+          dimensionId
+          dimensionTitle
+          categoryId
+          categoryTitle
+          questionText
+          answers {
+            id
+            text
+            value
+          }
         }
       }
     }

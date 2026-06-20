@@ -4,7 +4,7 @@ import { SurveyAssignationEntity } from './dto/survey-assignation.entity';
 import { CreateSurveyAssignationInput } from './dto/create-survey-assignation.input';
 import { SubmitSurveyFillInput } from './dto/submit-survey-fill.input';
 import { SurveyFillSubmissionEntity } from './dto/survey-fill-submission.entity';
-import { SurveyFillResultEntity } from './dto/survey-fill-result.entity';
+import { SurveyAssignationResultsEntity } from './dto/survey-fill-result.entity';
 import { SurveyInviteContextEntity } from './dto/survey-invite.entity';
 import { SurveyAssignationService } from './survey-assignation.service';
 
@@ -36,7 +36,7 @@ export class SurveyAssignationResolver {
     return this.surveyAssignationService.findOne(id, session.user.id);
   }
 
-  @Query(() => [SurveyFillResultEntity], { name: 'surveyAssignationFillResults' })
+  @Query(() => SurveyAssignationResultsEntity, { name: 'surveyAssignationFillResults' })
   async surveyAssignationFillResults(
     @Args('id', { type: () => ID }) id: string,
     @Session() session: UserSession

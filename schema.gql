@@ -348,7 +348,7 @@ type Query {
   questions: [QuestionEntity!]!
   survey(id: ID!): SurveyEntity
   surveyAssignation(id: ID!): SurveyAssignationEntity
-  surveyAssignationFillResults(id: ID!): [SurveyFillResultEntity!]!
+  surveyAssignationFillResults(id: ID!): SurveyAssignationResultsEntity!
   surveyAssignations(surveyId: ID!): [SurveyAssignationEntity!]!
   surveyInviteByToken(token: String!): SurveyInviteContextEntity
   surveyType(id: ID!): SurveyTypeEntity
@@ -401,6 +401,11 @@ type SurveyAssignationEntity {
   welcomeMessage: String
 }
 
+type SurveyAssignationResultsEntity {
+  fills: [SurveyFillResultEntity!]!
+  surveyType: SurveyTypeInfoResultEntity!
+}
+
 type SurveyAssignationSurveySummaryEntity {
   id: ID!
   title: String!
@@ -426,13 +431,19 @@ type SurveyFillAnswerResultEntity {
 type SurveyFillMainAnswerResultEntity {
   answerText: String!
   answerValue: Float!
+  categoryId: ID
+  categoryTitle: String
   dimensionId: ID!
   dimensionTitle: String!
 }
 
 type SurveyFillQuestionAnswerGroupEntity {
   answers: [SurveyFillAnswerResultEntity!]!
+  categoryId: ID
+  categoryTitle: String
+  dimensionId: ID!
   dimensionQuestionId: ID!
+  dimensionTitle: String!
   questionText: String!
 }
 
@@ -493,6 +504,15 @@ type SurveyTypeEntity {
   randomizeQuestions: Boolean!
   subcategoryName: String
   updatedAt: DateTime!
+  visibleCategories: Boolean!
+  visibleSubcategories: Boolean!
+}
+
+type SurveyTypeInfoResultEntity {
+  categoryName: String
+  hasCategories: Boolean!
+  hasSubcategories: Boolean!
+  subcategoryName: String
   visibleCategories: Boolean!
   visibleSubcategories: Boolean!
 }

@@ -40,32 +40,15 @@ interface AssignationDetail {
   invitees: InviteeDetail[];
 }
 
-interface FillAnswerResult {
-  id: string;
-  text: string;
-  value: number;
-}
-
-interface FillMainAnswerResult {
-  dimensionId: string;
-  dimensionTitle: string;
-  answerText: string;
-  answerValue: number;
-}
-
-interface FillQuestionAnswerGroup {
-  dimensionQuestionId: string;
-  questionText: string;
-  answers: FillAnswerResult[];
-}
-
 interface FillResult {
   inviteeId: string;
   inviteeEmail: string;
   inviteeName?: string | null;
   submittedAt: string;
-  mainAnswers: FillMainAnswerResult[];
-  questionAnswers: FillQuestionAnswerGroup[];
+}
+
+interface FillResultsData {
+  fills: FillResult[];
 }
 
 type ActiveTab = 'invitees' | 'results';
@@ -255,85 +238,32 @@ type ActiveTab = 'invitees' | 'results';
             } @else {
               <div class="divide-y divide-slate-200">
                 @for (result of fillResults(); track result.inviteeId) {
-                  <div class="p-6">
-                    <button
-                      type="button"
-                      class="flex w-full items-center justify-between text-left"
-                      (click)="toggleExpand(result.inviteeId)"
-                    >
-                      <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-emerald-500">check_circle</span>
-                        <div>
-                          <p class="text-sm font-medium text-slate-900">
-                            {{ result.inviteeName ?? result.inviteeEmail }}
-                          </p>
-                          @if (result.inviteeName) {
-                            <p class="text-xs text-slate-500">{{ result.inviteeEmail }}</p>
-                          }
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-3">
-                        <span class="text-xs text-slate-500">
-                          Submitted {{ formatDateTime(result.submittedAt) }}
-                        </span>
-                        <span class="material-symbols-outlined text-slate-400 transition-transform"
-                          [class.rotate-180]="expandedInviteeId() === result.inviteeId">
-                          expand_more
-                        </span>
-                      </div>
-                    </button>
-
-                    @if (expandedInviteeId() === result.inviteeId) {
-                      <div class="mt-4 space-y-4">
-                        @if (result.mainAnswers.length > 0) {
-                          <div>
-                            <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                              Main questions
-                            </h4>
-                            <div class="rounded-lg border border-slate-200 divide-y divide-slate-100">
-                              @for (ma of result.mainAnswers; track ma.dimensionId) {
-                                <div class="flex items-center justify-between px-4 py-3">
-                                  <span class="text-sm text-slate-700">{{ ma.dimensionTitle }}</span>
-                                  <span class="text-sm font-medium text-slate-900">
-                                    {{ ma.answerText }}
-                                    <span class="ml-1 text-xs text-slate-400">({{ ma.answerValue }})</span>
-                                  </span>
-                                </div>
-                              }
-                            </div>
-                          </div>
-                        }
-
-                        @if (result.questionAnswers.length > 0) {
-                          <div>
-                            <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                              Survey questions
-                            </h4>
-                            <div class="rounded-lg border border-slate-200 divide-y divide-slate-100">
-                              @for (qa of result.questionAnswers; track qa.dimensionQuestionId) {
-                                <div class="px-4 py-3">
-                                  <p class="text-sm text-slate-700 mb-1">{{ qa.questionText }}</p>
-                                  <div class="flex flex-wrap gap-1.5">
-                                    @for (ans of qa.answers; track ans.id) {
-                                      <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
-                                        {{ ans.text }}
-                                        <span class="ml-1 text-indigo-400">({{ ans.value }})</span>
-                                      </span>
-                                    }
-                                  </div>
-                                </div>
-                              }
-                            </div>
-                          </div>
-                        }
-
-                        @if (result.mainAnswers.length === 0 && result.questionAnswers.length === 0) {
-                          <p class="text-sm text-slate-500 italic">No answers recorded</p>
+                  <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-emerald-500">check_circle</span>
+                      <div>
+                        <p class="text-sm font-medium text-slate-900">
+                          {{ result.inviteeName ?? result.inviteeEmail }}
+                        </p>
+                        @if (result.inviteeName) {
+                          <p class="text-xs text-slate-500">{{ result.inviteeEmail }}</p>
                         }
                       </div>
-                    }
+                    </div>
+                    <span class="text-xs text-slate-500">
+                      {{ formatDateTime(result.submittedAt) }}
+                    </span>
                   </div>
                 }
+              </div>
+              <div class="border-t border-slate-200 px-6 py-4 flex justify-end">
+                <a
+                  [routerLink]="['/dashboard/surveys', surveyId(), 'assignations', id(), 'results']"
+                  class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
+                >
+                  <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                  View full results
+                </a>
               </div>
             }
           }
@@ -344,9 +274,6 @@ type ActiveTab = 'invitees' | 'results';
   styles: `
     :host {
       display: block;
-    }
-    .rotate-180 {
-      transform: rotate(180deg);
     }
   `,
 })
@@ -366,7 +293,6 @@ export default class SurveyAssignationDetailComponent {
   protected readonly fillResults = signal<FillResult[]>([]);
   protected readonly resultsLoading = signal(false);
   protected readonly resultsError = signal<string | null>(null);
-  protected readonly expandedInviteeId = signal<string | null>(null);
 
   protected readonly origin = computed(() =>
     typeof window !== 'undefined' ? window.location.origin : ''
@@ -430,9 +356,8 @@ export default class SurveyAssignationDetailComponent {
       .subscribe({
         next: (result) => {
           this.resultsLoading.set(false);
-          this.fillResults.set(
-            (result.data?.surveyAssignationFillResults ?? []) as FillResult[]
-          );
+          const data = result.data?.surveyAssignationFillResults as FillResultsData | undefined;
+          this.fillResults.set(data?.fills ?? []);
         },
         error: (err) => {
           this.resultsLoading.set(false);
@@ -453,12 +378,6 @@ export default class SurveyAssignationDetailComponent {
     this.resultsError.set(null);
     const id = this.id();
     if (id) this.loadFillResults(id);
-  }
-
-  protected toggleExpand(inviteeId: string): void {
-    this.expandedInviteeId.update((current) =>
-      current === inviteeId ? null : inviteeId
-    );
   }
 
   protected formatDate(iso: string): string {

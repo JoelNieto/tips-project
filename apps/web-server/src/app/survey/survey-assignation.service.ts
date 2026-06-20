@@ -197,7 +197,23 @@ export class SurveyAssignationService {
   async findFillResults(id: string, userId: string) {
     const assignation = await this.prisma.surveyAssignation.findUnique({
       where: { id },
-      select: { createdById: true },
+      select: {
+        createdById: true,
+        survey: {
+          select: {
+            surveyType: {
+              select: {
+                hasCategories: true,
+                hasSubcategories: true,
+                categoryName: true,
+                subcategoryName: true,
+                visibleCategories: true,
+                visibleSubcategories: true,
+              },
+            },
+          },
+        },
+      },
     });
     if (!assignation) {
       throw new NotFoundException(`Survey assignation with id ${id} not found`);
@@ -206,13 +222,33 @@ export class SurveyAssignationService {
       throw new ForbiddenException('Only the creator can view fill results');
     }
 
+    const surveyType = assignation.survey?.surveyType ?? {
+      hasCategories: false,
+      hasSubcategories: false,
+      categoryName: null,
+      subcategoryName: null,
+      visibleCategories: false,
+      visibleSubcategories: false,
+    };
+
+    const parentDimensionSelect = {
+      id: true,
+      title: true,
+    } as const;
+
     const fills = await this.prisma.surveyFill.findMany({
       where: { invitee: { assignationId: id } },
       include: {
         invitee: { select: { id: true, email: true, name: true } },
         mainAnswers: {
           include: {
-            dimension: { select: { id: true, title: true } },
+            dimension: {
+              select: {
+                id: true,
+                title: true,
+                parentDimension: { select: parentDimensionSelect },
+              },
+            },
             mainQuestionAnswer: { select: { id: true, text: true, value: true } },
           },
         },
@@ -220,6 +256,13 @@ export class SurveyAssignationService {
           include: {
             dimensionQuestion: {
               include: {
+                dimension: {
+                  select: {
+                    id: true,
+                    title: true,
+                    parentDimension: { select: parentDimensionSelect },
+                  },
+                },
                 question: { select: { id: true, title: true, text: true } },
               },
             },
@@ -230,25 +273,35 @@ export class SurveyAssignationService {
       orderBy: { submittedAt: 'asc' },
     });
 
-    return fills.map((fill) => ({
-      inviteeId: fill.inviteeId,
-      inviteeEmail: fill.invitee.email,
-      inviteeName: fill.invitee.name,
-      submittedAt: fill.submittedAt,
-      mainAnswers: fill.mainAnswers.map((ma) => ({
-        dimensionId: ma.dimensionId,
-        dimensionTitle: ma.dimension.title,
-        answerText: ma.mainQuestionAnswer.text,
-        answerValue: ma.mainQuestionAnswer.value,
+    return {
+      surveyType,
+      fills: fills.map((fill) => ({
+        inviteeId: fill.inviteeId,
+        inviteeEmail: fill.invitee.email,
+        inviteeName: fill.invitee.name,
+        submittedAt: fill.submittedAt,
+        mainAnswers: fill.mainAnswers.map((ma) => ({
+          dimensionId: ma.dimension.id,
+          dimensionTitle: ma.dimension.title,
+          categoryId: ma.dimension.parentDimension?.id ?? null,
+          categoryTitle: ma.dimension.parentDimension?.title ?? null,
+          answerText: ma.mainQuestionAnswer.text,
+          answerValue: ma.mainQuestionAnswer.value,
+        })),
+        questionAnswers: this.groupQuestionAnswers(fill.questionAnswers),
       })),
-      questionAnswers: this.groupQuestionAnswers(fill.questionAnswers),
-    }));
+    };
   }
 
   private groupQuestionAnswers(
     rows: {
       dimensionQuestionId: string;
       dimensionQuestion: {
+        dimension: {
+          id: string;
+          title: string;
+          parentDimension: { id: string; title: string } | null;
+        };
         question: { id: string; title: string; text: string };
       };
       answer: { id: string; text: string; value: number };
@@ -258,6 +311,10 @@ export class SurveyAssignationService {
       string,
       {
         dimensionQuestionId: string;
+        dimensionId: string;
+        dimensionTitle: string;
+        categoryId: string | null;
+        categoryTitle: string | null;
         questionText: string;
         answers: { id: string; text: string; value: number }[];
       }
@@ -266,8 +323,13 @@ export class SurveyAssignationService {
     for (const row of rows) {
       if (!groups.has(row.dimensionQuestionId)) {
         const q = row.dimensionQuestion.question;
+        const dim = row.dimensionQuestion.dimension;
         groups.set(row.dimensionQuestionId, {
           dimensionQuestionId: row.dimensionQuestionId,
+          dimensionId: dim.id,
+          dimensionTitle: dim.title,
+          categoryId: dim.parentDimension?.id ?? null,
+          categoryTitle: dim.parentDimension?.title ?? null,
           questionText: q.text?.trim() || q.title,
           answers: [],
         });

@@ -67,6 +67,11 @@ export const dashboardRoutes: Routes = [
       import('../survey-assignations/survey-assignation-form'),
   },
   {
+    path: 'surveys/:surveyId/assignations/:id/results',
+    loadComponent: () =>
+      import('../survey-assignations/survey-assignation-results-page'),
+  },
+  {
     path: 'surveys/:surveyId/assignations/:id',
     loadComponent: () =>
       import('../survey-assignations/survey-assignation-detail'),
