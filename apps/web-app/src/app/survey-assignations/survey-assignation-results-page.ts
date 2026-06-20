@@ -11,7 +11,15 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
+import RadarChartComponent, {
+  type RadarSeries,
+} from '../shared/radar-chart/radar-chart';
 import { SURVEY_ASSIGNATION_FILL_RESULTS_QUERY } from './graphql/survey-assignations.graphql';
+import {
+  categoryTotals,
+  collectCategoryAxes,
+  mapTotalsToAxes,
+} from './survey-results-chart.utils';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 
@@ -83,7 +91,7 @@ interface ResultGroup {
 @Component({
   selector: 'app-survey-assignation-results-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RadarChartComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -137,6 +145,51 @@ interface ResultGroup {
             }
           </select>
         </div>
+
+        <!-- Chart panel -->
+        @if (showChart()) {
+          <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-slate-900">Category breakdown</h3>
+                <p class="mt-1 text-sm text-slate-500">
+                  Sum of selected answer values per {{ categoryLabel().toLowerCase() }}
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-4">
+                <label class="flex items-center gap-2 text-sm text-slate-700">
+                  <span class="font-medium">Chart type</span>
+                  <select
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+                    disabled
+                  >
+                    <option value="radar">Radar</option>
+                  </select>
+                </label>
+                <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    [checked]="compareToAverage()"
+                    (change)="onCompareToggle($event)"
+                  />
+                  Compare to group average
+                </label>
+              </div>
+            </div>
+
+            @if (!selectedFill() && chartSeries().length === 0) {
+              <p class="text-sm text-slate-500 text-center py-4">
+                Select an invitee to view their results, or enable group average comparison.
+              </p>
+            } @else {
+              <app-radar-chart
+                [axes]="chartAxes()"
+                [series]="chartSeries()"
+              />
+            }
+          </div>
+        }
 
         <!-- Results panel -->
         @if (selectedFill(); as fill) {
@@ -233,6 +286,7 @@ export default class SurveyAssignationResultsPageComponent {
   protected readonly error = signal<string | null>(null);
   protected readonly resultsData = signal<ResultsData | null>(null);
   protected readonly selectedInviteeId = signal<string | null>(null);
+  protected readonly compareToAverage = signal(true);
 
   protected readonly completedCount = computed(
     () => this.resultsData()?.fills.length ?? 0
@@ -251,6 +305,77 @@ export default class SurveyAssignationResultsPageComponent {
     if (!inviteeId) return null;
     return this.resultsData()?.fills.find((f) => f.inviteeId === inviteeId) ?? null;
   });
+
+  protected readonly chartCategoryAxes = computed(() => {
+    const data = this.resultsData();
+    if (!data) return { ids: [] as string[], titles: [] as string[] };
+    return collectCategoryAxes(data.fills, this.hasCategories());
+  });
+
+  protected readonly chartAxes = computed(
+    () => this.chartCategoryAxes().titles
+  );
+
+  protected readonly averageSeries = computed((): RadarSeries | null => {
+    const data = this.resultsData();
+    const axisIds = this.chartCategoryAxes().ids;
+    if (!data || axisIds.length === 0 || data.fills.length === 0) return null;
+
+    const hasCategories = this.hasCategories();
+    const sums = axisIds.map(() => 0);
+
+    for (const fill of data.fills) {
+      const totals = categoryTotals(fill, hasCategories);
+      const values = mapTotalsToAxes(totals, axisIds);
+      values.forEach((value, index) => {
+        sums[index] += value;
+      });
+    }
+
+    const averages = sums.map((sum) => sum / data.fills.length);
+    return {
+      label: 'Group average',
+      color: '#d97706',
+      values: averages,
+    };
+  });
+
+  protected readonly selectedSeries = computed((): RadarSeries | null => {
+    const fill = this.selectedFill();
+    const axisIds = this.chartCategoryAxes().ids;
+    if (!fill || axisIds.length === 0) return null;
+
+    const totals = categoryTotals(fill, this.hasCategories());
+    const label =
+      fill.inviteeName?.trim() ||
+      fill.inviteeEmail ||
+      'Selected invitee';
+
+    return {
+      label,
+      color: '#4f46e5',
+      values: mapTotalsToAxes(totals, axisIds),
+    };
+  });
+
+  protected readonly chartSeries = computed((): RadarSeries[] => {
+    const series: RadarSeries[] = [];
+    const selected = this.selectedSeries();
+    const average = this.averageSeries();
+
+    if (selected) {
+      series.push(selected);
+    }
+    if (this.compareToAverage() && average) {
+      series.push(average);
+    }
+
+    return series;
+  });
+
+  protected readonly showChart = computed(
+    () => this.hasCategories() && this.chartAxes().length >= 3
+  );
 
   protected readonly groupedResults = computed((): ResultGroup[] => {
     const fill = this.selectedFill();
@@ -336,6 +461,10 @@ export default class SurveyAssignationResultsPageComponent {
   protected onInviteeChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedInviteeId.set(value || null);
+  }
+
+  protected onCompareToggle(event: Event): void {
+    this.compareToAverage.set((event.target as HTMLInputElement).checked);
   }
 
   protected formatDate(iso: string): string {
