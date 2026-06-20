@@ -1,6 +1,15 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
+export class SurveyInviteeFillSummaryEntity {
+  @Field(() => ID)
+  id!: string;
+
+  @Field()
+  submittedAt!: Date;
+}
+
+@ObjectType()
 export class SurveyInviteeEntity {
   @Field(() => ID)
   id!: string;
@@ -19,4 +28,7 @@ export class SurveyInviteeEntity {
 
   @Field()
   updatedAt!: Date;
+
+  @Field(() => SurveyInviteeFillSummaryEntity, { nullable: true })
+  fill?: SurveyInviteeFillSummaryEntity | null;
 }

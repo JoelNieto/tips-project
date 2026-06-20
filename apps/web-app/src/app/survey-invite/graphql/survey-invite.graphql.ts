@@ -10,6 +10,7 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
       companyName
       startDate
       expirationDate
+      submittedAt
       survey {
         id
         title
@@ -134,6 +135,17 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
           }
         }
       }
+    }
+  }
+`;
+
+export const SUBMIT_SURVEY_FILL_MUTATION = gql`
+  mutation SubmitSurveyFill($input: SubmitSurveyFillInput!) {
+    submitSurveyFill(input: $input) {
+      id
+      surveyId
+      inviteeId
+      submittedAt
     }
   }
 `;

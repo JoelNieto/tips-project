@@ -301,6 +301,7 @@ type Mutation {
   deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
   deleteSurveyType(id: ID!): SurveyTypeEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
+  submitSurveyFill(input: SubmitSurveyFillInput!): SurveyFillSubmissionEntity!
   updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
   updateAnswerSet(id: ID!, input: UpdateAnswerSetInput!): AnswerSetEntity!
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
@@ -347,6 +348,7 @@ type Query {
   questions: [QuestionEntity!]!
   survey(id: ID!): SurveyEntity
   surveyAssignation(id: ID!): SurveyAssignationEntity
+  surveyAssignationFillResults(id: ID!): [SurveyFillResultEntity!]!
   surveyAssignations(surveyId: ID!): [SurveyAssignationEntity!]!
   surveyInviteByToken(token: String!): SurveyInviteContextEntity
   surveyType(id: ID!): SurveyTypeEntity
@@ -366,6 +368,22 @@ type QuestionEntity {
   title: String!
   updatedAt: DateTime!
   weight: Float
+}
+
+input SubmitSurveyFillInput {
+  mainAnswers: [SubmitSurveyMainAnswerInput!]
+  questionAnswers: [SubmitSurveyQuestionAnswerInput!]
+  token: String!
+}
+
+input SubmitSurveyMainAnswerInput {
+  dimensionId: ID!
+  mainQuestionAnswerId: ID!
+}
+
+input SubmitSurveyQuestionAnswerInput {
+  answerIds: [ID!]!
+  dimensionQuestionId: ID!
 }
 
 type SurveyAssignationEntity {
@@ -399,12 +417,48 @@ type SurveyEntity {
   updatedAt: DateTime!
 }
 
+type SurveyFillAnswerResultEntity {
+  id: ID!
+  text: String!
+  value: Float!
+}
+
+type SurveyFillMainAnswerResultEntity {
+  answerText: String!
+  answerValue: Float!
+  dimensionId: ID!
+  dimensionTitle: String!
+}
+
+type SurveyFillQuestionAnswerGroupEntity {
+  answers: [SurveyFillAnswerResultEntity!]!
+  dimensionQuestionId: ID!
+  questionText: String!
+}
+
+type SurveyFillResultEntity {
+  inviteeEmail: String!
+  inviteeId: ID!
+  inviteeName: String
+  mainAnswers: [SurveyFillMainAnswerResultEntity!]!
+  questionAnswers: [SurveyFillQuestionAnswerGroupEntity!]!
+  submittedAt: DateTime!
+}
+
+type SurveyFillSubmissionEntity {
+  id: ID!
+  inviteeId: ID!
+  submittedAt: DateTime!
+  surveyId: ID!
+}
+
 type SurveyInviteContextEntity {
   companyName: String
   email: String!
   expirationDate: DateTime!
   name: String
   startDate: DateTime!
+  submittedAt: DateTime
   survey: SurveyEntity!
   token: String!
   welcomeMessage: String
@@ -413,10 +467,16 @@ type SurveyInviteContextEntity {
 type SurveyInviteeEntity {
   createdAt: DateTime!
   email: String!
+  fill: SurveyInviteeFillSummaryEntity
   id: ID!
   name: String
   token: String!
   updatedAt: DateTime!
+}
+
+type SurveyInviteeFillSummaryEntity {
+  id: ID!
+  submittedAt: DateTime!
 }
 
 type SurveyTypeEntity {

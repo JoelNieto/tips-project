@@ -47,6 +47,10 @@ export const SURVEY_ASSIGNATION_QUERY = gql`
         name
         token
         createdAt
+        fill {
+          id
+          submittedAt
+        }
       }
     }
   }
@@ -69,6 +73,32 @@ export const CREATE_SURVEY_ASSIGNATION_MUTATION = gql`
         email
         name
         token
+      }
+    }
+  }
+`;
+
+export const SURVEY_ASSIGNATION_FILL_RESULTS_QUERY = gql`
+  query SurveyAssignationFillResults($id: ID!) {
+    surveyAssignationFillResults(id: $id) {
+      inviteeId
+      inviteeEmail
+      inviteeName
+      submittedAt
+      mainAnswers {
+        dimensionId
+        dimensionTitle
+        answerText
+        answerValue
+      }
+      questionAnswers {
+        dimensionQuestionId
+        questionText
+        answers {
+          id
+          text
+          value
+        }
       }
     }
   }

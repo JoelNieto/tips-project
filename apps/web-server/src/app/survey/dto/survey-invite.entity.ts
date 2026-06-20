@@ -24,6 +24,9 @@ export class SurveyInviteContextEntity {
   @Field()
   expirationDate!: Date;
 
+  @Field({ nullable: true })
+  submittedAt?: Date | null;
+
   @Field(() => SurveyEntity)
   survey!: SurveyEntity;
 }

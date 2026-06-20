@@ -126,6 +126,7 @@ model Survey {
   createdBy    User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
   dimensions   Dimension[]
   assignations SurveyAssignation[]
+  fills        SurveyFill[]
 
   @@map("surveys")
 }
@@ -157,41 +158,44 @@ model SurveyInvitee {
   token         String            @unique
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+  fill          SurveyFill?
 
   @@index([token])
   @@map("survey_invitees")
 }
 
 model Dimension {
-  id                  String               @id @default(uuid())
-  surveyId            String
-  survey              Survey               @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  parentDimensionId   String?
-  parentDimension     Dimension?           @relation("DimensionHierarchy", fields: [parentDimensionId], references: [id], onDelete: Cascade)
-  subdimensions       Dimension[]          @relation("DimensionHierarchy")
-  title               String
-  description         String?
-  weighting           Float?
-  mainQuestionText    String?
-  order               Int?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  mainQuestionAnswers MainQuestionAnswer[]
-  dimensionQuestions  DimensionQuestion[]
+  id                    String                 @id @default(uuid())
+  surveyId              String
+  survey                Survey                 @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  parentDimensionId     String?
+  parentDimension       Dimension?             @relation("DimensionHierarchy", fields: [parentDimensionId], references: [id], onDelete: Cascade)
+  subdimensions         Dimension[]            @relation("DimensionHierarchy")
+  title                 String
+  description           String?
+  weighting             Float?
+  mainQuestionText      String?
+  order                 Int?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  mainQuestionAnswers   MainQuestionAnswer[]
+  dimensionQuestions    DimensionQuestion[]
+  surveyFillMainAnswers SurveyFillMainAnswer[]
 
   @@map("dimensions")
 }
 
 model MainQuestionAnswer {
-  id           String    @id @default(uuid())
-  dimensionId  String
-  dimension    Dimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
-  text         String
-  sortOrder    Int?
-  value        Float
-  reverseValue Float?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                    String                 @id @default(uuid())
+  dimensionId           String
+  dimension             Dimension              @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  text                  String
+  sortOrder             Int?
+  value                 Float
+  reverseValue          Float?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  surveyFillMainAnswers SurveyFillMainAnswer[]
 
   @@map("main_question_answers")
 }
@@ -229,33 +233,35 @@ model Question {
 }
 
 model Answer {
-  id                       String                    @id @default(uuid())
-  answerSetId              String
-  answerSet                AnswerSet                 @relation(fields: [answerSetId], references: [id], onDelete: Cascade)
-  text                     String
-  sortOrder                Int?
-  value                    Float
-  reverseValue             Float?
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  dimensionQuestionAnswers DimensionQuestionAnswer[]
+  id                        String                     @id @default(uuid())
+  answerSetId               String
+  answerSet                 AnswerSet                  @relation(fields: [answerSetId], references: [id], onDelete: Cascade)
+  text                      String
+  sortOrder                 Int?
+  value                     Float
+  reverseValue              Float?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  dimensionQuestionAnswers  DimensionQuestionAnswer[]
+  surveyFillQuestionAnswers SurveyFillQuestionAnswer[]
 
   @@map("answers")
 }
 
 model DimensionQuestion {
-  id                    String                    @id @default(uuid())
-  dimensionId           String
-  dimension             Dimension                 @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
-  questionId            String
-  question              Question                  @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  order                 Int?
-  weightOverride        Float?
-  isReversedOverride    Boolean?
-  isMultiAnswerOverride Boolean?
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @updatedAt
-  answerOverrides       DimensionQuestionAnswer[]
+  id                        String                     @id @default(uuid())
+  dimensionId               String
+  dimension                 Dimension                  @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  questionId                String
+  question                  Question                   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  order                     Int?
+  weightOverride            Float?
+  isReversedOverride        Boolean?
+  isMultiAnswerOverride     Boolean?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  answerOverrides           DimensionQuestionAnswer[]
+  surveyFillQuestionAnswers SurveyFillQuestionAnswer[]
 
   @@map("dimension_questions")
 }
@@ -274,6 +280,50 @@ model DimensionQuestionAnswer {
 
   @@unique([dimensionQuestionId, answerId])
   @@map("dimension_question_answers")
+}
+
+model SurveyFill {
+  id              String                     @id @default(uuid())
+  surveyId        String
+  survey          Survey                     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  inviteeId       String                     @unique
+  invitee         SurveyInvitee              @relation(fields: [inviteeId], references: [id], onDelete: Cascade)
+  submittedAt     DateTime                   @default(now())
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  mainAnswers     SurveyFillMainAnswer[]
+  questionAnswers SurveyFillQuestionAnswer[]
+
+  @@index([surveyId])
+  @@map("survey_fills")
+}
+
+model SurveyFillMainAnswer {
+  id                   String             @id @default(uuid())
+  fillId               String
+  fill                 SurveyFill         @relation(fields: [fillId], references: [id], onDelete: Cascade)
+  dimensionId          String
+  dimension            Dimension          @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  mainQuestionAnswerId String
+  mainQuestionAnswer   MainQuestionAnswer @relation(fields: [mainQuestionAnswerId], references: [id], onDelete: Cascade)
+  createdAt            DateTime           @default(now())
+
+  @@unique([fillId, dimensionId])
+  @@map("survey_fill_main_answers")
+}
+
+model SurveyFillQuestionAnswer {
+  id                  String            @id @default(uuid())
+  fillId              String
+  fill                SurveyFill        @relation(fields: [fillId], references: [id], onDelete: Cascade)
+  dimensionQuestionId String
+  dimensionQuestion   DimensionQuestion @relation(fields: [dimensionQuestionId], references: [id], onDelete: Cascade)
+  answerId            String
+  answer              Answer            @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  createdAt           DateTime          @default(now())
+
+  @@unique([fillId, dimensionQuestionId, answerId])
+  @@map("survey_fill_question_answers")
 }
 
 model User {
