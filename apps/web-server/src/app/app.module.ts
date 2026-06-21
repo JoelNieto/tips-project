@@ -9,15 +9,19 @@ import { AppController } from './app.controller';
 import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { auth } from './auth/auth';
+import { AuthCoreModule } from './auth/auth-core.module';
 import { CompanyModule } from './company/company.module';
 import { EmployeeModule } from './employee/employee.module';
+import { OrganizationModule } from './organization/organization.module';
 import { PositionModule } from './position/position.module';
 import { PrismaModule } from './prisma.module';
 import { SurveyModule } from './survey/survey.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     AuthModule.forRoot({ auth }),
+    AuthCoreModule,
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
       useFactory: async () => ({
@@ -31,6 +35,8 @@ import { SurveyModule } from './survey/survey.module';
       driver: ApolloDriver,
     }),
     PrismaModule,
+    UserModule,
+    OrganizationModule,
     CompanyModule,
     PositionModule,
     EmployeeModule,

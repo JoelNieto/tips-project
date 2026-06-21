@@ -4,12 +4,15 @@ import { Router } from '@angular/router';
 
 import { getAuthClient, updateAuthUser } from './auth-client';
 
+export type UserRole = 'ADMIN' | 'DESIGNER' | 'ORG_ADMIN' | 'EMPLOYEE';
+
 export interface User {
   id: string;
   email: string;
   name: string;
   image?: string | null;
   locale?: string | null;
+  role?: UserRole | null;
   emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,8 +21,6 @@ export interface User {
 export interface AuthCredentials {
   email: string;
   password: string;
-  name?: string;
-  locale?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,6 +39,11 @@ export class AuthService {
   readonly error = this._error.asReadonly();
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly ready = this._ready.asReadonly();
+  readonly role = computed(() => this._user()?.role ?? null);
+  readonly isAdmin = computed(() => this.role() === 'ADMIN');
+  readonly isDesigner = computed(() => this.role() === 'DESIGNER');
+  readonly isOrgAdmin = computed(() => this.role() === 'ORG_ADMIN');
+  readonly isEmployee = computed(() => this.role() === 'EMPLOYEE');
 
   private _readyPromise: Promise<void>;
   private _resolveReady!: () => void;
@@ -51,6 +57,11 @@ export class AuthService {
 
   waitUntilReady(): Promise<void> {
     return this._readyPromise;
+  }
+
+  hasRole(...roles: UserRole[]): boolean {
+    const role = this.role();
+    return !!role && roles.includes(role);
   }
 
   async signIn(credentials: AuthCredentials): Promise<boolean> {
@@ -73,42 +84,6 @@ export class AuthService {
       return true;
     } catch {
       this._error.set('auth.signInFailed');
-      return false;
-    } finally {
-      this._loading.set(false);
-    }
-  }
-
-  async signUp(credentials: AuthCredentials): Promise<boolean> {
-    this._loading.set(true);
-    this._error.set(null);
-
-    try {
-      const { data, error } = await getAuthClient().signUp.email({
-        email: credentials.email,
-        password: credentials.password,
-        name: credentials.name ?? credentials.email.split('@')[0],
-      });
-
-      if (error) {
-        this._error.set(error.message ?? 'auth.signUpFailed');
-        return false;
-      }
-
-      this._user.set(data.user as User);
-
-      if (credentials.locale) {
-        await updateAuthUser({ locale: credentials.locale });
-        const { data: sessionData } = await getAuthClient().getSession();
-        if (sessionData?.user) {
-          this._user.set(sessionData.user as User);
-        }
-      }
-
-      await this.syncLocaleFromUser();
-      return true;
-    } catch {
-      this._error.set('auth.signUpFailed');
       return false;
     } finally {
       this._loading.set(false);

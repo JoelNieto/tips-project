@@ -20,6 +20,10 @@ export function getAuthClient() {
               type: 'string',
               required: false,
             },
+            role: {
+              type: 'string',
+              required: false,
+            },
           },
         }),
       ],

@@ -4,18 +4,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { SurveyType, Prisma, User } from '@generated/prisma';
+import type { AuthUserContext } from '../auth/auth-policy.service';
+import { AuthPolicyService } from '../auth/auth-policy.service';
 import { PrismaService } from '../prisma.service';
 import type { CreateSurveyTypeInput } from './dto/create-survey-type.input';
 import type { UpdateSurveyTypeInput } from './dto/update-survey-type.input';
 
 @Injectable()
 export class SurveyTypeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authPolicy: AuthPolicyService
+  ) {}
 
-  async findAll(createdById?: string): Promise<SurveyType[]> {
+  async findAll(user: AuthUserContext): Promise<SurveyType[]> {
     const where: Prisma.SurveyTypeWhereInput = {};
-    if (createdById) {
-      where.createdById = createdById;
+    if (!this.authPolicy.isAdmin(user)) {
+      where.createdById = user.id;
     }
     return this.prisma.surveyType.findMany({
       where,

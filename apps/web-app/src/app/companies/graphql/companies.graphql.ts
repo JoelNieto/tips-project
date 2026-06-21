@@ -4,6 +4,7 @@ export const COMPANIES_QUERY = gql`
   query Companies {
     companies {
       id
+      organizationId
       name
       legalName
       description
@@ -34,6 +35,7 @@ export const COMPANY_QUERY = gql`
   query Company($id: ID!) {
     company(id: $id) {
       id
+      organizationId
       name
       legalName
       description
@@ -64,6 +66,7 @@ export const CREATE_COMPANY_MUTATION = gql`
   mutation CreateCompany($input: CreateCompanyInput!) {
     createCompany(input: $input) {
       id
+      organizationId
       name
       legalName
       description
@@ -94,6 +97,7 @@ export const UPDATE_COMPANY_MUTATION = gql`
   mutation UpdateCompany($id: ID!, $input: UpdateCompanyInput!) {
     updateCompany(id: $id, input: $input) {
       id
+      organizationId
       name
       legalName
       description

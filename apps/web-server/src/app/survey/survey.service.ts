@@ -4,51 +4,78 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Survey, Prisma, User } from '@generated/prisma';
+import { UserRole } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
+import type { AuthUserContext } from '../auth/auth-policy.service';
+import { AuthPolicyService } from '../auth/auth-policy.service';
 import type { CreateSurveyInput } from './dto/create-survey.input';
 import type { UpdateSurveyInput } from './dto/update-survey.input';
 
 @Injectable()
 export class SurveyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authPolicy: AuthPolicyService
+  ) {}
 
-  async findAll(createdById?: string): Promise<Survey[]> {
-    const where: Prisma.SurveyWhereInput = {};
-    if (createdById) {
-      where.createdById = createdById;
-    }
-    return this.prisma.survey.findMany({
-      where,
+  private surveyInclude = {
+    surveyType: true,
+    createdBy: true,
+    dimensions: {
+      where: { parentDimensionId: null },
       include: {
-        surveyType: true,
-        createdBy: true,
-        dimensions: {
-          where: { parentDimensionId: null },
+        mainQuestionAnswers: true,
+        dimensionQuestions: {
+          include: {
+            question: {
+              include: { answerSet: { include: { answers: true } } },
+            },
+            answerOverrides: true,
+          },
+        },
+        subdimensions: {
           include: {
             mainQuestionAnswers: true,
             dimensionQuestions: {
-              include: { question: { include: { answerSet: { include: { answers: true } } } }, answerOverrides: true },
-            },
-            subdimensions: {
               include: {
-                mainQuestionAnswers: true,
-                dimensionQuestions: {
-                  include: { question: { include: { answerSet: { include: { answers: true } } } }, answerOverrides: true },
+                question: {
+                  include: { answerSet: { include: { answers: true } } },
                 },
+                answerOverrides: true,
               },
             },
           },
-          orderBy: { order: 'asc' },
         },
       },
+      orderBy: { order: 'asc' as const },
+    },
+  } satisfies Prisma.SurveyInclude;
+
+  async findAll(user: AuthUserContext): Promise<Survey[]> {
+    const where: Prisma.SurveyWhereInput = {};
+
+    if (this.authPolicy.isAdmin(user)) {
+      // no filter
+    } else if (this.authPolicy.isDesigner(user)) {
+      where.createdById = user.id;
+    } else if (this.authPolicy.isOrgAdmin(user)) {
+      const orgIds = this.authPolicy.getOrganizationIds(user);
+      where.organizationSurveys = {
+        some: { organizationId: { in: orgIds } },
+      };
+    } else {
+      throw new ForbiddenException('No access to surveys');
+    }
+
+    return this.prisma.survey.findMany({
+      where,
+      include: this.surveyInclude,
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(
-    id: string
-  ): Promise<(Survey & { surveyType: unknown; createdBy: User }) | null> {
-    return this.prisma.survey.findUnique({
+  async findOne(id: string, user?: AuthUserContext) {
+    const survey = await this.prisma.survey.findUnique({
       where: { id },
       include: {
         surveyType: true,
@@ -60,7 +87,11 @@ export class SurveyService {
             dimensionQuestions: {
               include: {
                 question: {
-                  include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
+                  include: {
+                    answerSet: {
+                      include: { answers: { orderBy: { sortOrder: 'asc' } } },
+                    },
+                  },
                 },
                 answerOverrides: true,
               },
@@ -72,7 +103,13 @@ export class SurveyService {
                 dimensionQuestions: {
                   include: {
                     question: {
-                      include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } },
+                      include: {
+                        answerSet: {
+                          include: {
+                            answers: { orderBy: { sortOrder: 'asc' } },
+                          },
+                        },
+                      },
                     },
                     answerOverrides: true,
                   },
@@ -86,9 +123,17 @@ export class SurveyService {
         },
       },
     });
+
+    if (!survey || !user) {
+      return survey;
+    }
+
+    await this.assertReadAccess(user, survey.id, survey.createdById);
+    return survey;
   }
 
-  async create(input: CreateSurveyInput, createdById: string) {
+  async create(input: CreateSurveyInput, user: AuthUserContext) {
+    this.authPolicy.assertRole(user, [UserRole.ADMIN, UserRole.DESIGNER]);
     const surveyType = await this.prisma.surveyType.findUnique({
       where: { id: input.surveyTypeId },
     });
@@ -105,7 +150,7 @@ export class SurveyService {
             title: input.title,
             surveyTypeId: input.surveyTypeId,
             description: input.description ?? undefined,
-            createdById,
+            createdById: user.id,
           },
         });
         await tx.dimension.create({
@@ -127,7 +172,7 @@ export class SurveyService {
         title: input.title,
         surveyTypeId: input.surveyTypeId,
         description: input.description ?? undefined,
-        createdById,
+        createdById: user.id,
       },
     });
     const result = await this.findOne(survey.id);
@@ -138,15 +183,9 @@ export class SurveyService {
   async update(
     id: string,
     input: UpdateSurveyInput,
-    userId: string
+    user: AuthUserContext
   ): Promise<Survey & { surveyType: unknown; createdBy: User }> {
-    const existing = await this.prisma.survey.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException(`Survey with id ${id} not found`);
-    }
-    if (existing.createdById !== userId) {
-      throw new ForbiddenException('Only the creator can update this survey');
-    }
+    await this.assertWriteAccess(user, id);
     const updated = await this.prisma.survey.update({
       where: { id },
       data: {
@@ -160,14 +199,54 @@ export class SurveyService {
     return result;
   }
 
-  async delete(id: string, userId: string): Promise<Survey> {
-    const existing = await this.prisma.survey.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException(`Survey with id ${id} not found`);
-    }
-    if (existing.createdById !== userId) {
-      throw new ForbiddenException('Only the creator can delete this survey');
-    }
+  async delete(id: string, user: AuthUserContext): Promise<Survey> {
+    await this.assertWriteAccess(user, id);
     return this.prisma.survey.delete({ where: { id } });
+  }
+
+  private async assertReadAccess(
+    user: AuthUserContext,
+    surveyId: string,
+    createdById: string
+  ): Promise<void> {
+    if (this.authPolicy.isAdmin(user)) {
+      return;
+    }
+
+    if (this.authPolicy.isDesigner(user) && createdById === user.id) {
+      return;
+    }
+
+    if (this.authPolicy.isOrgAdmin(user)) {
+      const orgIds = this.authPolicy.getOrganizationIds(user);
+      const assignment = await this.prisma.organizationSurvey.findFirst({
+        where: { surveyId, organizationId: { in: orgIds } },
+      });
+      if (assignment) {
+        return;
+      }
+    }
+
+    throw new ForbiddenException('No access to this survey');
+  }
+
+  private async assertWriteAccess(
+    user: AuthUserContext,
+    surveyId: string
+  ): Promise<void> {
+    const existing = await this.prisma.survey.findUnique({ where: { id: surveyId } });
+    if (!existing) {
+      throw new NotFoundException(`Survey with id ${surveyId} not found`);
+    }
+
+    if (this.authPolicy.isAdmin(user)) {
+      return;
+    }
+
+    if (this.authPolicy.isDesigner(user) && existing.createdById === user.id) {
+      return;
+    }
+
+    throw new ForbiddenException('Only survey designers can modify this survey');
   }
 }

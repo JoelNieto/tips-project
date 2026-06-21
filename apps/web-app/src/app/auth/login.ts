@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { LocaleService } from '../i18n/locale.service';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -28,18 +27,10 @@ import { AuthService } from './auth.service';
             T
           </div>
           <h1 class="text-2xl font-bold text-slate-900">
-            {{
-              isSignUp()
-                ? ('auth.login.createAccount' | translate)
-                : ('auth.login.welcomeBack' | translate)
-            }}
+            {{ 'auth.login.welcomeBack' | translate }}
           </h1>
           <p class="text-slate-500 mt-1">
-            {{
-              isSignUp()
-                ? ('auth.login.signUpSubtitle' | translate)
-                : ('auth.login.signInSubtitle' | translate)
-            }}
+            {{ 'auth.login.signInSubtitle' | translate }}
           </p>
         </div>
 
@@ -54,27 +45,6 @@ import { AuthService } from './auth.service';
           }
 
           <form (ngSubmit)="onSubmit()" class="space-y-5">
-            @if (isSignUp()) {
-              <div>
-                <label
-                  for="name"
-                  class="block text-sm font-medium text-slate-700 mb-1.5"
-                >
-                  {{ 'auth.login.fullName' | translate }}
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  [(ngModel)]="name"
-                  name="name"
-                  required
-                  autocomplete="name"
-                  placeholder="Jane Doe"
-                  class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                />
-              </div>
-            }
-
             <div>
               <label
                 for="email"
@@ -107,9 +77,7 @@ import { AuthService } from './auth.service';
                 [(ngModel)]="password"
                 name="password"
                 required
-                autocomplete="{{
-                  isSignUp() ? 'new-password' : 'current-password'
-                }}"
+                autocomplete="current-password"
                 placeholder="••••••••"
                 class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
@@ -127,41 +95,17 @@ import { AuthService } from './auth.service';
                     aria-hidden="true"
                     >progress_activity</span
                   >
-                  {{
-                    isSignUp()
-                      ? ('auth.login.creatingAccount' | translate)
-                      : ('auth.login.signingIn' | translate)
-                  }}
+                  {{ 'auth.login.signingIn' | translate }}
                 </span>
               } @else {
-                {{
-                  isSignUp()
-                    ? ('auth.login.createAccountButton' | translate)
-                    : ('auth.login.signIn' | translate)
-                }}
+                {{ 'auth.login.signIn' | translate }}
               }
             </button>
           </form>
         </div>
 
         <p class="text-center text-sm text-slate-500 mt-6">
-          @if (isSignUp()) {
-            {{ 'auth.login.alreadyHaveAccount' | translate }}
-            <button
-              (click)="isSignUp.set(false)"
-              class="text-indigo-600 font-medium hover:text-indigo-500"
-            >
-              {{ 'auth.login.signIn' | translate }}
-            </button>
-          } @else {
-            {{ 'auth.login.dontHaveAccount' | translate }}
-            <button
-              (click)="isSignUp.set(true)"
-              class="text-indigo-600 font-medium hover:text-indigo-500"
-            >
-              {{ 'auth.login.getStarted' | translate }}
-            </button>
-          }
+          {{ 'auth.login.adminProvisioned' | translate }}
         </p>
       </div>
     </div>
@@ -175,35 +119,21 @@ import { AuthService } from './auth.service';
 export default class LoginComponent {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly localeService = inject(LocaleService);
 
   returnUrl = input<string>('/dashboard');
 
   protected email = signal('');
   protected password = signal('');
-  protected name = signal('');
-  protected isSignUp = signal(false);
 
   protected isAuthErrorKey(error: string): boolean {
     return error.startsWith('auth.');
   }
 
   async onSubmit() {
-    let success: boolean;
-
-    if (this.isSignUp()) {
-      success = await this.auth.signUp({
-        email: this.email(),
-        password: this.password(),
-        name: this.name(),
-        locale: this.localeService.getActiveLocale(),
-      });
-    } else {
-      success = await this.auth.signIn({
-        email: this.email(),
-        password: this.password(),
-      });
-    }
+    const success = await this.auth.signIn({
+      email: this.email(),
+      password: this.password(),
+    });
 
     if (success) {
       this.router.navigateByUrl(this.returnUrl());

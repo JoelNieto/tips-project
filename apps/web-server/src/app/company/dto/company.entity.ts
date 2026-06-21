@@ -1,10 +1,25 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../../user/dto/user.entity';
+
+@ObjectType()
+export class OrganizationSummaryEntity {
+  @Field(() => ID)
+  id!: string;
+
+  @Field()
+  name!: string;
+}
 
 @ObjectType()
 export class CompanyEntity {
   @Field(() => ID)
   id!: string;
+
+  @Field(() => ID)
+  organizationId!: string;
+
+  @Field(() => OrganizationSummaryEntity, { nullable: true })
+  organization?: OrganizationSummaryEntity;
 
   @Field()
   name!: string;

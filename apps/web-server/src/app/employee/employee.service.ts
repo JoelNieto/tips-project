@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import type { Employee, Prisma } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
+import type { AuthUserContext } from '../auth/auth-policy.service';
+import { AuthPolicyService } from '../auth/auth-policy.service';
 import type { CreateEmployeeInput } from './dto/create-employee.input';
 import type { UpdateEmployeeInput } from './dto/update-employee.input';
 
@@ -14,10 +16,16 @@ type EmployeeWithPosition = Prisma.EmployeeGetPayload<{
 
 @Injectable()
 export class EmployeeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authPolicy: AuthPolicyService
+  ) {}
 
-  async findByCompany(companyId: string): Promise<EmployeeWithPosition[]> {
-    await this.ensureCompanyExists(companyId);
+  async findByCompany(
+    companyId: string,
+    user: AuthUserContext
+  ): Promise<EmployeeWithPosition[]> {
+    await this.authPolicy.assertCompanyAccess(user, companyId);
 
     return this.prisma.employee.findMany({
       where: { companyId },
@@ -26,15 +34,25 @@ export class EmployeeService {
     });
   }
 
-  async findOne(id: string): Promise<EmployeeWithPosition | null> {
-    return this.prisma.employee.findUnique({
+  async findOne(id: string, user: AuthUserContext): Promise<EmployeeWithPosition | null> {
+    const employee = await this.prisma.employee.findUnique({
       where: { id },
       include: { position: true },
     });
+
+    if (!employee) {
+      return null;
+    }
+
+    await this.authPolicy.assertCompanyAccess(user, employee.companyId);
+    return employee;
   }
 
-  async create(input: CreateEmployeeInput): Promise<EmployeeWithPosition> {
-    await this.ensureCompanyExists(input.companyId);
+  async create(
+    input: CreateEmployeeInput,
+    user: AuthUserContext
+  ): Promise<EmployeeWithPosition> {
+    await this.authPolicy.assertCompanyAccess(user, input.companyId);
 
     if (input.positionId) {
       await this.ensurePositionBelongsToCompany(
@@ -63,7 +81,8 @@ export class EmployeeService {
 
   async update(
     id: string,
-    input: UpdateEmployeeInput
+    input: UpdateEmployeeInput,
+    user: AuthUserContext
   ): Promise<EmployeeWithPosition> {
     const existing = await this.prisma.employee.findUnique({
       where: { id },
@@ -72,6 +91,8 @@ export class EmployeeService {
     if (!existing) {
       throw new NotFoundException(`Employee with id ${id} not found`);
     }
+
+    await this.authPolicy.assertCompanyAccess(user, existing.companyId);
 
     if (input.positionId) {
       await this.ensurePositionBelongsToCompany(
@@ -110,7 +131,7 @@ export class EmployeeService {
     });
   }
 
-  async delete(id: string): Promise<Employee> {
+  async delete(id: string, user: AuthUserContext): Promise<Employee> {
     const existing = await this.prisma.employee.findUnique({
       where: { id },
     });
@@ -119,19 +140,11 @@ export class EmployeeService {
       throw new NotFoundException(`Employee with id ${id} not found`);
     }
 
+    await this.authPolicy.assertCompanyAccess(user, existing.companyId);
+
     return this.prisma.employee.delete({
       where: { id },
     });
-  }
-
-  private async ensureCompanyExists(companyId: string): Promise<void> {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
-    });
-
-    if (!company) {
-      throw new NotFoundException(`Company with id ${companyId} not found`);
-    }
   }
 
   private async ensurePositionBelongsToCompany(

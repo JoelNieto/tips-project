@@ -23,9 +23,11 @@ import {
   DELETE_COMPANY_MUTATION,
   UPDATE_COMPANY_MUTATION,
 } from './graphql/companies.graphql';
+import { ORGANIZATIONS_QUERY } from '../organizations/graphql/organizations.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 
 interface CompanyFormModel {
+  organizationId: string;
   name: string;
   legalName: string;
   description: string;
@@ -44,6 +46,7 @@ interface CompanyFormModel {
 }
 
 const emptyModel: CompanyFormModel = {
+  organizationId: '',
   name: '',
   legalName: '',
   description: '',
@@ -97,6 +100,22 @@ const emptyModel: CompanyFormModel = {
           @if (submitError()) {
             <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
               {{ submitError() }}
+            </div>
+          }
+
+          @if (!isEditMode()) {
+            <div>
+              <label for="organizationId" class="block text-sm font-medium text-slate-700">Organization *</label>
+              <select
+                id="organizationId"
+                [formField]="companyForm.organizationId"
+                class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">Select organization</option>
+                @for (org of organizations(); track org.id) {
+                  <option [value]="org.id">{{ org.name }}</option>
+                }
+              </select>
             </div>
           }
 
@@ -319,6 +338,8 @@ export default class CompanyFormComponent {
     required(schemaPath.name, { message: 'Name is required' });
   });
 
+  protected readonly organizations = signal<{ id: string; name: string }[]>([]);
+
   protected readonly loading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
@@ -329,6 +350,15 @@ export default class CompanyFormComponent {
   };
 
   constructor() {
+    this.apollo
+      .watchQuery<{ organizations: { id: string; name: string }[] }>({
+        query: ORGANIZATIONS_QUERY,
+      })
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        this.organizations.set((result.data?.organizations ?? []) as { id: string; name: string }[]);
+      });
+
     effect(() => {
       const companyId = this.id();
       if (companyId && companyId !== 'new') {
@@ -354,6 +384,7 @@ export default class CompanyFormComponent {
           const company = result.data?.company;
           if (company && typeof company === 'object') {
             this.companyModel.set({
+              organizationId: (company['organizationId'] as string) ?? '',
               name: (company['name'] as string) ?? '',
               legalName: (company['legalName'] as string) ?? '',
               description: (company['description'] as string) ?? '',
@@ -386,6 +417,7 @@ export default class CompanyFormComponent {
 
     const value = this.companyModel();
     const input = {
+      organizationId: value.organizationId || undefined,
       name: value.name,
       legalName: value.legalName || undefined,
       description: value.description || undefined,
@@ -422,6 +454,10 @@ export default class CompanyFormComponent {
           },
         });
     } else {
+      if (!value.organizationId) {
+        this.submitError.set('Organization is required');
+        return;
+      }
       this.submitting.set(true);
       this.apollo
         .mutate({

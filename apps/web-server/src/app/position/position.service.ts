@@ -5,15 +5,23 @@ import {
 } from '@nestjs/common';
 import type { Position } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
+import type { AuthUserContext } from '../auth/auth-policy.service';
+import { AuthPolicyService } from '../auth/auth-policy.service';
 import type { CreatePositionInput } from './dto/create-position.input';
 import type { UpdatePositionInput } from './dto/update-position.input';
 
 @Injectable()
 export class PositionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authPolicy: AuthPolicyService
+  ) {}
 
-  async findByCompany(companyId: string): Promise<Position[]> {
-    await this.ensureCompanyExists(companyId);
+  async findByCompany(
+    companyId: string,
+    user: AuthUserContext
+  ): Promise<Position[]> {
+    await this.authPolicy.assertCompanyAccess(user, companyId);
 
     return this.prisma.position.findMany({
       where: { companyId },
@@ -21,14 +29,21 @@ export class PositionService {
     });
   }
 
-  async findOne(id: string): Promise<Position | null> {
-    return this.prisma.position.findUnique({
+  async findOne(id: string, user: AuthUserContext): Promise<Position | null> {
+    const position = await this.prisma.position.findUnique({
       where: { id },
     });
+
+    if (!position) {
+      return null;
+    }
+
+    await this.authPolicy.assertCompanyAccess(user, position.companyId);
+    return position;
   }
 
-  async create(input: CreatePositionInput): Promise<Position> {
-    await this.ensureCompanyExists(input.companyId);
+  async create(input: CreatePositionInput, user: AuthUserContext): Promise<Position> {
+    await this.authPolicy.assertCompanyAccess(user, input.companyId);
 
     if (input.parentPositionId) {
       await this.ensureParentPosition(input.parentPositionId, input.companyId);
@@ -44,7 +59,11 @@ export class PositionService {
     });
   }
 
-  async update(id: string, input: UpdatePositionInput): Promise<Position> {
+  async update(
+    id: string,
+    input: UpdatePositionInput,
+    user: AuthUserContext
+  ): Promise<Position> {
     const existing = await this.prisma.position.findUnique({
       where: { id },
     });
@@ -52,6 +71,8 @@ export class PositionService {
     if (!existing) {
       throw new NotFoundException(`Position with id ${id} not found`);
     }
+
+    await this.authPolicy.assertCompanyAccess(user, existing.companyId);
 
     if (input.parentPositionId !== undefined) {
       if (input.parentPositionId === id) {
@@ -77,7 +98,7 @@ export class PositionService {
     });
   }
 
-  async delete(id: string): Promise<Position> {
+  async delete(id: string, user: AuthUserContext): Promise<Position> {
     const existing = await this.prisma.position.findUnique({
       where: { id },
       include: { childPositions: true },
@@ -86,6 +107,8 @@ export class PositionService {
     if (!existing) {
       throw new NotFoundException(`Position with id ${id} not found`);
     }
+
+    await this.authPolicy.assertCompanyAccess(user, existing.companyId);
 
     if (existing.childPositions.length > 0) {
       throw new BadRequestException(
@@ -96,16 +119,6 @@ export class PositionService {
     return this.prisma.position.delete({
       where: { id },
     });
-  }
-
-  private async ensureCompanyExists(companyId: string): Promise<void> {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
-    });
-
-    if (!company) {
-      throw new NotFoundException(`Company with id ${companyId} not found`);
-    }
   }
 
   private async ensureParentPosition(

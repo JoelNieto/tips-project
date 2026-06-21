@@ -11,6 +11,8 @@
   "nav": {
     "home": "Inicio",
     "companies": "Empresas",
+    "organizations": "Organizaciones",
+    "users": "Usuarios",
     "surveyTypes": "Tipos de encuesta",
     "questionBank": "Banco de preguntas",
     "answerSets": "Banco de respuestas",
@@ -34,10 +36,7 @@
       "signingIn": "Iniciando sesión…",
       "creatingAccount": "Creando cuenta…",
       "signIn": "Iniciar sesión",
-      "createAccountButton": "Crear cuenta",
-      "alreadyHaveAccount": "¿Ya tienes cuenta?",
-      "dontHaveAccount": "¿No tienes cuenta?",
-      "getStarted": "Regístrate"
+      "adminProvisioned": "Las cuentas las crea un administrador de la plataforma."
     }
   },
   "profile": {

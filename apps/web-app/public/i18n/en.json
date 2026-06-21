@@ -11,6 +11,8 @@
   "nav": {
     "home": "Home",
     "companies": "Companies",
+    "organizations": "Organizations",
+    "users": "Users",
     "surveyTypes": "Survey Types",
     "questionBank": "Question Bank",
     "answerSets": "Answer Sets",
@@ -34,10 +36,7 @@
       "signingIn": "Signing in…",
       "creatingAccount": "Creating account…",
       "signIn": "Sign in",
-      "createAccountButton": "Create account",
-      "alreadyHaveAccount": "Already have an account?",
-      "dontHaveAccount": "Don't have an account?",
-      "getStarted": "Get started"
+      "adminProvisioned": "Accounts are created by a platform administrator."
     }
   },
   "profile": {

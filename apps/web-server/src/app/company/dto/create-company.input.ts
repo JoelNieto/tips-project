@@ -1,15 +1,20 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, ID, InputType } from '@nestjs/graphql';
 import {
   IsEmail,
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
 
 @InputType()
 export class CreateCompanyInput {
+  @Field(() => ID)
+  @IsUUID()
+  organizationId!: string;
+
   @Field()
   @IsString()
   @MinLength(1)

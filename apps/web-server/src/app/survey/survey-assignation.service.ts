@@ -6,8 +6,11 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { Prisma } from '@generated/prisma';
+import { UserRole } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
 import { SurveyService } from './survey.service';
+import type { AuthUserContext } from '../auth/auth-policy.service';
+import { AuthPolicyService } from '../auth/auth-policy.service';
 import type { CreateSurveyAssignationInput } from './dto/create-survey-assignation.input';
 import type {
   SubmitSurveyFillInput,
@@ -32,13 +35,24 @@ const assignationInclude = {
 export class SurveyAssignationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly surveyService: SurveyService
+    private readonly surveyService: SurveyService,
+    private readonly authPolicy: AuthPolicyService
   ) {}
 
-  async findBySurvey(surveyId: string, userId: string) {
-    await this.assertSurveyOwnership(surveyId, userId);
+  async findBySurvey(surveyId: string, user: AuthUserContext) {
+    await this.assertSurveyReadAccess(user, surveyId);
+
+    const where: Prisma.SurveyAssignationWhereInput = { surveyId };
+
+    if (this.authPolicy.isOrgAdmin(user)) {
+      const orgIds = this.authPolicy.getOrganizationIds(user);
+      where.company = { organizationId: { in: orgIds } };
+    } else if (!this.authPolicy.isAdmin(user)) {
+      where.createdById = user.id;
+    }
+
     const rows = await this.prisma.surveyAssignation.findMany({
-      where: { surveyId, createdById: userId },
+      where,
       include: assignationInclude,
       orderBy: { createdAt: 'desc' },
     });
@@ -48,7 +62,7 @@ export class SurveyAssignationService {
     }));
   }
 
-  async findOne(id: string, userId: string) {
+  async findOne(id: string, user: AuthUserContext) {
     const assignation = await this.prisma.surveyAssignation.findUnique({
       where: { id },
       include: assignationInclude,
@@ -56,16 +70,12 @@ export class SurveyAssignationService {
     if (!assignation) {
       throw new NotFoundException(`Survey assignation with id ${id} not found`);
     }
-    if (assignation.createdById !== userId) {
-      throw new ForbiddenException(
-        'Only the creator can view this survey assignation'
-      );
-    }
+    await this.assertAssignationAccess(user, assignation);
     return { ...assignation, inviteeCount: assignation.invitees.length };
   }
 
-  async create(input: CreateSurveyAssignationInput, userId: string) {
-    await this.assertSurveyOwnership(input.surveyId, userId);
+  async create(input: CreateSurveyAssignationInput, user: AuthUserContext) {
+    this.authPolicy.assertRole(user, [UserRole.ADMIN, UserRole.ORG_ADMIN]);
 
     const company = await this.prisma.company.findUnique({
       where: { id: input.companyId },
@@ -73,6 +83,13 @@ export class SurveyAssignationService {
     if (!company) {
       throw new NotFoundException(`Company with id ${input.companyId} not found`);
     }
+
+    await this.authPolicy.assertCompanyAccess(user, input.companyId);
+    await this.authPolicy.assertSurveyAvailableToOrg(
+      user,
+      input.surveyId,
+      company.organizationId
+    );
 
     const startDate = new Date(input.startDate);
     const expirationDate = new Date(input.expirationDate);
@@ -93,7 +110,7 @@ export class SurveyAssignationService {
           welcomeMessage: input.welcomeMessage ?? undefined,
           startDate,
           expirationDate,
-          createdById: userId,
+          createdById: user.id,
         },
       });
 
@@ -201,35 +218,22 @@ export class SurveyAssignationService {
     });
   }
 
-  async findFillResults(id: string, userId: string) {
+  async findFillResults(id: string, user: AuthUserContext) {
     const assignation = await this.prisma.surveyAssignation.findUnique({
       where: { id },
-      select: {
-        createdById: true,
-        survey: {
-          select: {
-            surveyType: {
-              select: {
-                hasCategories: true,
-                hasSubcategories: true,
-                categoryName: true,
-                subcategoryName: true,
-                visibleCategories: true,
-                visibleSubcategories: true,
-              },
-            },
-          },
-        },
-      },
+      include: assignationInclude,
     });
     if (!assignation) {
       throw new NotFoundException(`Survey assignation with id ${id} not found`);
     }
-    if (assignation.createdById !== userId) {
-      throw new ForbiddenException('Only the creator can view fill results');
-    }
+    await this.assertAssignationAccess(user, assignation);
 
-    const surveyType = assignation.survey?.surveyType ?? {
+    const survey = await this.prisma.survey.findUnique({
+      where: { id: assignation.surveyId },
+      include: { surveyType: true },
+    });
+
+    const surveyType = survey?.surveyType ?? {
       hasCategories: false,
       hasSubcategories: false,
       categoryName: null,
@@ -347,18 +351,15 @@ export class SurveyAssignationService {
     return [...groups.values()];
   }
 
-  async delete(id: string, userId: string) {
+  async delete(id: string, user: AuthUserContext) {
     const existing = await this.prisma.surveyAssignation.findUnique({
       where: { id },
+      include: assignationInclude,
     });
     if (!existing) {
       throw new NotFoundException(`Survey assignation with id ${id} not found`);
     }
-    if (existing.createdById !== userId) {
-      throw new ForbiddenException(
-        'Only the creator can delete this survey assignation'
-      );
-    }
+    await this.assertAssignationAccess(user, existing);
     return this.prisma.surveyAssignation.delete({
       where: { id },
       include: assignationInclude,
@@ -507,16 +508,68 @@ export class SurveyAssignationService {
     return rows;
   }
 
-  private async assertSurveyOwnership(surveyId: string, userId: string) {
+  private async assertSurveyReadAccess(
+    user: AuthUserContext,
+    surveyId: string
+  ): Promise<void> {
+    if (this.authPolicy.isAdmin(user)) {
+      return;
+    }
+
+    if (this.authPolicy.isOrgAdmin(user)) {
+      const orgIds = this.authPolicy.getOrganizationIds(user);
+      const assignment = await this.prisma.organizationSurvey.findFirst({
+        where: { surveyId, organizationId: { in: orgIds } },
+      });
+      if (assignment) {
+        return;
+      }
+    }
+
     const survey = await this.prisma.survey.findUnique({
       where: { id: surveyId },
+      select: { createdById: true },
     });
     if (!survey) {
       throw new NotFoundException(`Survey with id ${surveyId} not found`);
     }
-    if (survey.createdById !== userId) {
-      throw new ForbiddenException('Only the survey creator can manage assignations');
+    if (survey.createdById === user.id) {
+      return;
     }
+
+    throw new ForbiddenException('No access to survey assignations');
+  }
+
+  private async assertAssignationAccess(
+    user: AuthUserContext,
+    assignation: Prisma.SurveyAssignationGetPayload<{
+      include: typeof assignationInclude;
+    }>
+  ): Promise<void> {
+    if (this.authPolicy.isAdmin(user)) {
+      return;
+    }
+
+    if (this.authPolicy.isOrgAdmin(user)) {
+      const orgIds = this.authPolicy.getOrganizationIds(user);
+      const company = await this.prisma.company.findUnique({
+        where: { id: assignation.companyId },
+      });
+      if (company && orgIds.includes(company.organizationId)) {
+        await this.authPolicy.assertSurveyAvailableToOrg(
+          user,
+          assignation.surveyId,
+          company.organizationId
+        );
+        return;
+      }
+    }
+
+    if (assignation.createdById === user.id) {
+      return;
+    }
+
+    throw new ForbiddenException('No access to this survey assignation');
   }
 
   private async resolveRecipients(

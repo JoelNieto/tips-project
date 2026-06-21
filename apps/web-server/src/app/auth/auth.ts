@@ -4,6 +4,7 @@ import { PrismaClient } from '@generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { admin } from 'better-auth/plugins';
 
 const adapter = new PrismaPg({
   connectionString: process.env['DATABASE_URL'],
@@ -27,8 +28,15 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
   },
   trustedOrigins: parseTrustedOrigins(),
+  plugins: [
+    admin({
+      defaultRole: 'DESIGNER',
+      adminRoles: ['ADMIN'],
+    }),
+  ],
   user: {
     additionalFields: {
       locale: {
@@ -36,6 +44,12 @@ export const auth = betterAuth({
         required: false,
         defaultValue: 'en',
         input: true,
+      },
+      role: {
+        type: 'string',
+        required: false,
+        defaultValue: 'DESIGNER',
+        input: false,
       },
     },
   },

@@ -48,6 +48,11 @@ type AnswerSetEntity {
   updatedAt: DateTime!
 }
 
+input AssignSurveyToOrganizationInput {
+  organizationId: ID!
+  surveyId: ID!
+}
+
 type CompanyEntity {
   city: String
   country: String
@@ -60,6 +65,8 @@ type CompanyEntity {
   legalName: String
   logo: String
   name: String!
+  organization: OrganizationSummaryEntity
+  organizationId: ID!
   phone: String
   postalCode: String
   size: String
@@ -93,6 +100,7 @@ input CreateCompanyInput {
   legalName: String
   logo: String
   name: String!
+  organizationId: ID!
   phone: String
   postalCode: String
   size: String
@@ -132,6 +140,11 @@ input CreateMainQuestionAnswerInput {
   sortOrder: Float
   text: String!
   value: Float!
+}
+
+input CreateOrganizationInput {
+  description: String
+  name: String!
 }
 
 input CreatePositionInput {
@@ -185,6 +198,16 @@ input CreateSurveyTypeInput {
   subcategoryName: String
   visibleCategories: Boolean = false
   visibleSubcategories: Boolean = false
+}
+
+input CreateUserInput {
+  email: String!
+  employeeId: ID
+  locale: String
+  name: String!
+  organizationId: ID
+  password: String!
+  role: UserRole!
 }
 
 type DashboardSummaryEntity {
@@ -280,29 +303,34 @@ type MainQuestionAnswerEntity {
 
 type Mutation {
   addQuestionToDimension(input: AddQuestionToDimensionInput!): DimensionQuestionEntity!
+  assignSurveyToOrganization(input: AssignSurveyToOrganizationInput!): OrganizationSurveyEntity!
   createAnswer(input: CreateAnswerInput!): AnswerEntity!
   createAnswerSet(input: CreateAnswerSetInput!): AnswerSetEntity!
   createCompany(input: CreateCompanyInput!): CompanyEntity!
   createDimension(input: CreateDimensionInput!): DimensionEntity!
   createEmployee(input: CreateEmployeeInput!): EmployeeEntity!
   createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  createOrganization(input: CreateOrganizationInput!): OrganizationEntity!
   createPosition(input: CreatePositionInput!): PositionEntity!
   createQuestion(input: CreateQuestionInput!): QuestionEntity!
   createSurvey(input: CreateSurveyInput!): SurveyEntity!
   createSurveyAssignation(input: CreateSurveyAssignationInput!): SurveyAssignationEntity!
   createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
+  createUser(input: CreateUserInput!): UserEntity!
   deleteAnswer(id: ID!): AnswerEntity!
   deleteAnswerSet(id: ID!): AnswerSetEntity!
   deleteCompany(id: ID!): CompanyEntity!
   deleteDimension(id: ID!): DimensionEntity!
   deleteEmployee(id: ID!): EmployeeEntity!
   deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
+  deleteOrganization(id: ID!): OrganizationEntity!
   deletePosition(id: ID!): PositionEntity!
   deleteQuestion(id: ID!): QuestionEntity!
   deleteSurvey(id: ID!): SurveyEntity!
   deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
   deleteSurveyType(id: ID!): SurveyTypeEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
+  removeSurveyFromOrganization(id: ID!): OrganizationSurveyEntity!
   submitSurveyFill(input: SubmitSurveyFillInput!): SurveyFillSubmissionEntity!
   updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
   updateAnswerSet(id: ID!, input: UpdateAnswerSetInput!): AnswerSetEntity!
@@ -311,16 +339,39 @@ type Mutation {
   updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
   updateEmployee(id: ID!, input: UpdateEmployeeInput!): EmployeeEntity!
   updateMainQuestionAnswer(id: ID!, input: UpdateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
+  updateOrganization(id: ID!, input: UpdateOrganizationInput!): OrganizationEntity!
   updatePosition(id: ID!, input: UpdatePositionInput!): PositionEntity!
   updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
   updateSurvey(id: ID!, input: UpdateSurveyInput!): SurveyEntity!
   updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
+  updateUser(id: ID!, input: UpdateUserInput!): UserEntity!
 }
 
 input NewAnswerSetNestedInput {
   answers: [AnswerNestedInput!]!
   description: String
   name: String!
+}
+
+type OrganizationEntity {
+  createdAt: DateTime!
+  createdBy: UserEntity!
+  description: String
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type OrganizationSummaryEntity {
+  id: ID!
+  name: String!
+}
+
+type OrganizationSurveyEntity {
+  createdAt: DateTime!
+  id: ID!
+  organizationId: ID!
+  surveyId: ID!
 }
 
 type PositionEntity {
@@ -344,6 +395,9 @@ type Query {
   employee(id: ID!): EmployeeEntity
   employees(companyId: ID!): [EmployeeEntity!]!
   hello: String!
+  organization(id: ID!): OrganizationEntity
+  organizationSurveys(organizationId: ID!): [OrganizationSurveyEntity!]!
+  organizations: [OrganizationEntity!]!
   position(id: ID!): PositionEntity
   positions(companyId: ID!): [PositionEntity!]!
   question(id: ID!): QuestionEntity
@@ -357,6 +411,8 @@ type Query {
   surveyTypes: [SurveyTypeEntity!]!
   surveys: [SurveyEntity!]!
   surveysUsingQuestion(questionId: ID!): [SurveyUsageEntity!]!
+  user(id: ID!): UserEntity
+  users: [UserEntity!]!
 }
 
 type QuestionEntity {
@@ -595,6 +651,11 @@ input UpdateMainQuestionAnswerInput {
   value: Float
 }
 
+input UpdateOrganizationInput {
+  description: String
+  name: String
+}
+
 input UpdatePositionInput {
   code: String
   name: String
@@ -631,8 +692,26 @@ input UpdateSurveyTypeInput {
   visibleSubcategories: Boolean
 }
 
+input UpdateUserInput {
+  employeeId: ID
+  organizationId: ID
+  role: UserRole
+}
+
 type UserEntity {
+  createdAt: DateTime!
   email: String!
   id: ID!
+  locale: String
   name: String!
+  role: UserRole!
+  updatedAt: DateTime!
+}
+
+"""Platform user role"""
+enum UserRole {
+  ADMIN
+  DESIGNER
+  EMPLOYEE
+  ORG_ADMIN
 }

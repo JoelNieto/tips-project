@@ -27,6 +27,54 @@ enum EmployeeStatus {
   TERMINATED
 }
 
+enum UserRole {
+  ADMIN
+  DESIGNER
+  ORG_ADMIN
+  EMPLOYEE
+}
+
+model Organization {
+  id          String               @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  createdById String
+  createdBy   User                 @relation("OrganizationsCreated", fields: [createdById], references: [id], onDelete: Restrict)
+  companies   Company[]
+  members     OrganizationUser[]
+  surveys     OrganizationSurvey[]
+
+  @@map("organizations")
+}
+
+model OrganizationUser {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@map("organization_users")
+}
+
+model OrganizationSurvey {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  surveyId       String
+  survey         Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  createdById    String
+  createdBy      User         @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, surveyId])
+  @@map("organization_surveys")
+}
+
 model Company {
   id                 String              @id @default(uuid())
   name               String
@@ -44,6 +92,8 @@ model Company {
   logo               String?
   industry           String?
   size               String?
+  organizationId     String
+  organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   createdById        String
@@ -86,6 +136,8 @@ model Employee {
   company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   positionId     String?
   position       Position?       @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  userId         String?         @unique
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   surveyInvitees SurveyInvitee[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -126,8 +178,9 @@ model Survey {
   createdById  String
   createdBy    User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
   dimensions   Dimension[]
-  assignations SurveyAssignation[]
-  fills        SurveyFill[]
+  assignations        SurveyAssignation[]
+  fills               SurveyFill[]
+  organizationSurveys OrganizationSurvey[]
 
   @@map("surveys")
 }
@@ -331,16 +384,24 @@ model SurveyFillQuestionAnswer {
 }
 
 model User {
-  id                        String              @id
+  id                        String               @id
   name                      String
-  email                     String              @unique
-  emailVerified             Boolean             @default(false)
+  email                     String               @unique
+  emailVerified             Boolean              @default(false)
   image                     String?
-  locale                    String              @default("en")
-  createdAt                 DateTime            @default(now())
-  updatedAt                 DateTime            @updatedAt
+  locale                    String               @default("en")
+  role                      UserRole             @default(DESIGNER)
+  banned                    Boolean              @default(false)
+  banReason                 String?
+  banExpires                DateTime?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
   sessions                  Session[]
   accounts                  Account[]
+  organizationsCreated      Organization[]       @relation("OrganizationsCreated")
+  organizationMemberships   OrganizationUser[]
+  organizationSurveysAssigned OrganizationSurvey[]
+  employeeProfile           Employee?
   companiesCreated          Company[]
   surveyTypesCreated        SurveyType[]
   surveysCreated            Survey[]

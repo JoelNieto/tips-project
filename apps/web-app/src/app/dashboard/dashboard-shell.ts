@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { AuthService } from '../auth/auth.service';
+import { AuthService, type UserRole } from '../auth/auth.service';
+
+interface NavItem {
+  path: string;
+  labelKey: string;
+  exact: boolean;
+  icon: string;
+  roles: UserRole[];
+}
 
 @Component({
   selector: 'app-dashboard-shell',
@@ -10,23 +18,20 @@ import { AuthService } from '../auth/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen flex bg-slate-50">
-      <!-- Sidebar -->
       <aside
         class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 lg:translate-x-0"
         [class.-translate-x-full]="!sidebarOpen()"
         [class.translate-x-0]="sidebarOpen()"
       >
         <div class="flex items-center gap-3 h-16 px-6 border-b border-slate-200 shrink-0">
-          <div
-            class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm font-bold"
-          >
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm font-bold">
             T
           </div>
           <span class="font-semibold text-slate-900">{{ 'common.appName' | translate }}</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
-          @for (item of navItems; track item.path) {
+          @for (item of visibleNavItems(); track item.path) {
             <a
               [routerLink]="item.path"
               routerLinkActive="bg-indigo-50 text-indigo-700"
@@ -47,6 +52,9 @@ import { AuthService } from '../auth/auth.service';
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-slate-900 truncate">{{ auth.user()?.name }}</p>
               <p class="text-xs text-slate-500 truncate">{{ auth.user()?.email }}</p>
+              @if (auth.role(); as role) {
+                <p class="text-xs text-indigo-600 truncate">{{ role }}</p>
+              }
             </div>
           </div>
           <button
@@ -59,7 +67,6 @@ import { AuthService } from '../auth/auth.service';
         </div>
       </aside>
 
-      <!-- Mobile overlay -->
       @if (sidebarOpen()) {
         <button
           type="button"
@@ -69,7 +76,6 @@ import { AuthService } from '../auth/auth.service';
         ></button>
       }
 
-      <!-- Main content -->
       <div class="flex-1 flex flex-col lg:pl-64">
         <header class="sticky top-0 z-10 h-16 bg-white border-b border-slate-200 flex items-center px-6 gap-4">
           <button
@@ -97,17 +103,25 @@ export default class DashboardShellComponent {
   protected readonly auth = inject(AuthService);
   protected sidebarOpen = signal(false);
 
-  protected readonly navItems = [
-    { path: '/dashboard', labelKey: 'nav.home', exact: true, icon: 'home' },
-    { path: '/dashboard/companies', labelKey: 'nav.companies', exact: false, icon: 'business' },
-    { path: '/dashboard/survey-types', labelKey: 'nav.surveyTypes', exact: false, icon: 'poll' },
-    { path: '/dashboard/question-bank', labelKey: 'nav.questionBank', exact: false, icon: 'quiz' },
-    { path: '/dashboard/answer-sets', labelKey: 'nav.answerSets', exact: false, icon: 'list_alt' },
-    { path: '/dashboard/surveys', labelKey: 'nav.surveys', exact: false, icon: 'poll' },
-    { path: '/dashboard/tips', labelKey: 'nav.tips', exact: false, icon: 'payments' },
-    { path: '/dashboard/reports', labelKey: 'nav.reports', exact: false, icon: 'bar_chart' },
-    { path: '/dashboard/profile', labelKey: 'nav.profile', exact: false, icon: 'person' },
+  private readonly navItems: NavItem[] = [
+    { path: '/dashboard', labelKey: 'nav.home', exact: true, icon: 'home', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'] },
+    { path: '/dashboard/users', labelKey: 'nav.users', exact: false, icon: 'group', roles: ['ADMIN'] },
+    { path: '/dashboard/organizations', labelKey: 'nav.organizations', exact: false, icon: 'corporate_fare', roles: ['ADMIN', 'ORG_ADMIN'] },
+    { path: '/dashboard/companies', labelKey: 'nav.companies', exact: false, icon: 'business', roles: ['ADMIN', 'ORG_ADMIN'] },
+    { path: '/dashboard/survey-types', labelKey: 'nav.surveyTypes', exact: false, icon: 'poll', roles: ['ADMIN', 'DESIGNER'] },
+    { path: '/dashboard/question-bank', labelKey: 'nav.questionBank', exact: false, icon: 'quiz', roles: ['ADMIN', 'DESIGNER'] },
+    { path: '/dashboard/answer-sets', labelKey: 'nav.answerSets', exact: false, icon: 'list_alt', roles: ['ADMIN', 'DESIGNER'] },
+    { path: '/dashboard/surveys', labelKey: 'nav.surveys', exact: false, icon: 'assignment', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN'] },
+    { path: '/dashboard/profile', labelKey: 'nav.profile', exact: false, icon: 'person', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'] },
   ];
+
+  protected readonly visibleNavItems = computed(() => {
+    const role = this.auth.role();
+    if (!role) {
+      return [];
+    }
+    return this.navItems.filter((item) => item.roles.includes(role));
+  });
 
   protected toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);
