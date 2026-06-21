@@ -21,7 +21,10 @@ const assignationInclude = {
   survey: { select: { id: true, title: true } },
   invitees: {
     orderBy: { createdAt: 'asc' as const },
-    include: { fill: { select: { id: true, submittedAt: true } } },
+    include: {
+      fill: { select: { id: true, submittedAt: true } },
+      employee: { include: { position: true } },
+    },
   },
 } satisfies Prisma.SurveyAssignationInclude;
 
@@ -77,7 +80,10 @@ export class SurveyAssignationService {
       throw new BadRequestException('Start date must be before expiration date');
     }
 
-    const normalizedInvitees = this.normalizeInvitees(input.invitees);
+    const normalizedInvitees = await this.resolveRecipients(
+      input,
+      input.companyId
+    );
 
     const assignation = await this.prisma.$transaction(async (tx) => {
       const created = await tx.surveyAssignation.create({
@@ -96,6 +102,7 @@ export class SurveyAssignationService {
           assignationId: created.id,
           email: invitee.email,
           name: invitee.name,
+          employeeId: invitee.employeeId,
           token: randomUUID(),
         })),
       });
@@ -512,27 +519,112 @@ export class SurveyAssignationService {
     }
   }
 
-  private normalizeInvitees(
-    invitees: CreateSurveyAssignationInput['invitees']
-  ): { email: string; name?: string }[] {
-    const seen = new Set<string>();
-    const result: { email: string; name?: string }[] = [];
+  private async resolveRecipients(
+    input: CreateSurveyAssignationInput,
+    companyId: string
+  ): Promise<{ email: string; name?: string; employeeId?: string }[]> {
+    const invitees = input.invitees ?? [];
+    const employeeIds = [...new Set(input.employeeIds ?? [])];
+    const positionIds = [...new Set(input.positionIds ?? [])];
 
-    for (const invitee of invitees) {
-      const email = invitee.email.trim().toLowerCase();
-      if (!email || seen.has(email)) {
+    if (
+      invitees.length === 0 &&
+      employeeIds.length === 0 &&
+      positionIds.length === 0
+    ) {
+      throw new BadRequestException(
+        'At least one invitee, employee, or position is required'
+      );
+    }
+
+    const employeesById =
+      employeeIds.length > 0
+        ? await this.prisma.employee.findMany({
+            where: {
+              id: { in: employeeIds },
+              companyId,
+              status: 'ACTIVE',
+            },
+          })
+        : [];
+
+    if (employeeIds.length > 0 && employeesById.length !== employeeIds.length) {
+      throw new BadRequestException(
+        'One or more selected employees were not found or are inactive'
+      );
+    }
+
+    const positions =
+      positionIds.length > 0
+        ? await this.prisma.position.findMany({
+            where: { id: { in: positionIds }, companyId },
+          })
+        : [];
+
+    if (positionIds.length > 0 && positions.length !== positionIds.length) {
+      throw new BadRequestException(
+        'One or more selected positions were not found'
+      );
+    }
+
+    const employeesFromPositions =
+      positionIds.length > 0
+        ? await this.prisma.employee.findMany({
+            where: {
+              companyId,
+              status: 'ACTIVE',
+              positionId: { in: positionIds },
+            },
+          })
+        : [];
+
+    const employeeMap = new Map<
+      string,
+      (typeof employeesById)[number]
+    >();
+    for (const employee of [...employeesById, ...employeesFromPositions]) {
+      employeeMap.set(employee.id, employee);
+    }
+
+    const byEmail = new Map<
+      string,
+      { email: string; name?: string; employeeId?: string }
+    >();
+
+    for (const employee of employeeMap.values()) {
+      const email = employee.email.trim().toLowerCase();
+      if (!email) {
         continue;
       }
-      seen.add(email);
-      const name = invitee.name?.trim();
-      result.push({
+      byEmail.set(email, {
         email,
-        name: name || undefined,
+        name: `${employee.firstName} ${employee.lastName}`.trim(),
+        employeeId: employee.id,
       });
     }
 
+    for (const invitee of invitees) {
+      const email = invitee.email.trim().toLowerCase();
+      if (!email) {
+        continue;
+      }
+      const manualName = invitee.name?.trim();
+      const existing = byEmail.get(email);
+      if (existing) {
+        if (manualName) {
+          existing.name = manualName;
+        }
+      } else {
+        byEmail.set(email, {
+          email,
+          name: manualName || undefined,
+        });
+      }
+    }
+
+    const result = Array.from(byEmail.values());
     if (result.length === 0) {
-      throw new BadRequestException('At least one valid invitee email is required');
+      throw new BadRequestException('At least one valid recipient is required');
     }
 
     return result;

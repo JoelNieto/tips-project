@@ -153,8 +153,10 @@ input CreateQuestionInput {
 
 input CreateSurveyAssignationInput {
   companyId: ID!
+  employeeIds: [ID!]
   expirationDate: DateTime!
-  invitees: [CreateSurveyInviteeInput!]!
+  invitees: [CreateSurveyInviteeInput!]
+  positionIds: [ID!]
   startDate: DateTime!
   surveyId: ID!
   welcomeMessage: String
@@ -478,6 +480,8 @@ type SurveyInviteContextEntity {
 type SurveyInviteeEntity {
   createdAt: DateTime!
   email: String!
+  employee: EmployeeEntity
+  employeeId: ID
   fill: SurveyInviteeFillSummaryEntity
   id: ID!
   name: String

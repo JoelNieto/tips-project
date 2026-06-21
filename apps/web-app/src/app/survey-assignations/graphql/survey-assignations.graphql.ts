@@ -45,6 +45,17 @@ export const SURVEY_ASSIGNATION_QUERY = gql`
         id
         email
         name
+        employeeId
+        employee {
+          id
+          firstName
+          lastName
+          position {
+            id
+            name
+            code
+          }
+        }
         token
         createdAt
         fill {
@@ -72,6 +83,16 @@ export const CREATE_SURVEY_ASSIGNATION_MUTATION = gql`
         id
         email
         name
+        employeeId
+        employee {
+          id
+          firstName
+          lastName
+          position {
+            id
+            name
+          }
+        }
         token
       }
     }

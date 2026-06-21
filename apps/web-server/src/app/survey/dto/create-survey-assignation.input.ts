@@ -1,7 +1,6 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsArray,
   IsDate,
   IsOptional,
@@ -38,10 +37,22 @@ export class CreateSurveyAssignationInput {
   @IsDate()
   expirationDate!: Date;
 
-  @Field(() => [CreateSurveyInviteeInput])
+  @Field(() => [CreateSurveyInviteeInput], { nullable: true })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => CreateSurveyInviteeInput)
-  invitees!: CreateSurveyInviteeInput[];
+  invitees?: CreateSurveyInviteeInput[];
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  employeeIds?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  positionIds?: string[];
 }

@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { EmployeeEntity } from '../../employee/dto/employee.entity';
 
 @ObjectType()
 export class SurveyInviteeFillSummaryEntity {
@@ -19,6 +20,12 @@ export class SurveyInviteeEntity {
 
   @Field({ nullable: true })
   name?: string | null;
+
+  @Field(() => ID, { nullable: true })
+  employeeId?: string | null;
+
+  @Field(() => EmployeeEntity, { nullable: true })
+  employee?: EmployeeEntity | null;
 
   @Field()
   token!: string;
