@@ -119,37 +119,59 @@ interface SubdimensionGroup {
       <!-- Header -->
       <div class="flex items-center gap-4">
         <a
-          [routerLink]="['/dashboard/surveys', surveyId(), 'assignations', id()]"
+          [routerLink]="[
+            '/dashboard/surveys',
+            surveyId(),
+            'assignations',
+            id(),
+          ]"
           class="text-slate-500 hover:text-slate-700"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
           <h2 class="text-2xl font-bold text-slate-900">Survey Results</h2>
-          <p class="mt-1 text-slate-500">{{ completedCount() }} submission{{ completedCount() === 1 ? '' : 's' }}</p>
+          <p class="mt-1 text-slate-500">
+            {{ completedCount() }} submission{{
+              completedCount() === 1 ? '' : 's'
+            }}
+          </p>
         </div>
       </div>
 
       <!-- Loading / Error -->
       @if (loading()) {
-        <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+        <div
+          class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
+        >
           Loading results...
         </div>
       } @else if (error()) {
-        <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <div
+          class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700"
+        >
           <p class="font-medium">Failed to load results</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (completedCount() === 0) {
-        <div class="rounded-xl border border-slate-200 bg-white p-12 text-center">
-          <span class="material-symbols-outlined text-4xl text-slate-300">assignment</span>
+        <div
+          class="rounded-xl border border-slate-200 bg-white p-12 text-center"
+        >
+          <span class="material-symbols-outlined text-4xl text-slate-300"
+            >assignment</span
+          >
           <p class="mt-4 text-slate-600">No submissions yet</p>
-          <p class="mt-1 text-sm text-slate-500">Results will appear here once invitees complete the survey.</p>
+          <p class="mt-1 text-sm text-slate-500">
+            Results will appear here once invitees complete the survey.
+          </p>
         </div>
       } @else {
         <!-- Invitee selector -->
         <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <label for="invitee-select" class="block text-sm font-medium text-slate-700 mb-2">
+          <label
+            for="invitee-select"
+            class="block text-sm font-medium text-slate-700 mb-2"
+          >
             Select invitee
           </label>
           <select
@@ -160,7 +182,11 @@ interface SubdimensionGroup {
             <option value="">— Choose an invitee —</option>
             @for (fill of resultsData()!.fills; track fill.inviteeId) {
               <option [value]="fill.inviteeId">
-                {{ fill.inviteeName ? fill.inviteeName + ' (' + fill.inviteeEmail + ')' : fill.inviteeEmail }}
+                {{
+                  fill.inviteeName
+                    ? fill.inviteeName + ' (' + fill.inviteeEmail + ')'
+                    : fill.inviteeEmail
+                }}
                 · {{ formatDate(fill.submittedAt) }}
               </option>
             }
@@ -169,12 +195,19 @@ interface SubdimensionGroup {
 
         <!-- Chart panel -->
         @if (showChart()) {
-          <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            class="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
+          >
+            <div
+              class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div>
-                <h3 class="text-lg font-semibold text-slate-900">Category breakdown</h3>
+                <h3 class="text-lg font-semibold text-slate-900">
+                  Category breakdown
+                </h3>
                 <p class="mt-1 text-sm text-slate-500">
-                  Sum of selected answer values per {{ categoryLabel().toLowerCase() }}
+                  Sum of selected answer values per
+                  {{ categoryLabel().toLowerCase() }}
                 </p>
               </div>
               <div class="flex flex-wrap items-center gap-4">
@@ -187,7 +220,9 @@ interface SubdimensionGroup {
                     <option value="radar">Radar</option>
                   </select>
                 </label>
-                <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <label
+                  class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
@@ -201,13 +236,11 @@ interface SubdimensionGroup {
 
             @if (!selectedFill() && chartSeries().length === 0) {
               <p class="text-sm text-slate-500 text-center py-4">
-                Select an invitee to view their results, or enable group average comparison.
+                Select an invitee to view their results, or enable group average
+                comparison.
               </p>
             } @else {
-              <app-radar-chart
-                [axes]="chartAxes()"
-                [series]="chartSeries()"
-              />
+              <app-radar-chart [axes]="chartAxes()" [series]="chartSeries()" />
             }
           </div>
         }
@@ -215,34 +248,48 @@ interface SubdimensionGroup {
         <!-- Results panel -->
         @if (selectedFill(); as fill) {
           <div class="space-y-1 text-sm text-slate-500 px-1">
-            Submitted: <span class="font-medium text-slate-700">{{ formatDateTime(fill.submittedAt) }}</span>
+            Submitted:
+            <span class="font-medium text-slate-700">{{
+              formatDateTime(fill.submittedAt)
+            }}</span>
           </div>
 
           @if (groupedResults().length === 0) {
-            <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div
+              class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
+            >
               No answers recorded for this submission.
             </div>
           } @else {
             <div class="space-y-4">
               @for (group of groupedResults(); track group.id) {
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div
+                  class="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                >
                   <!-- Group header (category or top-level dimension) -->
                   <div class="border-b border-slate-200 bg-slate-50 px-6 py-3">
                     <h3 class="font-semibold text-slate-900">
                       @if (hasCategories()) {
-                        <span class="mr-2 inline-flex items-center rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                        <span
+                          class="mr-2 inline-flex items-center rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700"
+                        >
                           {{ categoryLabel() }}
                         </span>
                       }
                       {{ group.title }}
                     </h3>
-                    @if (group.categoryTotal != null) {
+                    @if (group.categoryTotal !== null) {
                       <p class="mt-1 text-sm text-slate-600">
-                        Total: <span class="font-medium">{{ group.categoryTotal }}</span>
+                        Total:
+                        <span class="font-medium">{{
+                          group.categoryTotal
+                        }}</span>
                       </p>
                     }
                     @if (group.categoryMessage; as msg) {
-                      <div class="mt-2 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+                      <div
+                        class="mt-2 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900"
+                      >
                         @if (msg.label) {
                           <p class="font-semibold">{{ msg.label }}</p>
                         }
@@ -253,48 +300,54 @@ interface SubdimensionGroup {
 
                   <!-- Sub-dimension sections -->
                   @for (sub of group.subdimensions; track sub.dimensionId) {
-                    <div class="px-6 py-4 space-y-3 border-b border-slate-100 last:border-b-0">
+                    <div
+                      class="px-6 py-4 space-y-3 border-b border-slate-100 last:border-b-0"
+                    >
                       @if (hasCategories()) {
                         <h4 class="text-sm font-semibold text-slate-700">
                           {{ sub.dimensionTitle }}
                         </h4>
                       }
-                      @if (sub.dimensionTotal != null) {
-                        <p class="text-sm text-slate-600">
-                          Total: <span class="font-medium">{{ sub.dimensionTotal }}</span>
-                        </p>
-                      }
-                      @if (sub.dimensionMessage; as msg) {
-                        <div class="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
-                          @if (msg.label) {
-                            <p class="font-semibold">{{ msg.label }}</p>
-                          }
-                          <p [class.mt-1]="!!msg.label">{{ msg.message }}</p>
-                        </div>
-                      }
 
                       <!-- Main question answer -->
                       @if (sub.mainAnswer) {
-                        <div class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-                          <span class="text-sm text-slate-600">Main question</span>
+                        <div
+                          class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3"
+                        >
+                          <span class="text-sm text-slate-600"
+                            >Main question</span
+                          >
                           <span class="text-sm font-medium text-slate-900">
                             {{ sub.mainAnswer.text }}
-                            <span class="ml-1 text-xs text-slate-400">({{ sub.mainAnswer.value }})</span>
+                            <span class="ml-1 text-xs text-slate-400"
+                              >({{ sub.mainAnswer.value }})</span
+                            >
                           </span>
                         </div>
                       }
 
                       <!-- Survey questions -->
                       @if (sub.questions.length > 0) {
-                        <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
-                          @for (qa of sub.questions; track qa.dimensionQuestionId) {
+                        <div
+                          class="divide-y divide-slate-100 rounded-lg border border-slate-200"
+                        >
+                          @for (
+                            qa of sub.questions;
+                            track qa.dimensionQuestionId
+                          ) {
                             <div class="px-4 py-3">
-                              <p class="mb-2 text-sm text-slate-700">{{ qa.questionText }}</p>
+                              <p class="mb-2 text-sm text-slate-700">
+                                {{ qa.questionText }}
+                              </p>
                               <div class="flex flex-wrap gap-1.5">
                                 @for (ans of qa.answers; track ans.id) {
-                                  <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                                  <span
+                                    class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700"
+                                  >
                                     {{ ans.text }}
-                                    <span class="ml-1 text-indigo-400">({{ ans.value }})</span>
+                                    <span class="ml-1 text-indigo-400"
+                                      >({{ ans.value }})</span
+                                    >
                                   </span>
                                 }
                               </div>
@@ -309,7 +362,9 @@ interface SubdimensionGroup {
             </div>
           }
         } @else {
-          <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-500">
+          <div
+            class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-500"
+          >
             Select an invitee above to view their results
           </div>
         }
@@ -336,21 +391,23 @@ export default class SurveyAssignationResultsPageComponent {
   protected readonly compareToAverage = signal(true);
 
   protected readonly completedCount = computed(
-    () => this.resultsData()?.fills.length ?? 0
+    () => this.resultsData()?.fills.length ?? 0,
   );
 
   protected readonly hasCategories = computed(
-    () => this.resultsData()?.surveyType.hasCategories ?? false
+    () => this.resultsData()?.surveyType.hasCategories ?? false,
   );
 
   protected readonly categoryLabel = computed(
-    () => this.resultsData()?.surveyType.categoryName ?? 'Category'
+    () => this.resultsData()?.surveyType.categoryName ?? 'Category',
   );
 
   protected readonly selectedFill = computed(() => {
     const inviteeId = this.selectedInviteeId();
     if (!inviteeId) return null;
-    return this.resultsData()?.fills.find((f) => f.inviteeId === inviteeId) ?? null;
+    return (
+      this.resultsData()?.fills.find((f) => f.inviteeId === inviteeId) ?? null
+    );
   });
 
   protected readonly chartCategoryAxes = computed(() => {
@@ -360,7 +417,7 @@ export default class SurveyAssignationResultsPageComponent {
   });
 
   protected readonly chartAxes = computed(
-    () => this.chartCategoryAxes().titles
+    () => this.chartCategoryAxes().titles,
   );
 
   protected readonly averageSeries = computed((): RadarSeries | null => {
@@ -394,9 +451,7 @@ export default class SurveyAssignationResultsPageComponent {
 
     const totals = categoryTotals(fill, this.hasCategories());
     const label =
-      fill.inviteeName?.trim() ||
-      fill.inviteeEmail ||
-      'Selected invitee';
+      fill.inviteeName?.trim() || fill.inviteeEmail || 'Selected invitee';
 
     return {
       label,
@@ -421,7 +476,7 @@ export default class SurveyAssignationResultsPageComponent {
   });
 
   protected readonly showChart = computed(
-    () => this.hasCategories() && this.chartAxes().length >= 3
+    () => this.hasCategories() && this.chartAxes().length >= 3,
   );
 
   protected readonly groupedResults = computed((): ResultGroup[] => {
@@ -431,13 +486,13 @@ export default class SurveyAssignationResultsPageComponent {
     const hasCategories = this.hasCategories();
     const dimensions = this.resultsData()?.dimensions ?? [];
     const rangesByDimensionId = new Map(
-      dimensions.map((d) => [d.id, d.scoreRanges])
+      dimensions.map((d) => [d.id, d.scoreRanges]),
     );
     const categoryTotalsById = new Map(
-      categoryTotals(fill, hasCategories).map((t) => [t.id, t.total])
+      categoryTotals(fill, hasCategories).map((t) => [t.id, t.total]),
     );
     const dimensionTotalsById = new Map(
-      dimensionTotals(fill).map((t) => [t.id, t.total])
+      dimensionTotals(fill).map((t) => [t.id, t.total]),
     );
     const groups = new Map<string, ResultGroup>();
 
@@ -461,7 +516,7 @@ export default class SurveyAssignationResultsPageComponent {
     const getSubdimension = (
       group: ResultGroup,
       dimensionId: string,
-      dimensionTitle: string
+      dimensionTitle: string,
     ): SubdimensionGroup => {
       let sub = group.subdimensions.find((s) => s.dimensionId === dimensionId);
       if (!sub) {
@@ -481,8 +536,12 @@ export default class SurveyAssignationResultsPageComponent {
 
     // Index main answers
     for (const ma of fill.mainAnswers) {
-      const groupId = hasCategories ? (ma.categoryId ?? ma.dimensionId) : ma.dimensionId;
-      const groupTitle = hasCategories ? (ma.categoryTitle ?? ma.dimensionTitle) : ma.dimensionTitle;
+      const groupId = hasCategories
+        ? (ma.categoryId ?? ma.dimensionId)
+        : ma.dimensionId;
+      const groupTitle = hasCategories
+        ? (ma.categoryTitle ?? ma.dimensionTitle)
+        : ma.dimensionTitle;
       const group = getGroup(groupId, groupTitle);
       const sub = getSubdimension(group, ma.dimensionId, ma.dimensionTitle);
       sub.mainAnswer = { text: ma.answerText, value: ma.answerValue };
@@ -490,8 +549,12 @@ export default class SurveyAssignationResultsPageComponent {
 
     // Index question answers
     for (const qa of fill.questionAnswers) {
-      const groupId = hasCategories ? (qa.categoryId ?? qa.dimensionId) : qa.dimensionId;
-      const groupTitle = hasCategories ? (qa.categoryTitle ?? qa.dimensionTitle) : qa.dimensionTitle;
+      const groupId = hasCategories
+        ? (qa.categoryId ?? qa.dimensionId)
+        : qa.dimensionId;
+      const groupTitle = hasCategories
+        ? (qa.categoryTitle ?? qa.dimensionTitle)
+        : qa.dimensionTitle;
       const group = getGroup(groupId, groupTitle);
       const sub = getSubdimension(group, qa.dimensionId, qa.dimensionTitle);
       sub.questions.push(qa);
@@ -521,7 +584,8 @@ export default class SurveyAssignationResultsPageComponent {
         next: (result) => {
           this.loading.set(false);
           this.resultsData.set(
-            (result.data?.surveyAssignationFillResults ?? null) as ResultsData | null
+            (result.data?.surveyAssignationFillResults ??
+              null) as ResultsData | null,
           );
         },
         error: (err) => {

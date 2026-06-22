@@ -405,8 +405,8 @@ export default class SurveyFormComponent {
       .subscribe({
         next: (result) => {
           this.loading.set(result.loading);
-          if (result.errors?.length) {
-            this.submitError.set(result.errors[0]?.message ?? 'Failed to load survey');
+          if (result.error) {
+            this.submitError.set(result.error.message ?? 'Failed to load survey');
             return;
           }
           const s = result.data?.survey;
