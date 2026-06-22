@@ -230,7 +230,22 @@ export class SurveyAssignationService {
 
     const survey = await this.prisma.survey.findUnique({
       where: { id: assignation.surveyId },
-      include: { surveyType: true },
+      include: {
+        surveyType: true,
+        dimensions: {
+          where: { parentDimensionId: null },
+          include: {
+            scoreRanges: { orderBy: { order: 'asc' } },
+            subdimensions: {
+              include: {
+                scoreRanges: { orderBy: { order: 'asc' } },
+              },
+              orderBy: { order: 'asc' },
+            },
+          },
+          orderBy: { order: 'asc' },
+        },
+      },
     });
 
     const surveyType = survey?.surveyType ?? {
@@ -286,6 +301,7 @@ export class SurveyAssignationService {
 
     return {
       surveyType,
+      dimensions: this.flattenDimensionsForResults(survey?.dimensions ?? []),
       fills: fills.map((fill) => ({
         inviteeId: fill.inviteeId,
         inviteeEmail: fill.invitee.email,
@@ -349,6 +365,68 @@ export class SurveyAssignationService {
     }
 
     return [...groups.values()];
+  }
+
+  private flattenDimensionsForResults(
+    dimensions: {
+      id: string;
+      title: string;
+      parentDimensionId?: string | null;
+      scoreRanges: {
+        id: string;
+        label: string | null;
+        message: string;
+        minValue: number;
+        maxValue: number;
+        order: number | null;
+      }[];
+      subdimensions?: {
+        id: string;
+        title: string;
+        parentDimensionId?: string | null;
+        scoreRanges: {
+          id: string;
+          label: string | null;
+          message: string;
+          minValue: number;
+          maxValue: number;
+          order: number | null;
+        }[];
+      }[];
+    }[]
+  ) {
+    const result: {
+      id: string;
+      title: string;
+      parentId: string | null;
+      scoreRanges: {
+        id: string;
+        label: string | null;
+        message: string;
+        minValue: number;
+        maxValue: number;
+        order: number | null;
+      }[];
+    }[] = [];
+
+    for (const dim of dimensions) {
+      result.push({
+        id: dim.id,
+        title: dim.title,
+        parentId: dim.parentDimensionId ?? null,
+        scoreRanges: dim.scoreRanges,
+      });
+      for (const sub of dim.subdimensions ?? []) {
+        result.push({
+          id: sub.id,
+          title: sub.title,
+          parentId: dim.id,
+          scoreRanges: sub.scoreRanges,
+        });
+      }
+    }
+
+    return result;
   }
 
   async delete(id: string, user: AuthUserContext) {

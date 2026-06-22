@@ -24,27 +24,40 @@ export class SurveyService {
     dimensions: {
       where: { parentDimensionId: null },
       include: {
-        mainQuestionAnswers: true,
+        mainQuestionAnswers: { orderBy: { sortOrder: 'asc' as const } },
+        scoreRanges: { orderBy: { order: 'asc' as const } },
         dimensionQuestions: {
           include: {
             question: {
-              include: { answerSet: { include: { answers: true } } },
+              include: {
+                answerSet: {
+                  include: { answers: { orderBy: { sortOrder: 'asc' as const } } },
+                },
+              },
             },
             answerOverrides: true,
           },
+          orderBy: { order: 'asc' as const },
         },
         subdimensions: {
           include: {
-            mainQuestionAnswers: true,
+            mainQuestionAnswers: { orderBy: { sortOrder: 'asc' as const } },
+            scoreRanges: { orderBy: { order: 'asc' as const } },
             dimensionQuestions: {
               include: {
                 question: {
-                  include: { answerSet: { include: { answers: true } } },
+                  include: {
+                    answerSet: {
+                      include: { answers: { orderBy: { sortOrder: 'asc' as const } } },
+                    },
+                  },
                 },
                 answerOverrides: true,
               },
+              orderBy: { order: 'asc' as const },
             },
           },
+          orderBy: { order: 'asc' as const },
         },
       },
       orderBy: { order: 'asc' as const },
@@ -77,51 +90,7 @@ export class SurveyService {
   async findOne(id: string, user?: AuthUserContext) {
     const survey = await this.prisma.survey.findUnique({
       where: { id },
-      include: {
-        surveyType: true,
-        createdBy: true,
-        dimensions: {
-          where: { parentDimensionId: null },
-          include: {
-            mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
-            dimensionQuestions: {
-              include: {
-                question: {
-                  include: {
-                    answerSet: {
-                      include: { answers: { orderBy: { sortOrder: 'asc' } } },
-                    },
-                  },
-                },
-                answerOverrides: true,
-              },
-              orderBy: { order: 'asc' },
-            },
-            subdimensions: {
-              include: {
-                mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
-                dimensionQuestions: {
-                  include: {
-                    question: {
-                      include: {
-                        answerSet: {
-                          include: {
-                            answers: { orderBy: { sortOrder: 'asc' } },
-                          },
-                        },
-                      },
-                    },
-                    answerOverrides: true,
-                  },
-                  orderBy: { order: 'asc' },
-                },
-              },
-              orderBy: { order: 'asc' },
-            },
-          },
-          orderBy: { order: 'asc' },
-        },
-      },
+      include: this.surveyInclude,
     });
 
     if (!survey || !user) {

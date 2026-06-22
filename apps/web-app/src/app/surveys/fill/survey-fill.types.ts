@@ -57,6 +57,14 @@ export interface FillDimension {
   mainQuestionAnswers: FillMainQuestionAnswer[];
   dimensionQuestions: FillDimensionQuestion[];
   subdimensions?: FillDimension[];
+  scoreRanges?: {
+    id: string;
+    label?: string | null;
+    message: string;
+    minValue: number;
+    maxValue: number;
+    order?: number | null;
+  }[];
 }
 
 export interface FillSurveyType {

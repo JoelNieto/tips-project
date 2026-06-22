@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { MainQuestionAnswerEntity } from './main-question-answer.entity';
 import { DimensionQuestionEntity } from './dimension-question.entity';
+import { DimensionScoreRangeEntity } from './dimension-score-range.entity';
 
 @ObjectType()
 export class DimensionEntity {
@@ -36,4 +37,7 @@ export class DimensionEntity {
 
   @Field(() => [DimensionEntity], { nullable: true })
   subdimensions?: DimensionEntity[];
+
+  @Field(() => [DimensionScoreRangeEntity])
+  scoreRanges!: DimensionScoreRangeEntity[];
 }

@@ -17,6 +17,8 @@ import { AnswerSetResolver } from './answer-set.resolver';
 import { AnswerSetService } from './answer-set.service';
 import { SurveyAssignationResolver } from './survey-assignation.resolver';
 import { SurveyAssignationService } from './survey-assignation.service';
+import { DimensionScoreRangeResolver } from './dimension-score-range.resolver';
+import { DimensionScoreRangeService } from './dimension-score-range.service';
 import { DashboardResolver } from './dashboard.resolver';
 import { DashboardService } from './dashboard.service';
 import { PrismaModule } from '../prisma.module';
@@ -42,6 +44,8 @@ import { PrismaModule } from '../prisma.module';
     AnswerSetService,
     SurveyAssignationResolver,
     SurveyAssignationService,
+    DimensionScoreRangeResolver,
+    DimensionScoreRangeService,
     DashboardResolver,
     DashboardService,
   ],
@@ -55,6 +59,7 @@ import { PrismaModule } from '../prisma.module';
     AnswerService,
     AnswerSetService,
     SurveyAssignationService,
+    DimensionScoreRangeService,
     DashboardService,
   ],
 })

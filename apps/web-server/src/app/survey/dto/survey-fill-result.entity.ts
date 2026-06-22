@@ -1,4 +1,5 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
+import { DimensionScoreRangeEntity } from './dimension-score-range.entity';
 
 @ObjectType()
 export class SurveyFillAnswerResultEntity {
@@ -104,6 +105,24 @@ export class SurveyAssignationResultsEntity {
   @Field(() => SurveyTypeInfoResultEntity)
   surveyType!: SurveyTypeInfoResultEntity;
 
+  @Field(() => [SurveyResultDimensionEntity])
+  dimensions!: SurveyResultDimensionEntity[];
+
   @Field(() => [SurveyFillResultEntity])
   fills!: SurveyFillResultEntity[];
+}
+
+@ObjectType()
+export class SurveyResultDimensionEntity {
+  @Field(() => ID)
+  id!: string;
+
+  @Field()
+  title!: string;
+
+  @Field(() => ID, { nullable: true })
+  parentId?: string | null;
+
+  @Field(() => [DimensionScoreRangeEntity])
+  scoreRanges!: DimensionScoreRangeEntity[];
 }

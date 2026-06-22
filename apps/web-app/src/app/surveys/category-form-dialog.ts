@@ -14,12 +14,25 @@ import {
   CREATE_MAIN_QUESTION_ANSWER_MUTATION,
   UPDATE_MAIN_QUESTION_ANSWER_MUTATION,
   DELETE_MAIN_QUESTION_ANSWER_MUTATION,
+  CREATE_DIMENSION_SCORE_RANGE_MUTATION,
+  UPDATE_DIMENSION_SCORE_RANGE_MUTATION,
+  DELETE_DIMENSION_SCORE_RANGE_MUTATION,
 } from './graphql/surveys.graphql';
 import {
   CREATE_QUESTION_MUTATION,
   ANSWER_SETS_QUERY,
   QUESTIONS_QUERY,
 } from '../question-bank/graphql/questions.graphql';
+import type { FillDimension, FillDimensionQuestion } from './fill/survey-fill.types';
+import { computeDimensionScoreBounds } from './dimension-score-range.utils';
+
+interface ScoreRangeRow {
+  id?: string;
+  label: string;
+  minValue: string;
+  maxValue: string;
+  message: string;
+}
 
 interface AnswerRow {
   id?: string;
@@ -61,7 +74,16 @@ export interface CategoryFormDialogData {
       value: number;
       reverseValue?: number | null;
     }[];
+    scoreRanges?: {
+      id: string;
+      label?: string | null;
+      message: string;
+      minValue: number;
+      maxValue: number;
+      order?: number | null;
+    }[];
     dimensionQuestions: { id: string; question: { id: string; title: string } }[];
+    dimensionQuestionsForBounds?: FillDimensionQuestion[];
   };
 }
 
@@ -187,6 +209,83 @@ const emptyInlineQuestion: InlineQuestionModel = {
                   </div>
                 }
               </div>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h4 class="text-sm font-medium text-slate-900">Score ranges</h4>
+                <p class="text-xs text-slate-500">
+                  Optional interpretation messages for score bands.
+                  @if (scoreBoundsGuide()) {
+                    Possible score range: {{ scoreBoundsGuide()!.min }} – {{ scoreBoundsGuide()!.max }}
+                  }
+                </p>
+              </div>
+              <button
+                type="button"
+                (click)="addScoreRange()"
+                class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+              >
+                + Add range
+              </button>
+            </div>
+            <div class="space-y-3">
+              @for (r of scoreRanges(); track $index; let i = $index) {
+                <div class="rounded-lg border border-slate-200 p-3 bg-white space-y-3">
+                  <div class="grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <label class="block text-xs font-medium text-slate-500">Label</label>
+                      <input
+                        type="text"
+                        [value]="r.label"
+                        (input)="updateScoreRange(i, 'label', $event)"
+                        placeholder="e.g. Deficient"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-500">Min value</label>
+                      <input
+                        type="number"
+                        step="any"
+                        [value]="r.minValue"
+                        (input)="updateScoreRange(i, 'minValue', $event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-500">Max value</label>
+                      <input
+                        type="number"
+                        step="any"
+                        [value]="r.maxValue"
+                        (input)="updateScoreRange(i, 'maxValue', $event)"
+                        class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-500">Message</label>
+                    <textarea
+                      rows="2"
+                      [value]="r.message"
+                      (input)="updateScoreRange(i, 'message', $event)"
+                      class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+                    ></textarea>
+                  </div>
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      (click)="removeScoreRange(i)"
+                      class="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Remove range
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
 
@@ -454,6 +553,8 @@ export default class CategoryFormDialogComponent {
   protected readonly inlineModel = signal<InlineQuestionModel>({ ...emptyInlineQuestion, answers: [] });
   protected readonly mainQuestionAnswers = signal<AnswerRow[]>([]);
   private readonly originalMainQuestionAnswerIds = signal<Set<string>>(new Set());
+  protected readonly scoreRanges = signal<ScoreRangeRow[]>([]);
+  private readonly originalScoreRangeIds = signal<Set<string>>(new Set());
 
   protected readonly submitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
@@ -464,6 +565,25 @@ export default class CategoryFormDialogComponent {
     const selectedId = this.inlineModel().selectedAnswerSetId;
     if (!selectedId) return [];
     return this.answerSets().find((set) => set.id === selectedId)?.answers ?? [];
+  };
+
+  protected readonly scoreBoundsGuide = () => {
+    const d = this.data.dimension;
+    if (!d) return null;
+    const dimensionForBounds: FillDimension = {
+      id: this.data.dimensionId ?? '',
+      title: d.title,
+      description: d.description,
+      mainQuestionText: d.mainQuestionText,
+      mainQuestionAnswers: (d.mainQuestionAnswers ?? []).map((a) => ({
+        id: a.id,
+        text: a.text,
+        value: a.value,
+        reverseValue: a.reverseValue,
+      })),
+      dimensionQuestions: d.dimensionQuestionsForBounds ?? [],
+    };
+    return computeDimensionScoreBounds(dimensionForBounds);
   };
 
   constructor() {
@@ -482,6 +602,15 @@ export default class CategoryFormDialogComponent {
       }));
       this.mainQuestionAnswers.set(mainAnswers);
       this.originalMainQuestionAnswerIds.set(new Set(mainAnswers.map((a) => a.id!).filter(Boolean)));
+      const ranges = (d.scoreRanges ?? []).map((r) => ({
+        id: r.id,
+        label: r.label ?? '',
+        minValue: String(r.minValue),
+        maxValue: String(r.maxValue),
+        message: r.message,
+      }));
+      this.scoreRanges.set(ranges);
+      this.originalScoreRangeIds.set(new Set(ranges.map((r) => r.id!).filter(Boolean)));
       this.selectedQuestions.set(
         d.dimensionQuestions.map((dq) => ({
           type: 'bank' as const,
@@ -601,6 +730,28 @@ export default class CategoryFormDialogComponent {
     );
   }
 
+  protected addScoreRange(): void {
+    this.scoreRanges.update((list) => [
+      ...list,
+      { label: '', minValue: '0', maxValue: '0', message: '' },
+    ]);
+  }
+
+  protected removeScoreRange(index: number): void {
+    this.scoreRanges.update((list) => list.filter((_, i) => i !== index));
+  }
+
+  protected updateScoreRange(
+    index: number,
+    field: keyof ScoreRangeRow,
+    event: Event
+  ): void {
+    const value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
+    this.scoreRanges.update((list) =>
+      list.map((r, i) => (i === index ? { ...r, [field]: value } : r))
+    );
+  }
+
   protected addInlineQuestion(): void {
     const m = this.inlineModel();
     if (!m.title.trim() || !m.text.trim()) return;
@@ -694,7 +845,8 @@ export default class CategoryFormDialogComponent {
     );
 
     const mainAnswerOps = this.buildMainQuestionAnswerOps(dimensionId);
-    const total = mainAnswerOps.length + bankQuestions.length + newQuestions.length;
+    const scoreRangeOps = this.buildScoreRangeOps(dimensionId);
+    const total = mainAnswerOps.length + scoreRangeOps.length + bankQuestions.length + newQuestions.length;
 
     if (total === 0) {
       this.dialogRef.close({ dimensionId });
@@ -717,6 +869,7 @@ export default class CategoryFormDialogComponent {
     };
 
     mainAnswerOps.forEach((op) => op(checkDone, onError));
+    scoreRangeOps.forEach((op) => op(checkDone, onError));
 
     const addOne = (questionId: string): void => {
       this.apollo
@@ -836,6 +989,75 @@ export default class CategoryFormDialogComponent {
             .subscribe({
               next: () => onDone(),
               error: (err) => onError(err.message ?? 'Failed to create main question answer'),
+            });
+        });
+      }
+    }
+
+    return ops;
+  }
+
+  private buildScoreRangeOps(
+    dimensionId: string
+  ): Array<(onDone: () => void, onError: (message: string) => void) => void> {
+    const ranges = this.scoreRanges()
+      .filter((r) => r.message.trim())
+      .map((r, i) => ({
+        ...r,
+        message: r.message.trim(),
+        order: i,
+      }));
+    const originalIds = this.originalScoreRangeIds();
+    const currentIds = new Set(ranges.filter((r) => r.id).map((r) => r.id!));
+    const ops: Array<(onDone: () => void, onError: (message: string) => void) => void> = [];
+
+    for (const id of originalIds) {
+      if (!currentIds.has(id)) {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: DELETE_DIMENSION_SCORE_RANGE_MUTATION,
+              variables: { id },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to delete score range'),
+            });
+        });
+      }
+    }
+
+    for (const range of ranges) {
+      const input = {
+        label: range.label.trim() || undefined,
+        message: range.message,
+        minValue: parseFloat(range.minValue) || 0,
+        maxValue: parseFloat(range.maxValue) || 0,
+        order: range.order,
+      };
+
+      if (range.id) {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: UPDATE_DIMENSION_SCORE_RANGE_MUTATION,
+              variables: { id: range.id, input },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to update score range'),
+            });
+        });
+      } else {
+        ops.push((onDone, onError) => {
+          this.apollo
+            .mutate({
+              mutation: CREATE_DIMENSION_SCORE_RANGE_MUTATION,
+              variables: { input: { dimensionId, ...input } },
+            })
+            .subscribe({
+              next: () => onDone(),
+              error: (err) => onError(err.message ?? 'Failed to create score range'),
             });
         });
       }

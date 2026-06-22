@@ -17,6 +17,7 @@ export class DimensionService {
       where: { surveyId, parentDimensionId: null },
       include: {
         mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
+        scoreRanges: { orderBy: { order: 'asc' } },
         dimensionQuestions: {
           include: {
             question: { include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } } },
@@ -27,6 +28,7 @@ export class DimensionService {
         subdimensions: {
           include: {
             mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
+            scoreRanges: { orderBy: { order: 'asc' } },
             dimensionQuestions: {
               include: {
                 question: {
@@ -50,6 +52,7 @@ export class DimensionService {
       include: {
         survey: { select: { createdById: true } },
         mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
+        scoreRanges: { orderBy: { order: 'asc' } },
         dimensionQuestions: {
           include: {
             question: { include: { answerSet: { include: { answers: { orderBy: { sortOrder: 'asc' } } } } } },
@@ -60,6 +63,7 @@ export class DimensionService {
         subdimensions: {
           include: {
             mainQuestionAnswers: { orderBy: { sortOrder: 'asc' } },
+            scoreRanges: { orderBy: { order: 'asc' } },
             dimensionQuestions: {
               include: {
                 question: {

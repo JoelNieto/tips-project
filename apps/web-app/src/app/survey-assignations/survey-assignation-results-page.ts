@@ -18,7 +18,10 @@ import { SURVEY_ASSIGNATION_FILL_RESULTS_QUERY } from './graphql/survey-assignat
 import {
   categoryTotals,
   collectCategoryAxes,
+  dimensionTotals,
   mapTotalsToAxes,
+  matchRange,
+  type MatchedScoreRange,
 } from './survey-results-chart.utils';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
@@ -66,24 +69,42 @@ interface SurveyTypeInfo {
   visibleSubcategories: boolean;
 }
 
+interface ResultDimension {
+  id: string;
+  title: string;
+  parentId?: string | null;
+  scoreRanges: {
+    label?: string | null;
+    message: string;
+    minValue: number;
+    maxValue: number;
+    order?: number | null;
+  }[];
+}
+
 interface ResultsData {
   surveyType: SurveyTypeInfo;
+  dimensions: ResultDimension[];
   fills: FillResult[];
 }
 
 // ─── Grouped answer types (for rendering) ────────────────────────────────────
 
-interface SubdimensionGroup {
-  dimensionId: string;
-  dimensionTitle: string;
-  mainAnswer?: { text: string; value: number };
-  questions: QuestionAnswerGroup[];
-}
-
 interface ResultGroup {
   id: string;
   title: string;
+  categoryTotal?: number;
+  categoryMessage?: MatchedScoreRange | null;
   subdimensions: SubdimensionGroup[];
+}
+
+interface SubdimensionGroup {
+  dimensionId: string;
+  dimensionTitle: string;
+  dimensionTotal?: number;
+  dimensionMessage?: MatchedScoreRange | null;
+  mainAnswer?: { text: string; value: number };
+  questions: QuestionAnswerGroup[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -215,6 +236,19 @@ interface ResultGroup {
                       }
                       {{ group.title }}
                     </h3>
+                    @if (group.categoryTotal != null) {
+                      <p class="mt-1 text-sm text-slate-600">
+                        Total: <span class="font-medium">{{ group.categoryTotal }}</span>
+                      </p>
+                    }
+                    @if (group.categoryMessage; as msg) {
+                      <div class="mt-2 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+                        @if (msg.label) {
+                          <p class="font-semibold">{{ msg.label }}</p>
+                        }
+                        <p [class.mt-1]="!!msg.label">{{ msg.message }}</p>
+                      </div>
+                    }
                   </div>
 
                   <!-- Sub-dimension sections -->
@@ -224,6 +258,19 @@ interface ResultGroup {
                         <h4 class="text-sm font-semibold text-slate-700">
                           {{ sub.dimensionTitle }}
                         </h4>
+                      }
+                      @if (sub.dimensionTotal != null) {
+                        <p class="text-sm text-slate-600">
+                          Total: <span class="font-medium">{{ sub.dimensionTotal }}</span>
+                        </p>
+                      }
+                      @if (sub.dimensionMessage; as msg) {
+                        <div class="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+                          @if (msg.label) {
+                            <p class="font-semibold">{{ msg.label }}</p>
+                          }
+                          <p [class.mt-1]="!!msg.label">{{ msg.message }}</p>
+                        </div>
                       }
 
                       <!-- Main question answer -->
@@ -382,12 +429,30 @@ export default class SurveyAssignationResultsPageComponent {
     if (!fill) return [];
 
     const hasCategories = this.hasCategories();
+    const dimensions = this.resultsData()?.dimensions ?? [];
+    const rangesByDimensionId = new Map(
+      dimensions.map((d) => [d.id, d.scoreRanges])
+    );
+    const categoryTotalsById = new Map(
+      categoryTotals(fill, hasCategories).map((t) => [t.id, t.total])
+    );
+    const dimensionTotalsById = new Map(
+      dimensionTotals(fill).map((t) => [t.id, t.total])
+    );
     const groups = new Map<string, ResultGroup>();
 
     // Helper to get/create a group entry
     const getGroup = (groupId: string, groupTitle: string): ResultGroup => {
       if (!groups.has(groupId)) {
-        groups.set(groupId, { id: groupId, title: groupTitle, subdimensions: [] });
+        const total = categoryTotalsById.get(groupId);
+        const ranges = rangesByDimensionId.get(groupId) ?? [];
+        groups.set(groupId, {
+          id: groupId,
+          title: groupTitle,
+          categoryTotal: total,
+          categoryMessage: total != null ? matchRange(total, ranges) : null,
+          subdimensions: [],
+        });
       }
       return groups.get(groupId)!;
     };
@@ -400,7 +465,15 @@ export default class SurveyAssignationResultsPageComponent {
     ): SubdimensionGroup => {
       let sub = group.subdimensions.find((s) => s.dimensionId === dimensionId);
       if (!sub) {
-        sub = { dimensionId, dimensionTitle, questions: [] };
+        const total = dimensionTotalsById.get(dimensionId);
+        const ranges = rangesByDimensionId.get(dimensionId) ?? [];
+        sub = {
+          dimensionId,
+          dimensionTitle,
+          dimensionTotal: total,
+          dimensionMessage: total != null ? matchRange(total, ranges) : null,
+          questions: [],
+        };
         group.subdimensions.push(sub);
       }
       return sub;

@@ -120,6 +120,15 @@ input CreateDimensionInput {
   weighting: Float
 }
 
+input CreateDimensionScoreRangeInput {
+  dimensionId: String!
+  label: String
+  maxValue: Float!
+  message: String!
+  minValue: Float!
+  order: Int
+}
+
 input CreateEmployeeInput {
   birthdate: String
   companyId: ID!
@@ -231,6 +240,7 @@ type DimensionEntity {
   mainQuestionAnswers: [MainQuestionAnswerEntity!]!
   mainQuestionText: String
   order: Float
+  scoreRanges: [DimensionScoreRangeEntity!]!
   subdimensions: [DimensionEntity!]
   title: String!
   updatedAt: DateTime!
@@ -257,6 +267,15 @@ type DimensionQuestionEntity {
   question: QuestionEntity!
   updatedAt: DateTime!
   weightOverride: Float
+}
+
+type DimensionScoreRangeEntity {
+  id: ID!
+  label: String
+  maxValue: Float!
+  message: String!
+  minValue: Float!
+  order: Int
 }
 
 type EmployeeEntity {
@@ -308,6 +327,7 @@ type Mutation {
   createAnswerSet(input: CreateAnswerSetInput!): AnswerSetEntity!
   createCompany(input: CreateCompanyInput!): CompanyEntity!
   createDimension(input: CreateDimensionInput!): DimensionEntity!
+  createDimensionScoreRange(input: CreateDimensionScoreRangeInput!): DimensionScoreRangeEntity!
   createEmployee(input: CreateEmployeeInput!): EmployeeEntity!
   createMainQuestionAnswer(input: CreateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
   createOrganization(input: CreateOrganizationInput!): OrganizationEntity!
@@ -321,6 +341,7 @@ type Mutation {
   deleteAnswerSet(id: ID!): AnswerSetEntity!
   deleteCompany(id: ID!): CompanyEntity!
   deleteDimension(id: ID!): DimensionEntity!
+  deleteDimensionScoreRange(id: ID!): DimensionScoreRangeEntity!
   deleteEmployee(id: ID!): EmployeeEntity!
   deleteMainQuestionAnswer(id: ID!): MainQuestionAnswerEntity!
   deleteOrganization(id: ID!): OrganizationEntity!
@@ -337,6 +358,7 @@ type Mutation {
   updateCompany(id: ID!, input: UpdateCompanyInput!): CompanyEntity!
   updateDimension(id: ID!, input: UpdateDimensionInput!): DimensionEntity!
   updateDimensionQuestionOverrides(input: UpdateDimensionQuestionOverridesInput!): DimensionQuestionEntity!
+  updateDimensionScoreRange(id: ID!, input: UpdateDimensionScoreRangeInput!): DimensionScoreRangeEntity!
   updateEmployee(id: ID!, input: UpdateEmployeeInput!): EmployeeEntity!
   updateMainQuestionAnswer(id: ID!, input: UpdateMainQuestionAnswerInput!): MainQuestionAnswerEntity!
   updateOrganization(id: ID!, input: UpdateOrganizationInput!): OrganizationEntity!
@@ -460,6 +482,7 @@ type SurveyAssignationEntity {
 }
 
 type SurveyAssignationResultsEntity {
+  dimensions: [SurveyResultDimensionEntity!]!
   fills: [SurveyFillResultEntity!]!
   surveyType: SurveyTypeInfoResultEntity!
 }
@@ -550,6 +573,13 @@ type SurveyInviteeFillSummaryEntity {
   submittedAt: DateTime!
 }
 
+type SurveyResultDimensionEntity {
+  id: ID!
+  parentId: ID
+  scoreRanges: [DimensionScoreRangeEntity!]!
+  title: String!
+}
+
 type SurveyTypeEntity {
   categoryName: String
   code: String
@@ -629,6 +659,14 @@ input UpdateDimensionQuestionOverridesInput {
   isReversedOverride: Boolean
   order: Float
   weightOverride: Float
+}
+
+input UpdateDimensionScoreRangeInput {
+  label: String
+  maxValue: Float
+  message: String
+  minValue: Float
+  order: Int
 }
 
 input UpdateEmployeeInput {

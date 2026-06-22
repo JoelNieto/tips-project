@@ -238,8 +238,24 @@ model Dimension {
   mainQuestionAnswers   MainQuestionAnswer[]
   dimensionQuestions    DimensionQuestion[]
   surveyFillMainAnswers SurveyFillMainAnswer[]
+  scoreRanges           DimensionScoreRange[]
 
   @@map("dimensions")
+}
+
+model DimensionScoreRange {
+  id          String    @id @default(uuid())
+  dimensionId String
+  dimension   Dimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  label       String?
+  message     String
+  minValue    Float
+  maxValue    Float
+  order       Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("dimension_score_ranges")
 }
 
 model MainQuestionAnswer {

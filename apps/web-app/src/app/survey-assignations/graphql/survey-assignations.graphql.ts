@@ -110,6 +110,18 @@ export const SURVEY_ASSIGNATION_FILL_RESULTS_QUERY = gql`
         visibleCategories
         visibleSubcategories
       }
+      dimensions {
+        id
+        title
+        parentId
+        scoreRanges {
+          label
+          message
+          minValue
+          maxValue
+          order
+        }
+      }
       fills {
         inviteeId
         inviteeEmail

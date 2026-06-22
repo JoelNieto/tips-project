@@ -29,6 +29,25 @@ export interface CategoryTotal {
   total: number;
 }
 
+export interface DimensionTotal {
+  id: string;
+  title: string;
+  total: number;
+}
+
+export interface ScoreRangeForMatch {
+  label?: string | null;
+  message: string;
+  minValue: number;
+  maxValue: number;
+  order?: number | null;
+}
+
+export interface MatchedScoreRange {
+  label?: string | null;
+  message: string;
+}
+
 export function categoryTotals(
   fill: FillForChart,
   hasCategories: boolean
@@ -62,6 +81,43 @@ export function categoryTotals(
   }
 
   return [...totals.values()];
+}
+
+export function dimensionTotals(fill: FillForChart): DimensionTotal[] {
+  const totals = new Map<string, DimensionTotal>();
+
+  const addValue = (dimensionId: string, dimensionTitle: string, value: number) => {
+    const existing = totals.get(dimensionId);
+    if (existing) {
+      existing.total += value;
+      return;
+    }
+    totals.set(dimensionId, { id: dimensionId, title: dimensionTitle, total: value });
+  };
+
+  for (const ma of fill.mainAnswers) {
+    addValue(ma.dimensionId, ma.dimensionTitle, ma.answerValue);
+  }
+
+  for (const qa of fill.questionAnswers) {
+    const questionTotal = qa.answers.reduce((sum, answer) => sum + answer.value, 0);
+    addValue(qa.dimensionId, qa.dimensionTitle, questionTotal);
+  }
+
+  return [...totals.values()];
+}
+
+export function matchRange(
+  total: number,
+  ranges: ScoreRangeForMatch[]
+): MatchedScoreRange | null {
+  const sorted = [...ranges].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  for (const range of sorted) {
+    if (total >= range.minValue && total <= range.maxValue) {
+      return { label: range.label, message: range.message };
+    }
+  }
+  return null;
 }
 
 export function collectCategoryAxes(

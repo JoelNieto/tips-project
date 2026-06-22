@@ -59,6 +59,14 @@ export const SURVEY_QUERY = gql`
           value
           reverseValue
         }
+        scoreRanges {
+          id
+          label
+          message
+          minValue
+          maxValue
+          order
+        }
         dimensionQuestions {
           id
           order
@@ -111,6 +119,14 @@ export const SURVEY_QUERY = gql`
             sortOrder
             value
             reverseValue
+          }
+          scoreRanges {
+            id
+            label
+            message
+            minValue
+            maxValue
+            order
           }
           dimensionQuestions {
             id
@@ -277,6 +293,40 @@ export const UPDATE_MAIN_QUESTION_ANSWER_MUTATION = gql`
 export const DELETE_MAIN_QUESTION_ANSWER_MUTATION = gql`
   mutation DeleteMainQuestionAnswer($id: ID!) {
     deleteMainQuestionAnswer(id: $id) {
+      id
+    }
+  }
+`;
+
+export const CREATE_DIMENSION_SCORE_RANGE_MUTATION = gql`
+  mutation CreateDimensionScoreRange($input: CreateDimensionScoreRangeInput!) {
+    createDimensionScoreRange(input: $input) {
+      id
+      label
+      message
+      minValue
+      maxValue
+      order
+    }
+  }
+`;
+
+export const UPDATE_DIMENSION_SCORE_RANGE_MUTATION = gql`
+  mutation UpdateDimensionScoreRange($id: ID!, $input: UpdateDimensionScoreRangeInput!) {
+    updateDimensionScoreRange(id: $id, input: $input) {
+      id
+      label
+      message
+      minValue
+      maxValue
+      order
+    }
+  }
+`;
+
+export const DELETE_DIMENSION_SCORE_RANGE_MUTATION = gql`
+  mutation DeleteDimensionScoreRange($id: ID!) {
+    deleteDimensionScoreRange(id: $id) {
       id
     }
   }

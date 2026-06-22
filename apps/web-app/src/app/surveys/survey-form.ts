@@ -229,7 +229,18 @@ const emptyModel: SurveyFormModel = {
                         <div class="mt-4 pl-4 border-l-2 border-slate-200">
                           <p class="text-xs font-medium text-slate-500">Subdimensions</p>
                           @for (sub of dim.subdimensions; track sub.id) {
-                            <div class="mt-2 text-sm">{{ sub.title }}</div>
+                            <div class="mt-2 flex items-center justify-between text-sm">
+                              <span>{{ sub.title }}</span>
+                              @if (canManageDimensionQuestions()) {
+                                <button
+                                  type="button"
+                                  (click)="editSubdimension(sub)"
+                                  class="text-sm text-indigo-600 hover:text-indigo-800"
+                                >
+                                  Edit
+                                </button>
+                              }
+                            </div>
                           }
                         </div>
                       }
@@ -394,6 +405,10 @@ export default class SurveyFormComponent {
       .subscribe({
         next: (result) => {
           this.loading.set(result.loading);
+          if (result.errors?.length) {
+            this.submitError.set(result.errors[0]?.message ?? 'Failed to load survey');
+            return;
+          }
           const s = result.data?.survey;
           if (s && typeof s === 'object') {
             const st = s['surveyType'] as SurveyTypeOption;
@@ -506,12 +521,43 @@ export default class SurveyFormComponent {
           description: dim.description,
           mainQuestionText: dim.mainQuestionText,
           mainQuestionAnswers: dim.mainQuestionAnswers ?? [],
+          scoreRanges: dim.scoreRanges ?? [],
           dimensionQuestions: dim.dimensionQuestions ?? [],
+          dimensionQuestionsForBounds: dim.dimensionQuestions ?? [],
         },
       },
       width: '700px',
       role: 'dialog',
       ariaLabel: 'Edit category',
+    });
+    dialogRef.closed.subscribe((result) => {
+      if (result) {
+        this.submitError.set(null);
+        this.loadSurvey(s.id);
+      }
+    });
+  }
+
+  protected editSubdimension(sub: BuilderDimension): void {
+    const s = this.survey();
+    if (!s || !this.canManageDimensionQuestions()) return;
+    const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
+      data: {
+        surveyId: s.id,
+        dimensionId: sub.id,
+        dimension: {
+          title: sub.title,
+          description: sub.description,
+          mainQuestionText: sub.mainQuestionText,
+          mainQuestionAnswers: sub.mainQuestionAnswers ?? [],
+          scoreRanges: sub.scoreRanges ?? [],
+          dimensionQuestions: sub.dimensionQuestions ?? [],
+          dimensionQuestionsForBounds: sub.dimensionQuestions ?? [],
+        },
+      },
+      width: '700px',
+      role: 'dialog',
+      ariaLabel: 'Edit subcategory',
     });
     dialogRef.closed.subscribe((result) => {
       if (result) {
