@@ -15,6 +15,10 @@ import {
   SURVEY_ASSIGNATION_FILL_RESULTS_QUERY,
   SURVEY_ASSIGNATION_QUERY,
 } from './graphql/survey-assignations.graphql';
+import {
+  downloadResultsXls,
+  type ResultsForExport,
+} from './survey-results-export.utils';
 
 interface InviteeFill {
   id: string;
@@ -56,9 +60,7 @@ interface FillResult {
   submittedAt: string;
 }
 
-interface FillResultsData {
-  fills: FillResult[];
-}
+interface FillResultsData extends ResultsForExport {}
 
 type ActiveTab = 'invitees' | 'results';
 
@@ -139,9 +141,24 @@ type ActiveTab = 'invitees' | 'results';
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center justify-between mb-3">
             <span class="text-sm font-medium text-slate-700">Completion</span>
-            <span class="text-sm font-semibold text-slate-900">
-              {{ completedCount() }} / {{ a.invitees.length }}
-            </span>
+            <div class="flex items-center gap-3">
+              @if (completedCount() > 0) {
+                <button
+                  type="button"
+                  (click)="downloadRawData()"
+                  [disabled]="exporting()"
+                  class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >download</span
+                  >
+                  {{ exporting() ? 'Exporting...' : 'Download XLS' }}
+                </button>
+              }
+              <span class="text-sm font-semibold text-slate-900">
+                {{ completedCount() }} / {{ a.invitees.length }}
+              </span>
+            </div>
           </div>
           <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
             <div
@@ -355,7 +372,20 @@ type ActiveTab = 'invitees' | 'results';
                   </div>
                 }
               </div>
-              <div class="border-t border-slate-200 px-6 py-4 flex justify-end">
+              <div
+                class="border-t border-slate-200 px-6 py-4 flex justify-end gap-3"
+              >
+                <button
+                  type="button"
+                  (click)="downloadRawData()"
+                  [disabled]="exporting()"
+                  class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >download</span
+                  >
+                  {{ exporting() ? 'Exporting...' : 'Download XLS' }}
+                </button>
                 <a
                   [routerLink]="[
                     '/dashboard/surveys',
@@ -398,8 +428,10 @@ export default class SurveyAssignationDetailComponent {
 
   protected readonly activeTab = signal<ActiveTab>('invitees');
   protected readonly fillResults = signal<FillResult[]>([]);
+  protected readonly resultsData = signal<FillResultsData | null>(null);
   protected readonly resultsLoading = signal(false);
   protected readonly resultsError = signal<string | null>(null);
+  protected readonly exporting = signal(false);
 
   protected readonly origin = computed(() =>
     typeof window !== 'undefined' ? window.location.origin : '',
@@ -468,6 +500,7 @@ export default class SurveyAssignationDetailComponent {
           const data = result.data?.surveyAssignationFillResults as
             | FillResultsData
             | undefined;
+          this.resultsData.set(data ?? null);
           this.fillResults.set(data?.fills ?? []);
         },
         error: (err) => {
@@ -494,6 +527,50 @@ export default class SurveyAssignationDetailComponent {
     this.resultsError.set(null);
     const id = this.id();
     if (id) this.loadFillResults(id);
+  }
+
+  protected downloadRawData(): void {
+    const existing = this.resultsData();
+    if (existing?.fills.length) {
+      this.triggerDownload(existing);
+      return;
+    }
+
+    const assignationId = this.id();
+    if (!assignationId || this.exporting()) return;
+
+    this.exporting.set(true);
+    this.apollo
+      .query<{ surveyAssignationFillResults: FillResultsData }>({
+        query: SURVEY_ASSIGNATION_FILL_RESULTS_QUERY,
+        variables: { id: assignationId },
+        fetchPolicy: 'network-only',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.exporting.set(false);
+          const data = result.data?.surveyAssignationFillResults as
+            | FillResultsData
+            | undefined;
+          if (!data?.fills.length) return;
+          this.resultsData.set(data);
+          this.fillResults.set(data.fills);
+          this.triggerDownload(data);
+        },
+        error: () => {
+          this.exporting.set(false);
+          this.error.set('Failed to export results');
+        },
+      });
+  }
+
+  private triggerDownload(data: FillResultsData): void {
+    const surveyTitle =
+      this.assignation()?.survey?.title?.replace(/[^\w\-]+/g, '_') ??
+      'survey';
+    const date = new Date().toISOString().slice(0, 10);
+    downloadResultsXls(data, `${surveyTitle}_results_${date}.xlsx`);
   }
 
   protected formatDate(iso: string): string {
