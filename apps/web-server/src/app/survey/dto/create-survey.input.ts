@@ -56,4 +56,14 @@ export class CreateSurveyInput {
   @IsOptional()
   @IsBoolean()
   randomizeQuestions?: boolean;
+
+  @Field({ nullable: true, defaultValue: true })
+  @IsOptional()
+  @IsBoolean()
+  presentAllQuestionsAtOnce?: boolean;
+
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  allowPreviousQuestion?: boolean;
 }

@@ -9,6 +9,7 @@ import {
 import type { FillDimension, FillSurveyConfig } from './survey-fill.types';
 import {
   orderDimensionQuestions,
+  countFillStepsInDimension,
   sectionHasContent,
 } from './survey-fill.utils';
 import SurveyFillMainQuestionComponent from './survey-fill-main-question';
@@ -28,7 +29,14 @@ import SurveyFillQuestionComponent from './survey-fill-question';
       <section [class]="sectionClass()">
         @if (showHeader()) {
           <header class="mb-6">
-            <h3 class="text-xl font-semibold text-slate-900">{{ dimension().title }}</h3>
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 class="text-xl font-semibold text-slate-900">{{ dimension().title }}</h3>
+              @if (showQuestionCounter()) {
+                <span class="text-sm font-medium text-slate-500">
+                  {{ questionCount() }} {{ questionCount() === 1 ? 'question' : 'questions' }}
+                </span>
+              }
+            </div>
             @if (dimension().description) {
               <p class="mt-2 text-slate-600">{{ dimension().description }}</p>
             }
@@ -63,6 +71,7 @@ import SurveyFillQuestionComponent from './survey-fill-question';
                 [surveyConfig]="surveyConfig()"
                 [isSubdimension]="true"
                 [shuffleSeed]="shuffleSeed()"
+                [showQuestionCounter]="showQuestionCounter() && surveyConfig().visibleSubcategories"
               />
             }
           </div>
@@ -76,6 +85,7 @@ export default class SurveyFillSectionComponent {
   readonly surveyConfig = input.required<FillSurveyConfig>();
   readonly isSubdimension = input(false);
   readonly shuffleSeed = input(0);
+  readonly showQuestionCounter = input(false);
 
   protected readonly mainSelection = signal('');
   protected readonly questionSelections = signal<Record<string, string>>({});
@@ -104,6 +114,14 @@ export default class SurveyFillSectionComponent {
       this.dimension().dimensionQuestions ?? [],
       this.surveyConfig().randomizeQuestions,
       this.shuffleSeed() + hashString(this.dimension().id)
+    )
+  );
+
+  protected readonly questionCount = computed(() =>
+    countFillStepsInDimension(
+      this.dimension(),
+      this.surveyConfig(),
+      this.shuffleSeed()
     )
   );
 

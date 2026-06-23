@@ -32,6 +32,8 @@ export const SURVEY_QUERY = gql`
       visibleCategories
       visibleSubcategories
       randomizeQuestions
+      presentAllQuestionsAtOnce
+      allowPreviousQuestion
       createdBy {
         id
         name
@@ -178,6 +180,8 @@ export const CREATE_SURVEY_MUTATION = gql`
       visibleCategories
       visibleSubcategories
       randomizeQuestions
+      presentAllQuestionsAtOnce
+      allowPreviousQuestion
     }
   }
 `;
@@ -195,6 +199,8 @@ export const UPDATE_SURVEY_MUTATION = gql`
       visibleCategories
       visibleSubcategories
       randomizeQuestions
+      presentAllQuestionsAtOnce
+      allowPreviousQuestion
     }
   }
 `;

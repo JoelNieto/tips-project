@@ -35,6 +35,12 @@ export class SurveyEntity {
   randomizeQuestions!: boolean;
 
   @Field()
+  presentAllQuestionsAtOnce!: boolean;
+
+  @Field()
+  allowPreviousQuestion!: boolean;
+
+  @Field()
   createdAt!: Date;
 
   @Field()

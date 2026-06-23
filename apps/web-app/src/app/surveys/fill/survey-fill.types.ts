@@ -67,10 +67,31 @@ export interface FillDimension {
   }[];
 }
 
+export type FillStep =
+  | {
+      kind: 'main';
+      dimensionId: string;
+      dimensionTitle: string;
+      categoryId?: string;
+      categoryTitle?: string;
+      prompt: string;
+      answers: FillMainQuestionAnswer[];
+    }
+  | {
+      kind: 'question';
+      dimensionQuestion: FillDimensionQuestion;
+      dimensionId: string;
+      dimensionTitle: string;
+      categoryId?: string;
+      categoryTitle?: string;
+    };
+
 export interface FillSurveyConfig {
   visibleCategories: boolean;
   visibleSubcategories: boolean;
   randomizeQuestions: boolean;
+  presentAllQuestionsAtOnce: boolean;
+  allowPreviousQuestion: boolean;
 }
 
 export interface SurveyFillData {
@@ -84,5 +105,7 @@ export interface SurveyFillData {
   visibleCategories: boolean;
   visibleSubcategories: boolean;
   randomizeQuestions: boolean;
+  presentAllQuestionsAtOnce: boolean;
+  allowPreviousQuestion: boolean;
   dimensions: FillDimension[];
 }

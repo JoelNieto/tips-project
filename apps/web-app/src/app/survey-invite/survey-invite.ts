@@ -101,15 +101,17 @@ interface SubmitSurveyFillInput {
                   </div>
                 }
 
-                <div class="flex justify-end">
-                  <button
-                    type="submit"
-                    [disabled]="submitting()"
-                    class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {{ submitting() ? 'Submitting...' : 'Submit survey' }}
-                  </button>
-                </div>
+                @if (fillData.presentAllQuestionsAtOnce) {
+                  <div class="flex justify-end">
+                    <button
+                      type="submit"
+                      [disabled]="submitting()"
+                      class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {{ submitting() ? 'Submitting...' : 'Submit survey' }}
+                    </button>
+                  </div>
+                }
               </form>
             } @else {
               <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">

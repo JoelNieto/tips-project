@@ -37,6 +37,8 @@ interface SurveyFormModel {
   visibleCategories: boolean;
   visibleSubcategories: boolean;
   randomizeQuestions: boolean;
+  presentAllQuestionsAtOnce: boolean;
+  allowPreviousQuestion: boolean;
 }
 
 type BuilderDimension = FillDimension;
@@ -51,6 +53,8 @@ const emptyModel: SurveyFormModel = {
   visibleCategories: false,
   visibleSubcategories: false,
   randomizeQuestions: false,
+  presentAllQuestionsAtOnce: true,
+  allowPreviousQuestion: false,
 };
 
 @Component({
@@ -234,14 +238,36 @@ const emptyModel: SurveyFormModel = {
 
             <div>
               <h3 class="text-lg font-medium text-slate-900 mb-4">Behavior</h3>
-              <div class="flex items-center gap-2">
-                <input
-                  id="randomizeQuestions"
-                  type="checkbox"
-                  [formField]="surveyForm.randomizeQuestions"
-                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <label for="randomizeQuestions" class="text-sm font-medium text-slate-700">Randomize question order when filling survey</label>
+              <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <input
+                    id="randomizeQuestions"
+                    type="checkbox"
+                    [formField]="surveyForm.randomizeQuestions"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="randomizeQuestions" class="text-sm font-medium text-slate-700">Randomize question order when filling survey</label>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    id="presentAllQuestionsAtOnce"
+                    type="checkbox"
+                    [formField]="surveyForm.presentAllQuestionsAtOnce"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="presentAllQuestionsAtOnce" class="text-sm font-medium text-slate-700">Present all questions at once</label>
+                </div>
+                @if (!surveyModel().presentAllQuestionsAtOnce) {
+                  <div class="flex items-center gap-2 pl-6">
+                    <input
+                      id="allowPreviousQuestion"
+                      type="checkbox"
+                      [formField]="surveyForm.allowPreviousQuestion"
+                      class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label for="allowPreviousQuestion" class="text-sm font-medium text-slate-700">Allow going back to previous question</label>
+                  </div>
+                }
               </div>
             </div>
           </div>
@@ -402,6 +428,8 @@ export default class SurveyFormComponent {
       visibleCategories: model.visibleCategories,
       visibleSubcategories: model.visibleSubcategories,
       randomizeQuestions: model.randomizeQuestions,
+      presentAllQuestionsAtOnce: model.presentAllQuestionsAtOnce,
+      allowPreviousQuestion: model.allowPreviousQuestion,
     };
   });
 
@@ -473,6 +501,8 @@ export default class SurveyFormComponent {
               visibleCategories: (s['visibleCategories'] as boolean) ?? false,
               visibleSubcategories: (s['visibleSubcategories'] as boolean) ?? false,
               randomizeQuestions: (s['randomizeQuestions'] as boolean) ?? false,
+              presentAllQuestionsAtOnce: (s['presentAllQuestionsAtOnce'] as boolean) ?? true,
+              allowPreviousQuestion: (s['allowPreviousQuestion'] as boolean) ?? false,
             });
             const fillData = toSurveyFillData(s);
             if (fillData) {
@@ -503,6 +533,10 @@ export default class SurveyFormComponent {
       visibleCategories: value.visibleCategories,
       visibleSubcategories: value.visibleSubcategories,
       randomizeQuestions: value.randomizeQuestions,
+      presentAllQuestionsAtOnce: value.presentAllQuestionsAtOnce,
+      allowPreviousQuestion: value.presentAllQuestionsAtOnce
+        ? false
+        : value.allowPreviousQuestion,
     };
 
     if (this.isEditMode()) {

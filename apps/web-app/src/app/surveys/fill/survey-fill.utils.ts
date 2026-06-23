@@ -1,5 +1,6 @@
 import type {
   FillDimension,
+  FillStep,
   FillSurveyConfig,
   SurveyFillData,
 } from './survey-fill.types';
@@ -97,6 +98,15 @@ function shuffleArray<T>(items: T[], seed: number): T[] {
   return result;
 }
 
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 export function toSurveyFillData(
   raw: Record<string, unknown> | null | undefined
 ): SurveyFillData | null {
@@ -112,6 +122,8 @@ export function toSurveyFillData(
     visibleCategories: (raw['visibleCategories'] as boolean) ?? false,
     visibleSubcategories: (raw['visibleSubcategories'] as boolean) ?? false,
     randomizeQuestions: (raw['randomizeQuestions'] as boolean) ?? false,
+    presentAllQuestionsAtOnce: (raw['presentAllQuestionsAtOnce'] as boolean) ?? true,
+    allowPreviousQuestion: (raw['allowPreviousQuestion'] as boolean) ?? false,
     dimensions: ((raw['dimensions'] as FillDimension[]) ?? []).map(normalizeDimension),
   };
 }
@@ -138,6 +150,8 @@ export function toFillSurveyConfig(data: SurveyFillData): FillSurveyConfig {
     visibleCategories: data.visibleCategories,
     visibleSubcategories: data.visibleSubcategories,
     randomizeQuestions: data.randomizeQuestions,
+    presentAllQuestionsAtOnce: data.presentAllQuestionsAtOnce,
+    allowPreviousQuestion: data.allowPreviousQuestion,
   };
 }
 
@@ -147,4 +161,95 @@ export function categoryLabel(data: Pick<SurveyFillData, 'categoryName'>): strin
 
 export function subcategoryLabel(data: Pick<SurveyFillData, 'subcategoryName'>): string {
   return data.subcategoryName?.trim() || 'Subcategory';
+}
+
+export function countFillSteps(steps: FillStep[]): number {
+  return steps.length;
+}
+
+export function countFillStepsInDimension(
+  dim: FillDimension,
+  config: FillSurveyConfig,
+  shuffleSeed: number
+): number {
+  return collectStepsForDimension(dim, config, shuffleSeed, undefined, undefined).length;
+}
+
+export function buildFillSteps(
+  survey: SurveyFillData,
+  shuffleSeed = Date.now()
+): FillStep[] {
+  const config = toFillSurveyConfig(survey);
+  const steps: FillStep[] = [];
+  for (const dim of (survey.dimensions ?? []).filter(sectionHasContent)) {
+    steps.push(...collectStepsForDimension(dim, config, shuffleSeed, undefined, undefined));
+  }
+  return steps;
+}
+
+function collectStepsForDimension(
+  dim: FillDimension,
+  config: FillSurveyConfig,
+  shuffleSeed: number,
+  categoryId?: string,
+  categoryTitle?: string
+): FillStep[] {
+  const steps: FillStep[] = [];
+  const isSubdimension = categoryId !== undefined;
+  const stepCategoryId = isSubdimension ? categoryId : dim.id;
+  const stepCategoryTitle = isSubdimension ? categoryTitle : dim.title;
+
+  if (hasMainQuestion(dim)) {
+    steps.push({
+      kind: 'main',
+      dimensionId: dim.id,
+      dimensionTitle: dim.title,
+      categoryId: stepCategoryId,
+      categoryTitle: stepCategoryTitle,
+      prompt: dim.mainQuestionText!.trim(),
+      answers: dim.mainQuestionAnswers,
+    });
+  }
+
+  const orderedQuestions = orderDimensionQuestions(
+    dim.dimensionQuestions ?? [],
+    config.randomizeQuestions,
+    shuffleSeed + hashString(dim.id)
+  );
+
+  for (const dq of orderedQuestions) {
+    steps.push({
+      kind: 'question',
+      dimensionQuestion: dq,
+      dimensionId: dim.id,
+      dimensionTitle: dim.title,
+      categoryId: stepCategoryId,
+      categoryTitle: stepCategoryTitle,
+    });
+  }
+
+  for (const sub of dim.subdimensions ?? []) {
+    if (!sectionHasContent(sub)) continue;
+    steps.push(
+      ...collectStepsForDimension(
+        sub,
+        config,
+        shuffleSeed,
+        dim.id,
+        dim.title
+      )
+    );
+  }
+
+  return steps;
+}
+
+function hasMainQuestion(dim: FillDimension): boolean {
+  return (
+    !!dim.mainQuestionText?.trim() && (dim.mainQuestionAnswers?.length ?? 0) > 0
+  );
+}
+
+export function fillStepKey(step: FillStep): string {
+  return step.kind === 'main' ? `main-${step.dimensionId}` : `dq-${step.dimensionQuestion.id}`;
 }

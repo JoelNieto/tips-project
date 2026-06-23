@@ -185,10 +185,12 @@ input CreateSurveyAssignationInput {
 }
 
 input CreateSurveyInput {
+  allowPreviousQuestion: Boolean = false
   categoryName: String
   description: String
   hasCategories: Boolean = false
   hasSubcategories: Boolean = false
+  presentAllQuestionsAtOnce: Boolean = true
   randomizeQuestions: Boolean = false
   subcategoryName: String
   title: String!
@@ -485,6 +487,7 @@ type SurveyAssignationSurveySummaryEntity {
 }
 
 type SurveyEntity {
+  allowPreviousQuestion: Boolean!
   categoryName: String
   createdAt: DateTime!
   createdBy: UserEntity!
@@ -493,6 +496,7 @@ type SurveyEntity {
   hasCategories: Boolean!
   hasSubcategories: Boolean!
   id: ID!
+  presentAllQuestionsAtOnce: Boolean!
   randomizeQuestions: Boolean!
   subcategoryName: String
   title: String!
@@ -682,10 +686,12 @@ input UpdateQuestionInput {
 }
 
 input UpdateSurveyInput {
+  allowPreviousQuestion: Boolean
   categoryName: String
   description: String
   hasCategories: Boolean
   hasSubcategories: Boolean
+  presentAllQuestionsAtOnce: Boolean
   randomizeQuestions: Boolean
   subcategoryName: String
   title: String

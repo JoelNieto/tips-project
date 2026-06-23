@@ -113,6 +113,8 @@ export class SurveyService {
       visibleCategories: input.visibleCategories ?? false,
       visibleSubcategories: input.visibleSubcategories ?? false,
       randomizeQuestions: input.randomizeQuestions ?? false,
+      presentAllQuestionsAtOnce: input.presentAllQuestionsAtOnce ?? true,
+      allowPreviousQuestion: input.allowPreviousQuestion ?? false,
       createdById: user.id,
     };
 
@@ -157,6 +159,8 @@ export class SurveyService {
         ...(input.visibleCategories !== undefined && { visibleCategories: input.visibleCategories }),
         ...(input.visibleSubcategories !== undefined && { visibleSubcategories: input.visibleSubcategories }),
         ...(input.randomizeQuestions !== undefined && { randomizeQuestions: input.randomizeQuestions }),
+        ...(input.presentAllQuestionsAtOnce !== undefined && { presentAllQuestionsAtOnce: input.presentAllQuestionsAtOnce }),
+        ...(input.allowPreviousQuestion !== undefined && { allowPreviousQuestion: input.allowPreviousQuestion }),
       },
     });
     const result = await this.findOne(updated.id);

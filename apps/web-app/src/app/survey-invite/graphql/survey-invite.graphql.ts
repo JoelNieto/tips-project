@@ -22,6 +22,8 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
         visibleCategories
         visibleSubcategories
         randomizeQuestions
+        presentAllQuestionsAtOnce
+        allowPreviousQuestion
         dimensions {
           id
           title

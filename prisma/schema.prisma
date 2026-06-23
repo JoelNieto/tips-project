@@ -146,24 +146,26 @@ model Employee {
 }
 
 model Survey {
-  id                   String              @id @default(uuid())
-  title                String
-  description          String?
-  categoryName         String?
-  subcategoryName      String?
-  hasCategories        Boolean             @default(false)
-  hasSubcategories     Boolean             @default(false)
-  visibleCategories    Boolean             @default(false)
-  visibleSubcategories Boolean             @default(false)
-  randomizeQuestions   Boolean             @default(false)
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  createdById          String
-  createdBy            User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  dimensions           Dimension[]
-  assignations         SurveyAssignation[]
-  fills                SurveyFill[]
-  organizationSurveys  OrganizationSurvey[]
+  id                        String               @id @default(uuid())
+  title                     String
+  description               String?
+  categoryName              String?
+  subcategoryName           String?
+  hasCategories             Boolean              @default(false)
+  hasSubcategories          Boolean              @default(false)
+  visibleCategories         Boolean              @default(false)
+  visibleSubcategories      Boolean              @default(false)
+  randomizeQuestions        Boolean              @default(false)
+  presentAllQuestionsAtOnce Boolean              @default(true)
+  allowPreviousQuestion     Boolean              @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  createdById               String
+  createdBy                 User                 @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  dimensions                Dimension[]
+  assignations              SurveyAssignation[]
+  fills                     SurveyFill[]
+  organizationSurveys       OrganizationSurvey[]
 
   @@map("surveys")
 }
@@ -383,29 +385,29 @@ model SurveyFillQuestionAnswer {
 }
 
 model User {
-  id                        String               @id
-  name                      String
-  email                     String               @unique
-  emailVerified             Boolean              @default(false)
-  image                     String?
-  locale                    String               @default("en")
-  role                      UserRole             @default(DESIGNER)
-  banned                    Boolean              @default(false)
-  banReason                 String?
-  banExpires                DateTime?
-  createdAt                 DateTime             @default(now())
-  updatedAt                 DateTime             @updatedAt
-  sessions                  Session[]
-  accounts                  Account[]
-  organizationsCreated      Organization[]       @relation("OrganizationsCreated")
-  organizationMemberships   OrganizationUser[]
+  id                          String               @id
+  name                        String
+  email                       String               @unique
+  emailVerified               Boolean              @default(false)
+  image                       String?
+  locale                      String               @default("en")
+  role                        UserRole             @default(DESIGNER)
+  banned                      Boolean              @default(false)
+  banReason                   String?
+  banExpires                  DateTime?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  sessions                    Session[]
+  accounts                    Account[]
+  organizationsCreated        Organization[]       @relation("OrganizationsCreated")
+  organizationMemberships     OrganizationUser[]
   organizationSurveysAssigned OrganizationSurvey[]
-  employeeProfile           Employee?
-  companiesCreated          Company[]
-  surveysCreated            Survey[]
-  questionsCreated          Question[]
-  answerSetsCreated         AnswerSet[]
-  surveyAssignationsCreated SurveyAssignation[]
+  employeeProfile             Employee?
+  companiesCreated            Company[]
+  surveysCreated              Survey[]
+  questionsCreated            Question[]
+  answerSetsCreated           AnswerSet[]
+  surveyAssignationsCreated   SurveyAssignation[]
 
   @@map("users")
 }

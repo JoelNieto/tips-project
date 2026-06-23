@@ -7,13 +7,19 @@ import {
   signal,
 } from '@angular/core';
 import type { SurveyFillData } from './survey-fill.types';
-import { sectionHasContent, toFillSurveyConfig } from './survey-fill.utils';
+import {
+  buildFillSteps,
+  countFillSteps,
+  sectionHasContent,
+  toFillSurveyConfig,
+} from './survey-fill.utils';
 import SurveyFillSectionComponent from './survey-fill-section';
+import SurveyFillWizardComponent from './survey-fill-wizard';
 
 @Component({
   selector: 'app-survey-fill-view',
   standalone: true,
-  imports: [SurveyFillSectionComponent],
+  imports: [SurveyFillSectionComponent, SurveyFillWizardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto max-w-3xl space-y-8">
@@ -31,6 +37,11 @@ import SurveyFillSectionComponent from './survey-fill-section';
         @if (survey().description) {
           <p class="mt-3 text-slate-600">{{ survey().description }}</p>
         }
+        @if (showSurveyLevelCounter()) {
+          <p class="mt-3 text-sm font-medium text-slate-500">
+            {{ totalQuestionCount() }} {{ totalQuestionCount() === 1 ? 'question' : 'questions' }}
+          </p>
+        }
       </header>
 
       @if (visibleDimensions().length === 0) {
@@ -39,16 +50,22 @@ import SurveyFillSectionComponent from './survey-fill-section';
         >
           This survey has no questions yet.
         </div>
-      } @else {
+      } @else if (survey().presentAllQuestionsAtOnce) {
         <div class="space-y-10">
           @for (dim of visibleDimensions(); track dim.id) {
             <app-survey-fill-section
               [dimension]="dim"
               [surveyConfig]="fillSurveyConfig()"
               [shuffleSeed]="shuffleSeed()"
+              [showQuestionCounter]="survey().visibleCategories"
             />
           }
         </div>
+      } @else {
+        <app-survey-fill-wizard
+          [survey]="survey()"
+          [previewMode]="previewMode()"
+        />
       }
     </div>
   `,
@@ -65,6 +82,16 @@ export default class SurveyFillViewComponent {
 
   protected readonly fillSurveyConfig = computed(() =>
     toFillSurveyConfig(this.survey())
+  );
+
+  protected readonly totalQuestionCount = computed(() =>
+    countFillSteps(buildFillSteps(this.survey(), this.shuffleSeed()))
+  );
+
+  protected readonly showSurveyLevelCounter = computed(
+    () =>
+      this.survey().presentAllQuestionsAtOnce &&
+      !this.survey().visibleCategories
   );
 
   constructor() {

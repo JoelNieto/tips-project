@@ -57,4 +57,14 @@ export class UpdateSurveyInput {
   @IsOptional()
   @IsBoolean()
   randomizeQuestions?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  presentAllQuestionsAtOnce?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  allowPreviousQuestion?: boolean;
 }
