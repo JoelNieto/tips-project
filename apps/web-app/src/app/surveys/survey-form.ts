@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,22 +11,21 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required } from '@angular/forms/signals';
-import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import {
-  SURVEYS_QUERY,
-  SURVEY_QUERY,
-  CREATE_SURVEY_MUTATION,
-  DELETE_SURVEY_MUTATION,
-  UPDATE_SURVEY_MUTATION,
-  REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
-} from './graphql/surveys.graphql';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 import CategoryFormDialogComponent from './category-form-dialog';
 import SurveyFillViewComponent from './fill/survey-fill-view';
 import type { FillDimension, SurveyFillData } from './fill/survey-fill.types';
 import { toSurveyFillData } from './fill/survey-fill.utils';
+import {
+  CREATE_SURVEY_MUTATION,
+  DELETE_SURVEY_MUTATION,
+  REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
+  SURVEY_QUERY,
+  SURVEYS_QUERY,
+  UPDATE_SURVEY_MUTATION,
+} from './graphql/surveys.graphql';
 
 interface SurveyFormModel {
   title: string;
@@ -65,7 +65,10 @@ const emptyModel: SurveyFormModel = {
   template: `
     <div class="space-y-6">
       <div class="flex items-center gap-4">
-        <a routerLink="/dashboard/surveys" class="text-slate-500 hover:text-slate-700">
+        <a
+          routerLink="/dashboard/surveys"
+          class="text-slate-500 hover:text-slate-700"
+        >
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
@@ -120,14 +123,18 @@ const emptyModel: SurveyFormModel = {
       }
 
       @if (loading()) {
-        <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+        <div
+          class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
+        >
           Loading...
         </div>
       } @else if (isEditMode() && activeTab() === 'preview') {
         @if (surveyFillData(); as fillData) {
           <app-survey-fill-view [survey]="fillData" [previewMode]="true" />
         } @else {
-          <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+          <div
+            class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
+          >
             Save the survey first to preview.
           </div>
         }
@@ -135,26 +142,38 @@ const emptyModel: SurveyFormModel = {
         <form (submit)="onSubmit($event)" class="space-y-6">
           <div class="rounded-xl border border-slate-200 bg-white p-6">
             @if (submitError()) {
-              <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm mb-4">
+              <div
+                class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm mb-4"
+              >
                 {{ submitError() }}
               </div>
             }
 
             <div class="space-y-4">
               <div>
-                <label for="title" class="block text-sm font-medium text-slate-700">Title *</label>
+                <label
+                  for="title"
+                  class="block text-sm font-medium text-slate-700"
+                  >Title *</label
+                >
                 <input
                   id="title"
                   type="text"
                   [formField]="surveyForm.title"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
-                @if (surveyForm.title().touched() && surveyForm.title().invalid()) {
+                @if (
+                  surveyForm.title().touched() && surveyForm.title().invalid()
+                ) {
                   <p class="mt-1 text-sm text-red-600">Title is required</p>
                 }
               </div>
               <div>
-                <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
+                <label
+                  for="description"
+                  class="block text-sm font-medium text-slate-700"
+                  >Description</label
+                >
                 <textarea
                   id="description"
                   [formField]="surveyForm.description"
@@ -165,12 +184,20 @@ const emptyModel: SurveyFormModel = {
             </div>
           </div>
 
-          <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-6">
+          <div
+            class="rounded-xl border border-slate-200 bg-white p-6 space-y-6"
+          >
             <div class="border-b border-slate-200 pb-6">
-              <h3 class="text-lg font-medium text-slate-900 mb-4">Categories configuration</h3>
+              <h3 class="text-lg font-medium text-slate-900 mb-4">
+                Categories configuration
+              </h3>
               <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label for="categoryName" class="block text-sm font-medium text-slate-700">Category label</label>
+                  <label
+                    for="categoryName"
+                    class="block text-sm font-medium text-slate-700"
+                    >Category label</label
+                  >
                   <input
                     id="categoryName"
                     type="text"
@@ -180,7 +207,11 @@ const emptyModel: SurveyFormModel = {
                   />
                 </div>
                 <div>
-                  <label for="subcategoryName" class="block text-sm font-medium text-slate-700">Subcategory label</label>
+                  <label
+                    for="subcategoryName"
+                    class="block text-sm font-medium text-slate-700"
+                    >Subcategory label</label
+                  >
                   <input
                     id="subcategoryName"
                     type="text"
@@ -198,7 +229,11 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.hasCategories"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="hasCategories" class="text-sm font-medium text-slate-700">Has categories</label>
+                  <label
+                    for="hasCategories"
+                    class="text-sm font-medium text-slate-700"
+                    >Has categories</label
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <input
@@ -207,13 +242,19 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.hasSubcategories"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="hasSubcategories" class="text-sm font-medium text-slate-700">Has subcategories</label>
+                  <label
+                    for="hasSubcategories"
+                    class="text-sm font-medium text-slate-700"
+                    >Has subcategories</label
+                  >
                 </div>
               </div>
             </div>
 
             <div class="border-b border-slate-200 pb-6">
-              <h3 class="text-lg font-medium text-slate-900 mb-4">Visibility</h3>
+              <h3 class="text-lg font-medium text-slate-900 mb-4">
+                Visibility
+              </h3>
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
                   <input
@@ -222,7 +263,12 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.visibleCategories"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="visibleCategories" class="text-sm font-medium text-slate-700">Visible categories (show as sections when filling survey)</label>
+                  <label
+                    for="visibleCategories"
+                    class="text-sm font-medium text-slate-700"
+                    >Visible categories (show as sections when filling
+                    survey)</label
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <input
@@ -231,7 +277,11 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.visibleSubcategories"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="visibleSubcategories" class="text-sm font-medium text-slate-700">Visible subcategories</label>
+                  <label
+                    for="visibleSubcategories"
+                    class="text-sm font-medium text-slate-700"
+                    >Visible subcategories</label
+                  >
                 </div>
               </div>
             </div>
@@ -246,7 +296,11 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.randomizeQuestions"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="randomizeQuestions" class="text-sm font-medium text-slate-700">Randomize question order when filling survey</label>
+                  <label
+                    for="randomizeQuestions"
+                    class="text-sm font-medium text-slate-700"
+                    >Randomize question order when filling survey</label
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <input
@@ -255,7 +309,11 @@ const emptyModel: SurveyFormModel = {
                     [formField]="surveyForm.presentAllQuestionsAtOnce"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label for="presentAllQuestionsAtOnce" class="text-sm font-medium text-slate-700">Present all questions at once</label>
+                  <label
+                    for="presentAllQuestionsAtOnce"
+                    class="text-sm font-medium text-slate-700"
+                    >Present all questions at once</label
+                  >
                 </div>
                 @if (!surveyModel().presentAllQuestionsAtOnce) {
                   <div class="flex items-center gap-2 pl-6">
@@ -265,7 +323,11 @@ const emptyModel: SurveyFormModel = {
                       [formField]="surveyForm.allowPreviousQuestion"
                       class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <label for="allowPreviousQuestion" class="text-sm font-medium text-slate-700">Allow going back to previous question</label>
+                    <label
+                      for="allowPreviousQuestion"
+                      class="text-sm font-medium text-slate-700"
+                      >Allow going back to previous question</label
+                    >
                   </div>
                 }
               </div>
@@ -274,15 +336,21 @@ const emptyModel: SurveyFormModel = {
 
           @if (isEditMode() && survey()) {
             <div class="rounded-xl border border-slate-200 bg-white p-6">
-              <h3 class="text-lg font-medium text-slate-900 mb-4">Dimensions</h3>
+              <h3 class="text-lg font-medium text-slate-900 mb-4">
+                Dimensions
+              </h3>
               @if (dimensionsToShow().length === 0) {
-                <p class="text-sm text-slate-500 mb-3">{{ emptyDimensionsMessage() }}</p>
+                <p class="text-sm text-slate-500 mb-3">
+                  {{ emptyDimensionsMessage() }}
+                </p>
               } @else {
                 <div class="space-y-4">
                   @for (dim of dimensionsToShow(); track dim.id) {
                     <div class="rounded-lg border border-slate-200 p-4">
                       <div class="flex items-center justify-between">
-                        <h4 class="font-medium text-slate-900">{{ dim.title }}</h4>
+                        <h4 class="font-medium text-slate-900">
+                          {{ dim.title }}
+                        </h4>
                         @if (canManageDimensionQuestions()) {
                           <button
                             type="button"
@@ -294,18 +362,24 @@ const emptyModel: SurveyFormModel = {
                         }
                       </div>
                       @if (dim.description) {
-                        <p class="mt-1 text-sm text-slate-500">{{ dim.description }}</p>
+                        <p class="mt-1 text-sm text-slate-500">
+                          {{ dim.description }}
+                        </p>
                       }
                       @if (dim.mainQuestionText) {
-                        <p class="mt-2 text-sm italic">{{ dim.mainQuestionText }}</p>
+                        <p class="mt-2 text-sm italic">
+                          {{ dim.mainQuestionText }}
+                        </p>
                       }
                       <div class="mt-3">
-                        <p class="text-xs font-medium text-slate-500">Questions ({{ dim.dimensionQuestions.length }})</p>
+                        <p class="text-xs font-medium text-slate-500">
+                          Questions ({{ dim.dimensionQuestions.length }})
+                        </p>
                         @if (dim.dimensionQuestions.length) {
                           <ul class="mt-1 space-y-1">
                             @for (dq of dim.dimensionQuestions; track dq.id) {
                               <li class="flex items-center gap-2 text-sm">
-                                <span>{{ dq.question.title }}</span>
+                                <span>{{ dq.question.text }}</span>
                                 @if (canManageDimensionQuestions()) {
                                   <button
                                     type="button"
@@ -313,7 +387,10 @@ const emptyModel: SurveyFormModel = {
                                     class="text-red-600 hover:text-red-800"
                                     aria-label="Remove question"
                                   >
-                                    <span class="material-symbols-outlined text-[16px]">close</span>
+                                    <span
+                                      class="material-symbols-outlined text-[16px]"
+                                      >close</span
+                                    >
                                   </button>
                                 }
                               </li>
@@ -323,9 +400,13 @@ const emptyModel: SurveyFormModel = {
                       </div>
                       @if (canAddSubdimension() && dim.subdimensions?.length) {
                         <div class="mt-4 pl-4 border-l-2 border-slate-200">
-                          <p class="text-xs font-medium text-slate-500">Subdimensions</p>
+                          <p class="text-xs font-medium text-slate-500">
+                            Subdimensions
+                          </p>
                           @for (sub of dim.subdimensions; track sub.id) {
-                            <div class="mt-2 flex items-center justify-between text-sm">
+                            <div
+                              class="mt-2 flex items-center justify-between text-sm"
+                            >
                               <span>{{ sub.title }}</span>
                               @if (canManageDimensionQuestions()) {
                                 <button
@@ -362,7 +443,9 @@ const emptyModel: SurveyFormModel = {
               [disabled]="surveyForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create') }}
+              {{
+                submitting() ? 'Saving...' : isEditMode() ? 'Update' : 'Create'
+              }}
             </button>
             <a
               routerLink="/dashboard/surveys"
@@ -486,7 +569,9 @@ export default class SurveyFormComponent {
         next: (result) => {
           this.loading.set(result.loading);
           if (result.error) {
-            this.submitError.set(result.error.message ?? 'Failed to load survey');
+            this.submitError.set(
+              result.error.message ?? 'Failed to load survey',
+            );
             return;
           }
           const s = result.data?.survey;
@@ -499,10 +584,13 @@ export default class SurveyFormComponent {
               hasCategories: (s['hasCategories'] as boolean) ?? false,
               hasSubcategories: (s['hasSubcategories'] as boolean) ?? false,
               visibleCategories: (s['visibleCategories'] as boolean) ?? false,
-              visibleSubcategories: (s['visibleSubcategories'] as boolean) ?? false,
+              visibleSubcategories:
+                (s['visibleSubcategories'] as boolean) ?? false,
               randomizeQuestions: (s['randomizeQuestions'] as boolean) ?? false,
-              presentAllQuestionsAtOnce: (s['presentAllQuestionsAtOnce'] as boolean) ?? true,
-              allowPreviousQuestion: (s['allowPreviousQuestion'] as boolean) ?? false,
+              presentAllQuestionsAtOnce:
+                (s['presentAllQuestionsAtOnce'] as boolean) ?? true,
+              allowPreviousQuestion:
+                (s['allowPreviousQuestion'] as boolean) ?? false,
             });
             const fillData = toSurveyFillData(s);
             if (fillData) {
@@ -547,7 +635,10 @@ export default class SurveyFormComponent {
         .mutate({
           mutation: UPDATE_SURVEY_MUTATION,
           variables: { id: surveyId, input },
-          refetchQueries: [{ query: SURVEYS_QUERY }, { query: SURVEY_QUERY, variables: { id: surveyId } }],
+          refetchQueries: [
+            { query: SURVEYS_QUERY },
+            { query: SURVEY_QUERY, variables: { id: surveyId } },
+          ],
         })
         .subscribe({
           next: () => {
@@ -570,7 +661,8 @@ export default class SurveyFormComponent {
         .subscribe({
           next: (res) => {
             this.submitting.set(false);
-            const created = (res.data as { createSurvey?: { id?: string } })?.createSurvey;
+            const created = (res.data as { createSurvey?: { id?: string } })
+              ?.createSurvey;
             if (created?.id) {
               this.router.navigate(['/dashboard/surveys', created.id]);
             } else {
@@ -672,9 +764,7 @@ export default class SurveyFormComponent {
       .mutate({
         mutation: REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
         variables: { dimensionQuestionId },
-        refetchQueries: [
-          { query: SURVEY_QUERY, variables: { id: surveyId } },
-        ],
+        refetchQueries: [{ query: SURVEY_QUERY, variables: { id: surveyId } }],
       })
       .subscribe({
         next: () => {
@@ -693,7 +783,8 @@ export default class SurveyFormComponent {
     const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
       data: {
         title: 'Delete survey',
-        message: 'Are you sure? This will delete the survey and all its dimensions.',
+        message:
+          'Are you sure? This will delete the survey and all its dimensions.',
         confirmLabel: 'Delete',
         cancelLabel: 'Cancel',
         confirmDanger: true,

@@ -58,7 +58,7 @@ interface AnswerSetOption {
 }
 
 type SelectedQuestion =
-  | { type: 'bank'; id: string; title: string }
+  | { type: 'bank'; id: string; title: string; text: string }
   | { type: 'new'; title: string; text: string; model: InlineQuestionModel };
 
 export interface CategoryFormDialogData {
@@ -82,7 +82,7 @@ export interface CategoryFormDialogData {
       maxValue: number;
       order?: number | null;
     }[];
-    dimensionQuestions: { id: string; question: { id: string; title: string } }[];
+    dimensionQuestions: { id: string; question: { id: string; title: string; text: string } }[];
     dimensionQuestionsForBounds?: FillDimensionQuestion[];
   };
 }
@@ -296,7 +296,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
               <ul class="space-y-2 mb-4">
                 @for (q of selectedQuestions(); track trackQuestion($index, q); let i = $index) {
                   <li class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                    <span>{{ q.type === 'bank' ? q.title : q.title || 'New question' }}</span>
+                    <span>{{ q.text || 'New question' }}</span>
                     @if (q.type === 'new') {
                       <span class="text-xs text-amber-600">(will save to bank)</span>
                     }
@@ -546,7 +546,7 @@ export default class CategoryFormDialogComponent {
   });
 
   protected readonly selectedQuestions = signal<SelectedQuestion[]>([]);
-  protected readonly bankQuestions = signal<{ id: string; title: string }[]>([]);
+  protected readonly bankQuestions = signal<{ id: string; title: string; text: string }[]>([]);
   protected readonly answerSets = signal<AnswerSetOption[]>([]);
   protected readonly selectedBankId = signal('');
   protected readonly showInlineForm = signal(false);
@@ -616,11 +616,12 @@ export default class CategoryFormDialogComponent {
           type: 'bank' as const,
           id: dq.question.id,
           title: dq.question.title,
+          text: dq.question.text,
         }))
       );
     }
     this.apollo
-      .query<{ questions: { id: string; title: string }[] }>({
+      .query<{ questions: { id: string; title: string; text: string }[] }>({
         query: QUESTIONS_QUERY,
       })
       .subscribe({
@@ -665,7 +666,7 @@ export default class CategoryFormDialogComponent {
     if (!id) return;
     const q = this.bankQuestions().find((x) => x.id === id);
     if (!q || this.selectedQuestions().some((s) => s.type === 'bank' && s.id === id)) return;
-    this.selectedQuestions.update((list) => [...list, { type: 'bank', id: q.id, title: q.title }]);
+    this.selectedQuestions.update((list) => [...list, { type: 'bank', id: q.id, title: q.title, text: q.text }]);
   }
 
   protected updateInline(field: keyof InlineQuestionModel, event: Event): void {
@@ -837,7 +838,7 @@ export default class CategoryFormDialogComponent {
     );
     const questions = this.selectedQuestions();
     const bankQuestions = questions
-      .filter((q): q is { type: 'bank'; id: string; title: string } => q.type === 'bank')
+      .filter((q): q is { type: 'bank'; id: string; title: string; text: string } => q.type === 'bank')
       .filter((q) => !existingIds.has(q.id));
     const newQuestions = questions.filter(
       (q): q is { type: 'new'; title: string; text: string; model: InlineQuestionModel } =>
