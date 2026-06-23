@@ -80,7 +80,7 @@ export class SurveyFillResultEntity {
 }
 
 @ObjectType()
-export class SurveyTypeInfoResultEntity {
+export class SurveyAssignationResultsEntity {
   @Field()
   hasCategories!: boolean;
 
@@ -98,12 +98,6 @@ export class SurveyTypeInfoResultEntity {
 
   @Field()
   visibleSubcategories!: boolean;
-}
-
-@ObjectType()
-export class SurveyAssignationResultsEntity {
-  @Field(() => SurveyTypeInfoResultEntity)
-  surveyType!: SurveyTypeInfoResultEntity;
 
   @Field(() => [SurveyResultDimensionEntity])
   dimensions!: SurveyResultDimensionEntity[];

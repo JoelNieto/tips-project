@@ -1,6 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserEntity } from '../../company/dto/user.entity';
-import { SurveyTypeEntity } from './survey-type.entity';
 import { DimensionEntity } from './dimension.entity';
 
 @ObjectType()
@@ -11,11 +10,29 @@ export class SurveyEntity {
   @Field()
   title!: string;
 
-  @Field(() => SurveyTypeEntity)
-  surveyType!: SurveyTypeEntity;
-
   @Field({ nullable: true })
   description?: string | null;
+
+  @Field({ nullable: true })
+  categoryName?: string | null;
+
+  @Field({ nullable: true })
+  subcategoryName?: string | null;
+
+  @Field()
+  hasCategories!: boolean;
+
+  @Field()
+  hasSubcategories!: boolean;
+
+  @Field()
+  visibleCategories!: boolean;
+
+  @Field()
+  visibleSubcategories!: boolean;
+
+  @Field()
+  randomizeQuestions!: boolean;
 
   @Field()
   createdAt!: Date;

@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { SurveyTypeResolver } from './survey-type.resolver';
-import { SurveyTypeService } from './survey-type.service';
 import { SurveyResolver } from './survey.resolver';
 import { SurveyService } from './survey.service';
 import { DimensionResolver } from './dimension.resolver';
@@ -26,8 +24,6 @@ import { PrismaModule } from '../prisma.module';
 @Module({
   imports: [PrismaModule],
   providers: [
-    SurveyTypeResolver,
-    SurveyTypeService,
     SurveyResolver,
     SurveyService,
     DimensionResolver,
@@ -50,7 +46,6 @@ import { PrismaModule } from '../prisma.module';
     DashboardService,
   ],
   exports: [
-    SurveyTypeService,
     SurveyService,
     DimensionService,
     QuestionService,

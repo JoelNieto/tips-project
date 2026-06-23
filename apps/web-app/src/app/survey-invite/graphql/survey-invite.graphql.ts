@@ -15,17 +15,13 @@ export const SURVEY_INVITE_BY_TOKEN_QUERY = gql`
         id
         title
         description
-        surveyType {
-          id
-          name
-          hasCategories
-          hasSubcategories
-          categoryName
-          subcategoryName
-          visibleCategories
-          visibleSubcategories
-          randomizeQuestions
-        }
+        categoryName
+        subcategoryName
+        hasCategories
+        hasSubcategories
+        visibleCategories
+        visibleSubcategories
+        randomizeQuestions
         dimensions {
           id
           title

@@ -185,28 +185,20 @@ input CreateSurveyAssignationInput {
 }
 
 input CreateSurveyInput {
+  categoryName: String
   description: String
-  surveyTypeId: String!
+  hasCategories: Boolean = false
+  hasSubcategories: Boolean = false
+  randomizeQuestions: Boolean = false
+  subcategoryName: String
   title: String!
+  visibleCategories: Boolean = false
+  visibleSubcategories: Boolean = false
 }
 
 input CreateSurveyInviteeInput {
   email: String!
   name: String
-}
-
-input CreateSurveyTypeInput {
-  categoryName: String
-  code: String
-  description: String
-  hasCategories: Boolean = false
-  hasSubcategories: Boolean = false
-  isActive: Boolean = true
-  name: String!
-  randomizeQuestions: Boolean = false
-  subcategoryName: String
-  visibleCategories: Boolean = false
-  visibleSubcategories: Boolean = false
 }
 
 input CreateUserInput {
@@ -335,7 +327,6 @@ type Mutation {
   createQuestion(input: CreateQuestionInput!): QuestionEntity!
   createSurvey(input: CreateSurveyInput!): SurveyEntity!
   createSurveyAssignation(input: CreateSurveyAssignationInput!): SurveyAssignationEntity!
-  createSurveyType(input: CreateSurveyTypeInput!): SurveyTypeEntity!
   createUser(input: CreateUserInput!): UserEntity!
   deleteAnswer(id: ID!): AnswerEntity!
   deleteAnswerSet(id: ID!): AnswerSetEntity!
@@ -349,7 +340,6 @@ type Mutation {
   deleteQuestion(id: ID!): QuestionEntity!
   deleteSurvey(id: ID!): SurveyEntity!
   deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
-  deleteSurveyType(id: ID!): SurveyTypeEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
   removeSurveyFromOrganization(id: ID!): OrganizationSurveyEntity!
   submitSurveyFill(input: SubmitSurveyFillInput!): SurveyFillSubmissionEntity!
@@ -365,7 +355,6 @@ type Mutation {
   updatePosition(id: ID!, input: UpdatePositionInput!): PositionEntity!
   updateQuestion(id: ID!, input: UpdateQuestionInput!): QuestionEntity!
   updateSurvey(id: ID!, input: UpdateSurveyInput!): SurveyEntity!
-  updateSurveyType(id: ID!, input: UpdateSurveyTypeInput!): SurveyTypeEntity!
   updateUser(id: ID!, input: UpdateUserInput!): UserEntity!
 }
 
@@ -429,8 +418,6 @@ type Query {
   surveyAssignationFillResults(id: ID!): SurveyAssignationResultsEntity!
   surveyAssignations(surveyId: ID!): [SurveyAssignationEntity!]!
   surveyInviteByToken(token: String!): SurveyInviteContextEntity
-  surveyType(id: ID!): SurveyTypeEntity
-  surveyTypes: [SurveyTypeEntity!]!
   surveys: [SurveyEntity!]!
   surveysUsingQuestion(questionId: ID!): [SurveyUsageEntity!]!
   user(id: ID!): UserEntity
@@ -482,9 +469,14 @@ type SurveyAssignationEntity {
 }
 
 type SurveyAssignationResultsEntity {
+  categoryName: String
   dimensions: [SurveyResultDimensionEntity!]!
   fills: [SurveyFillResultEntity!]!
-  surveyType: SurveyTypeInfoResultEntity!
+  hasCategories: Boolean!
+  hasSubcategories: Boolean!
+  subcategoryName: String
+  visibleCategories: Boolean!
+  visibleSubcategories: Boolean!
 }
 
 type SurveyAssignationSurveySummaryEntity {
@@ -493,14 +485,20 @@ type SurveyAssignationSurveySummaryEntity {
 }
 
 type SurveyEntity {
+  categoryName: String
   createdAt: DateTime!
   createdBy: UserEntity!
   description: String
   dimensions: [DimensionEntity!]!
+  hasCategories: Boolean!
+  hasSubcategories: Boolean!
   id: ID!
-  surveyType: SurveyTypeEntity!
+  randomizeQuestions: Boolean!
+  subcategoryName: String
   title: String!
   updatedAt: DateTime!
+  visibleCategories: Boolean!
+  visibleSubcategories: Boolean!
 }
 
 type SurveyFillAnswerResultEntity {
@@ -578,33 +576,6 @@ type SurveyResultDimensionEntity {
   parentId: ID
   scoreRanges: [DimensionScoreRangeEntity!]!
   title: String!
-}
-
-type SurveyTypeEntity {
-  categoryName: String
-  code: String
-  createdAt: DateTime!
-  createdBy: UserEntity!
-  description: String
-  hasCategories: Boolean!
-  hasSubcategories: Boolean!
-  id: ID!
-  isActive: Boolean!
-  name: String!
-  randomizeQuestions: Boolean!
-  subcategoryName: String
-  updatedAt: DateTime!
-  visibleCategories: Boolean!
-  visibleSubcategories: Boolean!
-}
-
-type SurveyTypeInfoResultEntity {
-  categoryName: String
-  hasCategories: Boolean!
-  hasSubcategories: Boolean!
-  subcategoryName: String
-  visibleCategories: Boolean!
-  visibleSubcategories: Boolean!
 }
 
 type SurveyUsageEntity {
@@ -711,21 +682,13 @@ input UpdateQuestionInput {
 }
 
 input UpdateSurveyInput {
-  description: String
-  surveyTypeId: String
-  title: String
-}
-
-input UpdateSurveyTypeInput {
   categoryName: String
-  code: String
   description: String
   hasCategories: Boolean
   hasSubcategories: Boolean
-  isActive: Boolean
-  name: String
   randomizeQuestions: Boolean
   subcategoryName: String
+  title: String
   visibleCategories: Boolean
   visibleSubcategories: Boolean
 }

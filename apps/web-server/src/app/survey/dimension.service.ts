@@ -83,7 +83,6 @@ export class DimensionService {
   async create(input: CreateDimensionInput, userId: string): Promise<Dimension> {
     const survey = await this.prisma.survey.findUnique({
       where: { id: input.surveyId },
-      include: { surveyType: true },
     });
     if (!survey) {
       throw new NotFoundException(`Survey with id ${input.surveyId} not found`);
@@ -91,15 +90,15 @@ export class DimensionService {
     if (survey.createdById !== userId) {
       throw new ForbiddenException('Only the survey creator can add dimensions');
     }
-    if (!survey.surveyType.hasCategories) {
+    if (!survey.hasCategories) {
       throw new ForbiddenException(
-        'This survey type does not support multiple dimensions'
+        'This survey does not support multiple dimensions'
       );
     }
     if (input.parentDimensionId) {
-      if (!survey.surveyType.hasSubcategories) {
+      if (!survey.hasSubcategories) {
         throw new ForbiddenException(
-          'This survey type does not support subdimensions'
+          'This survey does not support subdimensions'
         );
       }
       const parent = await this.prisma.dimension.findUnique({

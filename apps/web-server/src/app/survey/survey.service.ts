@@ -19,7 +19,6 @@ export class SurveyService {
   ) {}
 
   private surveyInclude = {
-    surveyType: true,
     createdBy: true,
     dimensions: {
       where: { parentDimensionId: null },
@@ -103,25 +102,23 @@ export class SurveyService {
 
   async create(input: CreateSurveyInput, user: AuthUserContext) {
     this.authPolicy.assertRole(user, [UserRole.ADMIN, UserRole.DESIGNER]);
-    const surveyType = await this.prisma.surveyType.findUnique({
-      where: { id: input.surveyTypeId },
-    });
-    if (!surveyType) {
-      throw new NotFoundException(
-        `Survey type with id ${input.surveyTypeId} not found`
-      );
-    }
+    const hasCategories = input.hasCategories ?? false;
+    const surveyData = {
+      title: input.title,
+      description: input.description ?? undefined,
+      categoryName: input.categoryName ?? undefined,
+      subcategoryName: input.subcategoryName ?? undefined,
+      hasCategories,
+      hasSubcategories: input.hasSubcategories ?? false,
+      visibleCategories: input.visibleCategories ?? false,
+      visibleSubcategories: input.visibleSubcategories ?? false,
+      randomizeQuestions: input.randomizeQuestions ?? false,
+      createdById: user.id,
+    };
 
-    if (!surveyType.hasCategories) {
+    if (!hasCategories) {
       const survey = await this.prisma.$transaction(async (tx) => {
-        const s = await tx.survey.create({
-          data: {
-            title: input.title,
-            surveyTypeId: input.surveyTypeId,
-            description: input.description ?? undefined,
-            createdById: user.id,
-          },
-        });
+        const s = await tx.survey.create({ data: surveyData });
         await tx.dimension.create({
           data: {
             surveyId: s.id,
@@ -136,14 +133,7 @@ export class SurveyService {
       return result;
     }
 
-    const survey = await this.prisma.survey.create({
-      data: {
-        title: input.title,
-        surveyTypeId: input.surveyTypeId,
-        description: input.description ?? undefined,
-        createdById: user.id,
-      },
-    });
+    const survey = await this.prisma.survey.create({ data: surveyData });
     const result = await this.findOne(survey.id);
     if (!result) throw new NotFoundException('Failed to load created survey');
     return result;
@@ -153,14 +143,20 @@ export class SurveyService {
     id: string,
     input: UpdateSurveyInput,
     user: AuthUserContext
-  ): Promise<Survey & { surveyType: unknown; createdBy: User }> {
+  ): Promise<Survey & { createdBy: User }> {
     await this.assertWriteAccess(user, id);
     const updated = await this.prisma.survey.update({
       where: { id },
       data: {
         ...(input.title !== undefined && { title: input.title }),
-        ...(input.surveyTypeId !== undefined && { surveyTypeId: input.surveyTypeId }),
         ...(input.description !== undefined && { description: input.description }),
+        ...(input.categoryName !== undefined && { categoryName: input.categoryName }),
+        ...(input.subcategoryName !== undefined && { subcategoryName: input.subcategoryName }),
+        ...(input.hasCategories !== undefined && { hasCategories: input.hasCategories }),
+        ...(input.hasSubcategories !== undefined && { hasSubcategories: input.hasSubcategories }),
+        ...(input.visibleCategories !== undefined && { visibleCategories: input.visibleCategories }),
+        ...(input.visibleSubcategories !== undefined && { visibleSubcategories: input.visibleSubcategories }),
+        ...(input.randomizeQuestions !== undefined && { randomizeQuestions: input.randomizeQuestions }),
       },
     });
     const result = await this.findOne(updated.id);

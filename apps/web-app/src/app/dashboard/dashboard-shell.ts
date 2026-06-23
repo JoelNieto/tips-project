@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -23,11 +29,17 @@ interface NavItem {
         [class.-translate-x-full]="!sidebarOpen()"
         [class.translate-x-0]="sidebarOpen()"
       >
-        <div class="flex items-center gap-3 h-16 px-6 border-b border-slate-200 shrink-0">
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm font-bold">
+        <div
+          class="flex items-center gap-3 h-16 px-6 border-b border-slate-200 shrink-0"
+        >
+          <div
+            class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm font-bold"
+          >
             T
           </div>
-          <span class="font-semibold text-slate-900">{{ 'common.appName' | translate }}</span>
+          <span class="font-semibold text-slate-900">{{
+            'common.appName' | translate
+          }}</span>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
@@ -38,7 +50,11 @@ interface NavItem {
               [routerLinkActiveOptions]="{ exact: item.exact }"
               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
             >
-              <span class="material-symbols-outlined shrink-0 text-[20px] leading-none" [attr.aria-hidden]="true">{{ item.icon }}</span>
+              <span
+                class="material-symbols-outlined shrink-0 text-[20px] leading-none"
+                [attr.aria-hidden]="true"
+                >{{ item.icon }}</span
+              >
               {{ item.labelKey | translate }}
             </a>
           }
@@ -46,12 +62,18 @@ interface NavItem {
 
         <div class="p-4 border-t border-slate-200 shrink-0">
           <div class="flex items-center gap-3 px-3 py-2">
-            <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-medium">
+            <div
+              class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-medium"
+            >
               {{ userInitials() }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-900 truncate">{{ auth.user()?.name }}</p>
-              <p class="text-xs text-slate-500 truncate">{{ auth.user()?.email }}</p>
+              <p class="text-sm font-medium text-slate-900 truncate">
+                {{ auth.user()?.name }}
+              </p>
+              <p class="text-xs text-slate-500 truncate">
+                {{ auth.user()?.email }}
+              </p>
               @if (auth.role(); as role) {
                 <p class="text-xs text-indigo-600 truncate">{{ role }}</p>
               }
@@ -61,7 +83,11 @@ interface NavItem {
             (click)="auth.logout()"
             class="mt-2 w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-700 transition"
           >
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>
+            <span
+              class="material-symbols-outlined text-[20px]"
+              aria-hidden="true"
+              >logout</span
+            >
             {{ 'nav.signOut' | translate }}
           </button>
         </div>
@@ -77,14 +103,20 @@ interface NavItem {
       }
 
       <div class="flex-1 flex flex-col lg:pl-64">
-        <header class="sticky top-0 z-10 h-16 bg-white border-b border-slate-200 flex items-center px-6 gap-4">
+        <header
+          class="sticky top-0 z-10 h-16 bg-white border-b border-slate-200 flex items-center px-6 gap-4"
+        >
           <button
             class="lg:hidden p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
             (click)="toggleSidebar()"
           >
-            <span class="material-symbols-outlined text-2xl" aria-hidden="true">menu</span>
+            <span class="material-symbols-outlined text-2xl" aria-hidden="true"
+              >menu</span
+            >
           </button>
-          <h1 class="text-lg font-semibold text-slate-900">{{ 'common.dashboard' | translate }}</h1>
+          <h1 class="text-lg font-semibold text-slate-900">
+            {{ 'common.dashboard' | translate }}
+          </h1>
         </header>
 
         <main class="flex-1 p-6">
@@ -104,15 +136,62 @@ export default class DashboardShellComponent {
   protected sidebarOpen = signal(false);
 
   private readonly navItems: NavItem[] = [
-    { path: '/dashboard', labelKey: 'nav.home', exact: true, icon: 'home', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'] },
-    { path: '/dashboard/users', labelKey: 'nav.users', exact: false, icon: 'group', roles: ['ADMIN'] },
-    { path: '/dashboard/organizations', labelKey: 'nav.organizations', exact: false, icon: 'corporate_fare', roles: ['ADMIN', 'ORG_ADMIN'] },
-    { path: '/dashboard/companies', labelKey: 'nav.companies', exact: false, icon: 'business', roles: ['ADMIN', 'ORG_ADMIN'] },
-    { path: '/dashboard/survey-types', labelKey: 'nav.surveyTypes', exact: false, icon: 'poll', roles: ['ADMIN', 'DESIGNER'] },
-    { path: '/dashboard/question-bank', labelKey: 'nav.questionBank', exact: false, icon: 'quiz', roles: ['ADMIN', 'DESIGNER'] },
-    { path: '/dashboard/answer-sets', labelKey: 'nav.answerSets', exact: false, icon: 'list_alt', roles: ['ADMIN', 'DESIGNER'] },
-    { path: '/dashboard/surveys', labelKey: 'nav.surveys', exact: false, icon: 'assignment', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN'] },
-    { path: '/dashboard/profile', labelKey: 'nav.profile', exact: false, icon: 'person', roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'] },
+    {
+      path: '/dashboard',
+      labelKey: 'nav.home',
+      exact: true,
+      icon: 'home',
+      roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'],
+    },
+    {
+      path: '/dashboard/surveys',
+      labelKey: 'nav.surveys',
+      exact: false,
+      icon: 'assignment',
+      roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN'],
+    },
+    {
+      path: '/dashboard/organizations',
+      labelKey: 'nav.organizations',
+      exact: false,
+      icon: 'corporate_fare',
+      roles: ['ADMIN', 'ORG_ADMIN'],
+    },
+    {
+      path: '/dashboard/companies',
+      labelKey: 'nav.companies',
+      exact: false,
+      icon: 'business',
+      roles: ['ADMIN', 'ORG_ADMIN'],
+    },
+    {
+      path: '/dashboard/question-bank',
+      labelKey: 'nav.questionBank',
+      exact: false,
+      icon: 'quiz',
+      roles: ['ADMIN', 'DESIGNER'],
+    },
+    {
+      path: '/dashboard/answer-sets',
+      labelKey: 'nav.answerSets',
+      exact: false,
+      icon: 'list_alt',
+      roles: ['ADMIN', 'DESIGNER'],
+    },
+    {
+      path: '/dashboard/users',
+      labelKey: 'nav.users',
+      exact: false,
+      icon: 'group',
+      roles: ['ADMIN'],
+    },
+    {
+      path: '/dashboard/profile',
+      labelKey: 'nav.profile',
+      exact: false,
+      icon: 'person',
+      roles: ['ADMIN', 'DESIGNER', 'ORG_ADMIN', 'EMPLOYEE'],
+    },
   ];
 
   protected readonly visibleNavItems = computed(() => {

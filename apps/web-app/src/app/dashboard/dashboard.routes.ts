@@ -68,16 +68,6 @@ export const dashboardRoutes: Routes = [
     loadComponent: () => import('../companies/company-home'),
   },
   {
-    path: 'survey-types',
-    canActivate: [roleGuard('ADMIN', 'DESIGNER')],
-    loadComponent: () => import('../survey-types/survey-types-list'),
-  },
-  {
-    path: 'survey-types/:id',
-    canActivate: [roleGuard('ADMIN', 'DESIGNER')],
-    loadComponent: () => import('../survey-types/survey-type-form'),
-  },
-  {
     path: 'question-bank',
     canActivate: [roleGuard('ADMIN', 'DESIGNER')],
     loadComponent: () => import('../question-bank/question-bank-list'),

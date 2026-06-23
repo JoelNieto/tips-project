@@ -36,7 +36,8 @@ export interface FillForExport {
 }
 
 export interface ResultsForExport {
-  surveyType: { hasCategories: boolean; categoryName?: string | null };
+  hasCategories: boolean;
+  categoryName?: string | null;
   fills: FillForExport[];
 }
 
@@ -68,7 +69,7 @@ function resolveCategoryTitle(
 }
 
 function collectCategoryGroups(data: ResultsForExport): CategoryColumnGroup[] {
-  const hasCategories = data.surveyType.hasCategories;
+  const hasCategories = data.hasCategories;
   const groups = new Map<
     string,
     { title: string; questions: Map<string, QuestionColumn> }
@@ -167,7 +168,7 @@ function categorySumForFill(
 export function buildWideResultsSheet(
   data: ResultsForExport,
 ): XLSX.WorkSheet {
-  const hasCategories = data.surveyType.hasCategories;
+  const hasCategories = data.hasCategories;
   const categoryGroups = collectCategoryGroups(data);
 
   if (categoryGroups.length === 0 || data.fills.length === 0) {

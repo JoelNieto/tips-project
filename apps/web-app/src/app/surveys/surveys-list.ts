@@ -14,7 +14,8 @@ interface SurveyListItem {
   id: string;
   title: string;
   description?: string | null;
-  surveyType?: { id: string; name: string } | null;
+  hasCategories?: boolean;
+  hasSubcategories?: boolean;
   createdBy?: { id: string; name: string } | null;
 }
 
@@ -82,7 +83,7 @@ interface SurveyListItem {
                 <th
                   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                  Type
+                  Structure
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
@@ -111,7 +112,7 @@ interface SurveyListItem {
                     }
                   </td>
                   <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
-                    {{ survey.surveyType?.name ?? '—' }}
+                    {{ structureLabel(survey) }}
                   </td>
                   <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                     {{ survey.createdBy?.name ?? '—' }}
@@ -151,6 +152,13 @@ export default class SurveysListComponent {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly surveys = signal<SurveyListItem[]>([]);
+
+  protected structureLabel(survey: SurveyListItem): string {
+    if (survey.hasCategories) {
+      return survey.hasSubcategories ? 'Categorized + subcategories' : 'Categorized';
+    }
+    return 'Single group';
+  }
 
   constructor() {
     this.apollo

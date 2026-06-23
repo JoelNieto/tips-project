@@ -231,7 +231,6 @@ export class SurveyAssignationService {
     const survey = await this.prisma.survey.findUnique({
       where: { id: assignation.surveyId },
       include: {
-        surveyType: true,
         dimensions: {
           where: { parentDimensionId: null },
           include: {
@@ -248,13 +247,13 @@ export class SurveyAssignationService {
       },
     });
 
-    const surveyType = survey?.surveyType ?? {
-      hasCategories: false,
-      hasSubcategories: false,
-      categoryName: null,
-      subcategoryName: null,
-      visibleCategories: false,
-      visibleSubcategories: false,
+    const surveyConfig = {
+      hasCategories: survey?.hasCategories ?? false,
+      hasSubcategories: survey?.hasSubcategories ?? false,
+      categoryName: survey?.categoryName ?? null,
+      subcategoryName: survey?.subcategoryName ?? null,
+      visibleCategories: survey?.visibleCategories ?? false,
+      visibleSubcategories: survey?.visibleSubcategories ?? false,
     };
 
     const parentDimensionSelect = {
@@ -300,7 +299,7 @@ export class SurveyAssignationService {
     });
 
     return {
-      surveyType,
+      ...surveyConfig,
       dimensions: this.flattenDimensionsForResults(survey?.dimensions ?? []),
       fills: fills.map((fill) => ({
         inviteeId: fill.inviteeId,

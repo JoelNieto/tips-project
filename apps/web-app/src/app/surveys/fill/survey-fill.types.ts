@@ -67,13 +67,7 @@ export interface FillDimension {
   }[];
 }
 
-export interface FillSurveyType {
-  id: string;
-  name: string;
-  hasCategories: boolean;
-  hasSubcategories: boolean;
-  categoryName?: string | null;
-  subcategoryName?: string | null;
+export interface FillSurveyConfig {
   visibleCategories: boolean;
   visibleSubcategories: boolean;
   randomizeQuestions: boolean;
@@ -83,6 +77,12 @@ export interface SurveyFillData {
   id: string;
   title: string;
   description?: string | null;
-  surveyType: FillSurveyType;
+  categoryName?: string | null;
+  subcategoryName?: string | null;
+  hasCategories: boolean;
+  hasSubcategories: boolean;
+  visibleCategories: boolean;
+  visibleSubcategories: boolean;
+  randomizeQuestions: boolean;
   dimensions: FillDimension[];
 }

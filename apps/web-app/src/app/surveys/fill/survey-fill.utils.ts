@@ -1,21 +1,48 @@
 import type {
-  FillAnswerOption,
   FillDimension,
-  FillDimensionQuestion,
-  FillMainQuestionAnswer,
-  FillSurveyType,
+  FillSurveyConfig,
   SurveyFillData,
 } from './survey-fill.types';
 
-export function effectiveIsMultiAnswer(dq: FillDimensionQuestion): boolean {
+export function effectiveIsMultiAnswer(dq: {
+  isMultiAnswerOverride?: boolean | null;
+  question: { isMultiAnswer: boolean };
+}): boolean {
   return dq.isMultiAnswerOverride ?? dq.question.isMultiAnswer;
 }
 
-export function effectiveIsReversed(dq: FillDimensionQuestion): boolean {
+export function effectiveIsReversed(dq: {
+  isReversedOverride?: boolean | null;
+  question: { isReversed: boolean };
+}): boolean {
   return dq.isReversedOverride ?? dq.question.isReversed;
 }
 
-export function resolveAnswerOptions(dq: FillDimensionQuestion): FillAnswerOption[] {
+export function resolveAnswerOptions(dq: {
+  answerOverrides?: {
+    answer: {
+      id: string;
+      text: string;
+      sortOrder: number | null;
+      value: number;
+      reverseValue: number | null;
+    };
+    orderOverride?: number | null;
+    valueOverride?: number | null;
+    reverseValueOverride?: number | null;
+  }[];
+  question: {
+    answerSet?: {
+      answers: {
+        id: string;
+        text: string;
+        sortOrder: number | null;
+        value: number;
+        reverseValue: number | null;
+      }[];
+    } | null;
+  };
+}) {
   const overrides = dq.answerOverrides ?? [];
   if (overrides.length > 0) {
     return overrides
@@ -31,25 +58,25 @@ export function resolveAnswerOptions(dq: FillDimensionQuestion): FillAnswerOptio
   return [...(dq.question.answerSet?.answers ?? [])].sort(compareBySortOrder);
 }
 
-export function orderAnswerOptions(
-  options: FillAnswerOption[],
+export function orderAnswerOptions<T extends { sortOrder?: number | null }>(
+  options: T[],
   isReversed: boolean
-): FillAnswerOption[] {
+): T[] {
   const sorted = [...options].sort(compareBySortOrder);
   return isReversed ? [...sorted].reverse() : sorted;
 }
 
-export function orderMainQuestionAnswers(
-  answers: FillMainQuestionAnswer[]
-): FillMainQuestionAnswer[] {
+export function orderMainQuestionAnswers<T extends { sortOrder?: number | null }>(
+  answers: T[]
+): T[] {
   return [...answers].sort(compareBySortOrder);
 }
 
-export function orderDimensionQuestions(
-  questions: FillDimensionQuestion[],
+export function orderDimensionQuestions<T extends { order?: number | null }>(
+  questions: T[],
   randomize: boolean,
   shuffleSeed: number
-): FillDimensionQuestion[] {
+): T[] {
   const sorted = [...questions].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   if (!randomize) return sorted;
   return shuffleArray(sorted, shuffleSeed);
@@ -74,27 +101,18 @@ export function toSurveyFillData(
   raw: Record<string, unknown> | null | undefined
 ): SurveyFillData | null {
   if (!raw || typeof raw !== 'object') return null;
-  const st = raw['surveyType'] as Record<string, unknown> | undefined;
   return {
     id: (raw['id'] as string) ?? '',
     title: (raw['title'] as string) ?? '',
     description: (raw['description'] as string | null) ?? null,
-    surveyType: toFillSurveyType(st),
+    categoryName: (raw['categoryName'] as string | null) ?? null,
+    subcategoryName: (raw['subcategoryName'] as string | null) ?? null,
+    hasCategories: (raw['hasCategories'] as boolean) ?? false,
+    hasSubcategories: (raw['hasSubcategories'] as boolean) ?? false,
+    visibleCategories: (raw['visibleCategories'] as boolean) ?? false,
+    visibleSubcategories: (raw['visibleSubcategories'] as boolean) ?? false,
+    randomizeQuestions: (raw['randomizeQuestions'] as boolean) ?? false,
     dimensions: ((raw['dimensions'] as FillDimension[]) ?? []).map(normalizeDimension),
-  };
-}
-
-function toFillSurveyType(st?: Record<string, unknown>): FillSurveyType {
-  return {
-    id: (st?.['id'] as string) ?? '',
-    name: (st?.['name'] as string) ?? '',
-    hasCategories: (st?.['hasCategories'] as boolean) ?? false,
-    hasSubcategories: (st?.['hasSubcategories'] as boolean) ?? false,
-    categoryName: (st?.['categoryName'] as string | null) ?? null,
-    subcategoryName: (st?.['subcategoryName'] as string | null) ?? null,
-    visibleCategories: (st?.['visibleCategories'] as boolean) ?? false,
-    visibleSubcategories: (st?.['visibleSubcategories'] as boolean) ?? false,
-    randomizeQuestions: (st?.['randomizeQuestions'] as boolean) ?? false,
   };
 }
 
@@ -115,10 +133,18 @@ export function sectionHasContent(dim: FillDimension): boolean {
   return hasMain || hasQuestions || hasSubContent;
 }
 
-export function categoryLabel(surveyType: FillSurveyType): string {
-  return surveyType.categoryName?.trim() || 'Category';
+export function toFillSurveyConfig(data: SurveyFillData): FillSurveyConfig {
+  return {
+    visibleCategories: data.visibleCategories,
+    visibleSubcategories: data.visibleSubcategories,
+    randomizeQuestions: data.randomizeQuestions,
+  };
 }
 
-export function subcategoryLabel(surveyType: FillSurveyType): string {
-  return surveyType.subcategoryName?.trim() || 'Subcategory';
+export function categoryLabel(data: Pick<SurveyFillData, 'categoryName'>): string {
+  return data.categoryName?.trim() || 'Category';
+}
+
+export function subcategoryLabel(data: Pick<SurveyFillData, 'subcategoryName'>): string {
+  return data.subcategoryName?.trim() || 'Subcategory';
 }

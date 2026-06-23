@@ -7,12 +7,8 @@ export const SURVEYS_QUERY = gql`
       title
       description
       createdAt
-      surveyType {
-        id
-        name
-        hasCategories
-        hasSubcategories
-      }
+      hasCategories
+      hasSubcategories
       createdBy {
         id
         name
@@ -29,17 +25,13 @@ export const SURVEY_QUERY = gql`
       title
       description
       createdAt
-      surveyType {
-        id
-        name
-        hasCategories
-        hasSubcategories
-        categoryName
-        subcategoryName
-        visibleCategories
-        visibleSubcategories
-        randomizeQuestions
-      }
+      categoryName
+      subcategoryName
+      hasCategories
+      hasSubcategories
+      visibleCategories
+      visibleSubcategories
+      randomizeQuestions
       createdBy {
         id
         name
@@ -173,29 +165,19 @@ export const SURVEY_QUERY = gql`
   }
 `;
 
-export const SURVEY_TYPES_QUERY = gql`
-  query SurveyTypesForSurvey {
-    surveyTypes {
-      id
-      name
-      hasCategories
-      hasSubcategories
-    }
-  }
-`;
-
 export const CREATE_SURVEY_MUTATION = gql`
   mutation CreateSurvey($input: CreateSurveyInput!) {
     createSurvey(input: $input) {
       id
       title
       description
-      surveyType {
-        id
-        name
-        hasCategories
-        hasSubcategories
-      }
+      categoryName
+      subcategoryName
+      hasCategories
+      hasSubcategories
+      visibleCategories
+      visibleSubcategories
+      randomizeQuestions
     }
   }
 `;
@@ -206,6 +188,13 @@ export const UPDATE_SURVEY_MUTATION = gql`
       id
       title
       description
+      categoryName
+      subcategoryName
+      hasCategories
+      hasSubcategories
+      visibleCategories
+      visibleSubcategories
+      randomizeQuestions
     }
   }
 `;

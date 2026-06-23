@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import type { SurveyFillData } from './survey-fill.types';
-import { sectionHasContent } from './survey-fill.utils';
+import { sectionHasContent, toFillSurveyConfig } from './survey-fill.utils';
 import SurveyFillSectionComponent from './survey-fill-section';
 
 @Component({
@@ -44,7 +44,7 @@ import SurveyFillSectionComponent from './survey-fill-section';
           @for (dim of visibleDimensions(); track dim.id) {
             <app-survey-fill-section
               [dimension]="dim"
-              [surveyType]="survey().surveyType"
+              [surveyConfig]="fillSurveyConfig()"
               [shuffleSeed]="shuffleSeed()"
             />
           }
@@ -61,6 +61,10 @@ export default class SurveyFillViewComponent {
 
   protected readonly visibleDimensions = computed(() =>
     (this.survey().dimensions ?? []).filter(sectionHasContent)
+  );
+
+  protected readonly fillSurveyConfig = computed(() =>
+    toFillSurveyConfig(this.survey())
   );
 
   constructor() {

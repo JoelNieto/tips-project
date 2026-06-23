@@ -145,42 +145,25 @@ model Employee {
   @@map("employees")
 }
 
-model SurveyType {
-  id                   String   @id @default(uuid())
-  name                 String
+model Survey {
+  id                   String              @id @default(uuid())
+  title                String
   description          String?
-  code                 String?
-  isActive             Boolean  @default(true)
   categoryName         String?
   subcategoryName      String?
-  hasCategories        Boolean  @default(false)
-  hasSubcategories     Boolean  @default(false)
-  visibleCategories    Boolean  @default(false)
-  visibleSubcategories Boolean  @default(false)
-  randomizeQuestions   Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  hasCategories        Boolean             @default(false)
+  hasSubcategories     Boolean             @default(false)
+  visibleCategories    Boolean             @default(false)
+  visibleSubcategories Boolean             @default(false)
+  randomizeQuestions   Boolean             @default(false)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
   createdById          String
-  createdBy            User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  surveys              Survey[]
-
-  @@map("survey_types")
-}
-
-model Survey {
-  id           String              @id @default(uuid())
-  title        String
-  surveyTypeId String
-  surveyType   SurveyType          @relation(fields: [surveyTypeId], references: [id], onDelete: Restrict)
-  description  String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  createdById  String
-  createdBy    User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  dimensions   Dimension[]
-  assignations        SurveyAssignation[]
-  fills               SurveyFill[]
-  organizationSurveys OrganizationSurvey[]
+  createdBy            User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  dimensions           Dimension[]
+  assignations         SurveyAssignation[]
+  fills                SurveyFill[]
+  organizationSurveys  OrganizationSurvey[]
 
   @@map("surveys")
 }
@@ -419,7 +402,6 @@ model User {
   organizationSurveysAssigned OrganizationSurvey[]
   employeeProfile           Employee?
   companiesCreated          Company[]
-  surveyTypesCreated        SurveyType[]
   surveysCreated            Survey[]
   questionsCreated          Question[]
   answerSetsCreated         AnswerSet[]

@@ -102,14 +102,12 @@ export const CREATE_SURVEY_ASSIGNATION_MUTATION = gql`
 export const SURVEY_ASSIGNATION_FILL_RESULTS_QUERY = gql`
   query SurveyAssignationFillResults($id: ID!) {
     surveyAssignationFillResults(id: $id) {
-      surveyType {
-        hasCategories
-        hasSubcategories
-        categoryName
-        subcategoryName
-        visibleCategories
-        visibleSubcategories
-      }
+      hasCategories
+      hasSubcategories
+      categoryName
+      subcategoryName
+      visibleCategories
+      visibleSubcategories
       dimensions {
         id
         title

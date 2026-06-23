@@ -60,15 +60,6 @@ interface FillResult {
   questionAnswers: QuestionAnswerGroup[];
 }
 
-interface SurveyTypeInfo {
-  hasCategories: boolean;
-  hasSubcategories: boolean;
-  categoryName?: string | null;
-  subcategoryName?: string | null;
-  visibleCategories: boolean;
-  visibleSubcategories: boolean;
-}
-
 interface ResultDimension {
   id: string;
   title: string;
@@ -83,7 +74,12 @@ interface ResultDimension {
 }
 
 interface ResultsData {
-  surveyType: SurveyTypeInfo;
+  hasCategories: boolean;
+  hasSubcategories: boolean;
+  categoryName?: string | null;
+  subcategoryName?: string | null;
+  visibleCategories: boolean;
+  visibleSubcategories: boolean;
   dimensions: ResultDimension[];
   fills: FillResult[];
 }
@@ -395,11 +391,11 @@ export default class SurveyAssignationResultsPageComponent {
   );
 
   protected readonly hasCategories = computed(
-    () => this.resultsData()?.surveyType.hasCategories ?? false,
+    () => this.resultsData()?.hasCategories ?? false,
   );
 
   protected readonly categoryLabel = computed(
-    () => this.resultsData()?.surveyType.categoryName ?? 'Category',
+    () => this.resultsData()?.categoryName ?? 'Category',
   );
 
   protected readonly selectedFill = computed(() => {

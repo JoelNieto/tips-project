@@ -6,7 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import type { FillDimension, FillSurveyType } from './survey-fill.types';
+import type { FillDimension, FillSurveyConfig } from './survey-fill.types';
 import {
   orderDimensionQuestions,
   sectionHasContent,
@@ -60,7 +60,7 @@ import SurveyFillQuestionComponent from './survey-fill-question';
             @for (sub of dimension().subdimensions!; track sub.id) {
               <app-survey-fill-section
                 [dimension]="sub"
-                [surveyType]="surveyType()"
+                [surveyConfig]="surveyConfig()"
                 [isSubdimension]="true"
                 [shuffleSeed]="shuffleSeed()"
               />
@@ -73,7 +73,7 @@ import SurveyFillQuestionComponent from './survey-fill-question';
 })
 export default class SurveyFillSectionComponent {
   readonly dimension = input.required<FillDimension>();
-  readonly surveyType = input.required<FillSurveyType>();
+  readonly surveyConfig = input.required<FillSurveyConfig>();
   readonly isSubdimension = input(false);
   readonly shuffleSeed = input(0);
 
@@ -86,9 +86,9 @@ export default class SurveyFillSectionComponent {
 
   protected readonly showHeader = computed(() => {
     if (this.isSubdimension()) {
-      return this.surveyType().visibleSubcategories;
+      return this.surveyConfig().visibleSubcategories;
     }
-    return this.surveyType().visibleCategories;
+    return this.surveyConfig().visibleCategories;
   });
 
   protected readonly showMainQuestion = computed(() => {
@@ -102,7 +102,7 @@ export default class SurveyFillSectionComponent {
   protected readonly orderedQuestions = computed(() =>
     orderDimensionQuestions(
       this.dimension().dimensionQuestions ?? [],
-      this.surveyType().randomizeQuestions,
+      this.surveyConfig().randomizeQuestions,
       this.shuffleSeed() + hashString(this.dimension().id)
     )
   );

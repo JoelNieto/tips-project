@@ -16,7 +16,6 @@ import { Apollo } from 'apollo-angular';
 import {
   SURVEYS_QUERY,
   SURVEY_QUERY,
-  SURVEY_TYPES_QUERY,
   CREATE_SURVEY_MUTATION,
   DELETE_SURVEY_MUTATION,
   UPDATE_SURVEY_MUTATION,
@@ -30,23 +29,28 @@ import { toSurveyFillData } from './fill/survey-fill.utils';
 
 interface SurveyFormModel {
   title: string;
-  surveyTypeId: string;
   description: string;
+  categoryName: string;
+  subcategoryName: string;
+  hasCategories: boolean;
+  hasSubcategories: boolean;
+  visibleCategories: boolean;
+  visibleSubcategories: boolean;
+  randomizeQuestions: boolean;
 }
 
 type BuilderDimension = FillDimension;
 
-interface SurveyTypeOption {
-  id: string;
-  name: string;
-  hasCategories: boolean;
-  hasSubcategories: boolean;
-}
-
 const emptyModel: SurveyFormModel = {
   title: '',
-  surveyTypeId: '',
   description: '',
+  categoryName: '',
+  subcategoryName: '',
+  hasCategories: false,
+  hasSubcategories: false,
+  visibleCategories: false,
+  visibleSubcategories: false,
+  randomizeQuestions: false,
 };
 
 @Component({
@@ -146,25 +150,6 @@ const emptyModel: SurveyFormModel = {
                 }
               </div>
               <div>
-                <label for="surveyTypeId" class="block text-sm font-medium text-slate-700">Survey type *</label>
-                @if (isEditMode()) {
-                  <div class="mt-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    {{ surveyTypeName() }}
-                  </div>
-                } @else {
-                  <select
-                    id="surveyTypeId"
-                    [formField]="surveyForm.surveyTypeId"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                  >
-                    <option value="">Select type...</option>
-                    @for (st of surveyTypes(); track st.id) {
-                      <option [value]="st.id">{{ st.name }}</option>
-                    }
-                  </select>
-                }
-              </div>
-              <div>
                 <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
                 <textarea
                   id="description"
@@ -172,6 +157,91 @@ const emptyModel: SurveyFormModel = {
                   rows="3"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-6">
+            <div class="border-b border-slate-200 pb-6">
+              <h3 class="text-lg font-medium text-slate-900 mb-4">Categories configuration</h3>
+              <div class="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <label for="categoryName" class="block text-sm font-medium text-slate-700">Category label</label>
+                  <input
+                    id="categoryName"
+                    type="text"
+                    [formField]="surveyForm.categoryName"
+                    placeholder="e.g. dimensions, competencies"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label for="subcategoryName" class="block text-sm font-medium text-slate-700">Subcategory label</label>
+                  <input
+                    id="subcategoryName"
+                    type="text"
+                    [formField]="surveyForm.subcategoryName"
+                    placeholder="e.g. sub-dimensions"
+                    class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div class="mt-4 space-y-3">
+                <div class="flex items-center gap-2">
+                  <input
+                    id="hasCategories"
+                    type="checkbox"
+                    [formField]="surveyForm.hasCategories"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="hasCategories" class="text-sm font-medium text-slate-700">Has categories</label>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    id="hasSubcategories"
+                    type="checkbox"
+                    [formField]="surveyForm.hasSubcategories"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="hasSubcategories" class="text-sm font-medium text-slate-700">Has subcategories</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-b border-slate-200 pb-6">
+              <h3 class="text-lg font-medium text-slate-900 mb-4">Visibility</h3>
+              <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <input
+                    id="visibleCategories"
+                    type="checkbox"
+                    [formField]="surveyForm.visibleCategories"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="visibleCategories" class="text-sm font-medium text-slate-700">Visible categories (show as sections when filling survey)</label>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    id="visibleSubcategories"
+                    type="checkbox"
+                    [formField]="surveyForm.visibleSubcategories"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label for="visibleSubcategories" class="text-sm font-medium text-slate-700">Visible subcategories</label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-medium text-slate-900 mb-4">Behavior</h3>
+              <div class="flex items-center gap-2">
+                <input
+                  id="randomizeQuestions"
+                  type="checkbox"
+                  [formField]="surveyForm.randomizeQuestions"
+                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label for="randomizeQuestions" class="text-sm font-medium text-slate-700">Randomize question order when filling survey</label>
               </div>
             </div>
           </div>
@@ -306,11 +376,9 @@ export default class SurveyFormComponent {
   protected readonly surveyModel = signal<SurveyFormModel>({ ...emptyModel });
   protected readonly survey = signal<SurveyFillData | null>(null);
   protected readonly activeTab = signal<'builder' | 'preview'>('builder');
-  protected readonly surveyTypes = signal<SurveyTypeOption[]>([]);
 
   protected readonly surveyForm = form(this.surveyModel, (schemaPath) => {
     required(schemaPath.title, { message: 'Title is required' });
-    required(schemaPath.surveyTypeId, { message: 'Survey type is required' });
   });
 
   protected readonly loading = signal(false);
@@ -327,6 +395,13 @@ export default class SurveyFormComponent {
       ...s,
       title: model.title || s.title,
       description: model.description || s.description,
+      categoryName: model.categoryName || s.categoryName,
+      subcategoryName: model.subcategoryName || s.subcategoryName,
+      hasCategories: model.hasCategories,
+      hasSubcategories: model.hasSubcategories,
+      visibleCategories: model.visibleCategories,
+      visibleSubcategories: model.visibleSubcategories,
+      randomizeQuestions: model.randomizeQuestions,
     };
   });
 
@@ -336,11 +411,11 @@ export default class SurveyFormComponent {
   };
 
   protected readonly canAddDimension = () => {
-    return this.survey()?.surveyType?.hasCategories === true;
+    return this.surveyModel().hasCategories === true;
   };
 
   protected readonly canAddSubdimension = () => {
-    return this.survey()?.surveyType?.hasSubcategories === true;
+    return this.surveyModel().hasSubcategories === true;
   };
 
   protected readonly canManageDimensionQuestions = () => {
@@ -357,11 +432,6 @@ export default class SurveyFormComponent {
       : 'No question group found for this survey.';
   };
 
-  protected readonly surveyTypeName = () => {
-    const id = this.surveyModel().surveyTypeId;
-    return this.surveyTypes().find((st) => st.id === id)?.name ?? '—';
-  };
-
   constructor() {
     effect(() => {
       const surveyId = this.id();
@@ -374,24 +444,6 @@ export default class SurveyFormComponent {
         this.survey.set(null);
       }
     });
-    this.loadSurveyTypes();
-  }
-
-  private loadSurveyTypes(): void {
-    this.apollo
-      .watchQuery<{ surveyTypes: SurveyTypeOption[] }>({
-        query: SURVEY_TYPES_QUERY,
-      })
-      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (result) => {
-          if (result.data?.surveyTypes) {
-            this.surveyTypes.set(
-              result.data.surveyTypes as SurveyTypeOption[]
-            );
-          }
-        },
-      });
   }
 
   private loadSurvey(id: string): void {
@@ -411,11 +463,16 @@ export default class SurveyFormComponent {
           }
           const s = result.data?.survey;
           if (s && typeof s === 'object') {
-            const st = s['surveyType'] as SurveyTypeOption;
             this.surveyModel.set({
               title: (s['title'] as string) ?? '',
-              surveyTypeId: (st?.id as string) ?? '',
               description: (s['description'] as string) ?? '',
+              categoryName: (s['categoryName'] as string) ?? '',
+              subcategoryName: (s['subcategoryName'] as string) ?? '',
+              hasCategories: (s['hasCategories'] as boolean) ?? false,
+              hasSubcategories: (s['hasSubcategories'] as boolean) ?? false,
+              visibleCategories: (s['visibleCategories'] as boolean) ?? false,
+              visibleSubcategories: (s['visibleSubcategories'] as boolean) ?? false,
+              randomizeQuestions: (s['randomizeQuestions'] as boolean) ?? false,
             });
             const fillData = toSurveyFillData(s);
             if (fillData) {
@@ -438,8 +495,14 @@ export default class SurveyFormComponent {
     const value = this.surveyModel();
     const input = {
       title: value.title,
-      surveyTypeId: value.surveyTypeId,
       description: value.description || undefined,
+      categoryName: value.categoryName || undefined,
+      subcategoryName: value.subcategoryName || undefined,
+      hasCategories: value.hasCategories,
+      hasSubcategories: value.hasSubcategories,
+      visibleCategories: value.visibleCategories,
+      visibleSubcategories: value.visibleSubcategories,
+      randomizeQuestions: value.randomizeQuestions,
     };
 
     if (this.isEditMode()) {

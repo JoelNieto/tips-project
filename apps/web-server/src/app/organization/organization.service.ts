@@ -116,7 +116,7 @@ export class OrganizationService {
     return this.prisma.organizationSurvey.findMany({
       where: { organizationId },
       include: {
-        survey: { include: { surveyType: true, createdBy: true } },
+        survey: { include: { createdBy: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
