@@ -124,43 +124,53 @@ interface SurveyListItem {
                   <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
                     {{ survey.createdBy?.name ?? '—' }}
                   </td>
-                  <td class="whitespace-nowrap px-6 py-4 text-right text-sm space-x-3">
-                    <a
-                      [routerLink]="['/dashboard/surveys', survey.id, 'assignations']"
-                      class="text-indigo-600 hover:text-indigo-800"
-                    >
-                      {{ 'surveys.list.assign' | translate }}
-                    </a>
-                    <button
-                      type="button"
-                      [disabled]="duplicatingId() === survey.id"
-                      (click)="onDuplicate(survey.id)"
-                      class="text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
-                    >
-                      {{
-                        duplicatingId() === survey.id
-                          ? ('surveys.list.duplicating' | translate)
-                          : ('surveys.list.duplicate' | translate)
-                      }}
-                    </button>
-                    <a
-                      [routerLink]="['/dashboard/surveys', survey.id]"
-                      class="text-indigo-600 hover:text-indigo-800"
-                    >
-                      {{ 'surveys.list.edit' | translate }}
-                    </a>
-                    <button
-                      type="button"
-                      [disabled]="deletingId() === survey.id"
-                      (click)="onDelete(survey)"
-                      class="text-red-600 hover:text-red-800 disabled:opacity-50"
-                    >
-                      {{
-                        deletingId() === survey.id
-                          ? ('surveys.list.deleting' | translate)
-                          : ('surveys.list.delete' | translate)
-                      }}
-                    </button>
+                  <td class="whitespace-nowrap px-6 py-4 text-right">
+                    <div class="inline-flex items-center gap-1">
+                      <div class="relative group">
+                        <a
+                          [routerLink]="['/dashboard/surveys', survey.id, 'assignations']"
+                          class="inline-flex items-center justify-center rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition"
+                        >
+                          <span class="material-symbols-outlined text-[20px]">assignment_ind</span>
+                        </a>
+                        <span class="tooltip-label">{{ 'surveys.list.assign' | translate }}</span>
+                      </div>
+                      <div class="relative group">
+                        <button
+                          type="button"
+                          [disabled]="duplicatingId() === survey.id"
+                          (click)="onDuplicate(survey.id)"
+                          class="inline-flex items-center justify-center rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <span class="material-symbols-outlined text-[20px]">
+                            {{ duplicatingId() === survey.id ? 'hourglass_empty' : 'content_copy' }}
+                          </span>
+                        </button>
+                        <span class="tooltip-label">{{ 'surveys.list.duplicate' | translate }}</span>
+                      </div>
+                      <div class="relative group">
+                        <a
+                          [routerLink]="['/dashboard/surveys', survey.id]"
+                          class="inline-flex items-center justify-center rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition"
+                        >
+                          <span class="material-symbols-outlined text-[20px]">edit</span>
+                        </a>
+                        <span class="tooltip-label">{{ 'surveys.list.edit' | translate }}</span>
+                      </div>
+                      <div class="relative group">
+                        <button
+                          type="button"
+                          [disabled]="deletingId() === survey.id"
+                          (click)="onDelete(survey)"
+                          class="inline-flex items-center justify-center rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <span class="material-symbols-outlined text-[20px]">
+                            {{ deletingId() === survey.id ? 'hourglass_empty' : 'delete' }}
+                          </span>
+                        </button>
+                        <span class="tooltip-label">{{ 'surveys.list.delete' | translate }}</span>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               }
@@ -173,6 +183,37 @@ interface SurveyListItem {
   styles: `
     :host {
       display: block;
+    }
+
+    .tooltip-label {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      white-space: nowrap;
+      color: #fff;
+      background: #1e293b;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+
+    .tooltip-label::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: #1e293b;
+    }
+
+    .group:hover .tooltip-label {
+      opacity: 1;
     }
   `,
 })
