@@ -2,6 +2,32 @@
 @import 'tailwindcss';
 @import '@angular/cdk/overlay-prebuilt.css';
 
+/* App typeface: Plus Jakarta Sans (modern + professional) */
+@theme {
+  --font-sans:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+  /* Tabular numbers keep figures aligned in tables and survey results */
+  font-feature-settings:
+    'tnum' 1,
+    'cv11' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tighten heading tracking slightly for a more polished, designed feel */
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.015em;
+}
+
 /* Material Icons - classic icon font */
 .material-icons {
   font-family: 'Material Icons';
@@ -47,6 +73,7 @@
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
+  font-feature-settings: 'liga';
 }
 
 .material-symbols-outlined.md-18 {
