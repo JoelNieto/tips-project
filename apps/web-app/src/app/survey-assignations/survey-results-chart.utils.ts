@@ -1,3 +1,11 @@
+export interface ResultsChartSeries {
+  label: string;
+  color: string;
+  values: number[];
+}
+
+export type ResultsChartType = 'radar' | 'bar';
+
 interface MainAnswerResult {
   dimensionId: string;
   dimensionTitle: string;

@@ -11,9 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import RadarChartComponent, {
-  type RadarSeries,
-} from '../shared/radar-chart/radar-chart';
+import SurveyResultsChartComponent from '../shared/survey-results-chart/survey-results-chart';
 import { SURVEY_ASSIGNATION_FILL_RESULTS_QUERY } from './graphql/survey-assignations.graphql';
 import {
   categoryTotals,
@@ -22,7 +20,11 @@ import {
   mapTotalsToAxes,
   matchRange,
   type MatchedScoreRange,
+  type ResultsChartSeries,
+  type ResultsChartType,
 } from './survey-results-chart.utils';
+
+type ChartTypeSelection = 'none' | ResultsChartType;
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 
@@ -108,7 +110,7 @@ interface SubdimensionGroup {
 @Component({
   selector: 'app-survey-assignation-results-page',
   standalone: true,
-  imports: [RouterLink, RadarChartComponent],
+  imports: [RouterLink, SurveyResultsChartComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -163,34 +165,59 @@ interface SubdimensionGroup {
         </div>
       } @else {
         <!-- Invitee selector -->
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <label
-            for="invitee-select"
-            class="block text-sm font-medium text-slate-700 mb-2"
-          >
-            Select invitee
-          </label>
-          <select
-            id="invitee-select"
-            class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-            (change)="onInviteeChange($event)"
-          >
-            <option value="">— Choose an invitee —</option>
-            @for (fill of resultsData()!.fills; track fill.inviteeId) {
-              <option [value]="fill.inviteeId">
-                {{
-                  fill.inviteeName
-                    ? fill.inviteeName + ' (' + fill.inviteeEmail + ')'
-                    : fill.inviteeEmail
-                }}
-                · {{ formatDate(fill.submittedAt) }}
-              </option>
-            }
-          </select>
+        <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+          <div>
+            <label
+              for="invitee-select"
+              class="block text-sm font-medium text-slate-700 mb-2"
+            >
+              Select invitee
+            </label>
+            <select
+              id="invitee-select"
+              class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+              (change)="onInviteeChange($event)"
+            >
+              <option value="">— Choose an invitee —</option>
+              @for (fill of resultsData()!.fills; track fill.inviteeId) {
+                <option [value]="fill.inviteeId">
+                  {{
+                    fill.inviteeName
+                      ? fill.inviteeName + ' (' + fill.inviteeEmail + ')'
+                      : fill.inviteeEmail
+                  }}
+                  · {{ formatDate(fill.submittedAt) }}
+                </option>
+              }
+            </select>
+          </div>
+
+          @if (canShowChartControls()) {
+            <div>
+              <label
+                for="chart-type-select"
+                class="block text-sm font-medium text-slate-700 mb-2"
+              >
+                Chart type
+              </label>
+              <select
+                id="chart-type-select"
+                class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+                [value]="selectedChartType()"
+                (change)="onChartTypeChange($event)"
+              >
+                <option value="none">None</option>
+                <option value="radar" [disabled]="!canSelectRadar()">
+                  Radar
+                </option>
+                <option value="bar" [disabled]="!canSelectBar()">Bar</option>
+              </select>
+            </div>
+          }
         </div>
 
         <!-- Chart panel -->
-        @if (showChart()) {
+        @if (showChartPanel()) {
           <div
             class="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
           >
@@ -207,15 +234,6 @@ interface SubdimensionGroup {
                 </p>
               </div>
               <div class="flex flex-wrap items-center gap-4">
-                <label class="flex items-center gap-2 text-sm text-slate-700">
-                  <span class="font-medium">Chart type</span>
-                  <select
-                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                    disabled
-                  >
-                    <option value="radar">Radar</option>
-                  </select>
-                </label>
                 <label
                   class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
                 >
@@ -230,14 +248,11 @@ interface SubdimensionGroup {
               </div>
             </div>
 
-            @if (!selectedFill() && chartSeries().length === 0) {
-              <p class="text-sm text-slate-500 text-center py-4">
-                Select an invitee to view their results, or enable group average
-                comparison.
-              </p>
-            } @else {
-              <app-radar-chart [axes]="chartAxes()" [series]="chartSeries()" />
-            }
+            <app-survey-results-chart
+              [chartType]="activeChartType()"
+              [axes]="chartAxes()"
+              [series]="chartSeries()"
+            />
           </div>
         }
 
@@ -385,6 +400,7 @@ export default class SurveyAssignationResultsPageComponent {
   protected readonly resultsData = signal<ResultsData | null>(null);
   protected readonly selectedInviteeId = signal<string | null>(null);
   protected readonly compareToAverage = signal(true);
+  protected readonly selectedChartType = signal<ChartTypeSelection>('none');
 
   protected readonly completedCount = computed(
     () => this.resultsData()?.fills.length ?? 0,
@@ -416,7 +432,7 @@ export default class SurveyAssignationResultsPageComponent {
     () => this.chartCategoryAxes().titles,
   );
 
-  protected readonly averageSeries = computed((): RadarSeries | null => {
+  protected readonly averageSeries = computed((): ResultsChartSeries | null => {
     const data = this.resultsData();
     const axisIds = this.chartCategoryAxes().ids;
     if (!data || axisIds.length === 0 || data.fills.length === 0) return null;
@@ -440,7 +456,7 @@ export default class SurveyAssignationResultsPageComponent {
     };
   });
 
-  protected readonly selectedSeries = computed((): RadarSeries | null => {
+  protected readonly selectedSeries = computed((): ResultsChartSeries | null => {
     const fill = this.selectedFill();
     const axisIds = this.chartCategoryAxes().ids;
     if (!fill || axisIds.length === 0) return null;
@@ -456,8 +472,8 @@ export default class SurveyAssignationResultsPageComponent {
     };
   });
 
-  protected readonly chartSeries = computed((): RadarSeries[] => {
-    const series: RadarSeries[] = [];
+  protected readonly chartSeries = computed((): ResultsChartSeries[] => {
+    const series: ResultsChartSeries[] = [];
     const selected = this.selectedSeries();
     const average = this.averageSeries();
 
@@ -471,9 +487,26 @@ export default class SurveyAssignationResultsPageComponent {
     return series;
   });
 
-  protected readonly showChart = computed(
-    () => this.hasCategories() && this.chartAxes().length >= 3,
+  protected readonly canShowChartControls = computed(
+    () => this.chartAxes().length > 0,
   );
+
+  protected readonly canSelectRadar = computed(
+    () => this.chartAxes().length >= 3,
+  );
+
+  protected readonly canSelectBar = computed(
+    () => this.chartAxes().length > 0,
+  );
+
+  protected readonly showChartPanel = computed(
+    () => this.selectedChartType() !== 'none',
+  );
+
+  protected readonly activeChartType = computed((): ResultsChartType => {
+    const type = this.selectedChartType();
+    return type === 'none' ? 'bar' : type;
+  });
 
   protected readonly groupedResults = computed((): ResultGroup[] => {
     const fill = this.selectedFill();
@@ -598,6 +631,19 @@ export default class SurveyAssignationResultsPageComponent {
 
   protected onCompareToggle(event: Event): void {
     this.compareToAverage.set((event.target as HTMLInputElement).checked);
+  }
+
+  protected onChartTypeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as ChartTypeSelection;
+    if (value === 'radar' && !this.canSelectRadar()) {
+      this.selectedChartType.set('none');
+      return;
+    }
+    if (value === 'bar' && !this.canSelectBar()) {
+      this.selectedChartType.set('none');
+      return;
+    }
+    this.selectedChartType.set(value);
   }
 
   protected formatDate(iso: string): string {
