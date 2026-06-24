@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required } from '@angular/forms/signals';
 import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import {
   ANSWER_SETS_QUERY,
@@ -42,7 +43,7 @@ const emptyModel: AnswerSetFormModel = {
 @Component({
   selector: 'app-answer-set-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -55,13 +56,17 @@ const emptyModel: AnswerSetFormModel = {
         </a>
         <div>
           <h2 class="text-2xl font-bold text-slate-900">
-            {{ isEditMode() ? 'Edit answer set' : 'Create answer set' }}
+            {{
+              isEditMode()
+                ? ('answerSets.form.editTitle' | translate)
+                : ('answerSets.form.createTitle' | translate)
+            }}
           </h2>
           <p class="mt-1 text-slate-500">
             {{
               isEditMode()
-                ? 'Update reusable answer options'
-                : 'Add a new answer set to the bank'
+                ? ('answerSets.form.editSubtitle' | translate)
+                : ('answerSets.form.createSubtitle' | translate)
             }}
           </p>
         </div>
@@ -71,7 +76,7 @@ const emptyModel: AnswerSetFormModel = {
         <div
           class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
         >
-          Loading...
+          {{ 'answerSets.form.loading' | translate }}
         </div>
       } @else {
         <form
@@ -88,7 +93,7 @@ const emptyModel: AnswerSetFormModel = {
 
           <div>
             <label for="name" class="block text-sm font-medium text-slate-700"
-              >Name *</label
+              >{{ 'answerSets.form.name' | translate }} *</label
             >
             <input
               id="name"
@@ -97,7 +102,12 @@ const emptyModel: AnswerSetFormModel = {
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             />
             @if (answerSetForm.name().touched() && answerSetForm.name().invalid()) {
-              <p class="mt-1 text-sm text-red-600">Name is required</p>
+              <p class="mt-1 text-sm text-red-600">
+                {{
+                  (answerSetForm.name().errors()[0]?.message ??
+                    'answerSets.form.nameRequired') | translate
+                }}
+              </p>
             }
           </div>
 
@@ -105,7 +115,7 @@ const emptyModel: AnswerSetFormModel = {
             <label
               for="description"
               class="block text-sm font-medium text-slate-700"
-              >Description</label
+              >{{ 'answerSets.form.description' | translate }}</label
             >
             <textarea
               id="description"
@@ -117,18 +127,20 @@ const emptyModel: AnswerSetFormModel = {
 
           <div class="border-t border-slate-200 pt-6">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-slate-900">Answers</h3>
+              <h3 class="text-lg font-medium text-slate-900">
+                {{ 'answerSets.form.answersSection' | translate }}
+              </h3>
               <button
                 type="button"
                 (click)="addAnswer()"
                 class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
               >
-                + Add answer
+                {{ 'answerSets.form.addAnswer' | translate }}
               </button>
             </div>
             @if (answerSetModel().answers.length === 0) {
               <p class="text-sm text-slate-500">
-                Add at least one answer option.
+                {{ 'answerSets.form.addAnswerHint' | translate }}
               </p>
             }
             <div class="space-y-4">
@@ -139,7 +151,7 @@ const emptyModel: AnswerSetFormModel = {
                   <div class="flex-1 grid gap-4 sm:grid-cols-3">
                     <div class="sm:col-span-2">
                       <label class="block text-xs font-medium text-slate-500"
-                        >Text</label
+                        >{{ 'answerSets.form.text' | translate }}</label
                       >
                       <input
                         type="text"
@@ -150,7 +162,7 @@ const emptyModel: AnswerSetFormModel = {
                     </div>
                     <div>
                       <label class="block text-xs font-medium text-slate-500"
-                        >Value</label
+                        >{{ 'answerSets.form.value' | translate }}</label
                       >
                       <input
                         type="number"
@@ -162,7 +174,7 @@ const emptyModel: AnswerSetFormModel = {
                     </div>
                     <div>
                       <label class="block text-xs font-medium text-slate-500"
-                        >Reverse value</label
+                        >{{ 'answerSets.form.reverseValue' | translate }}</label
                       >
                       <input
                         type="number"
@@ -177,7 +189,7 @@ const emptyModel: AnswerSetFormModel = {
                     type="button"
                     (click)="removeAnswer(i)"
                     class="text-red-600 hover:text-red-800 p-1"
-                    aria-label="Remove answer"
+                    [attr.aria-label]="'answerSets.form.removeAnswerAria' | translate"
                   >
                     <span class="material-symbols-outlined text-[20px]"
                       >delete</span
@@ -194,13 +206,19 @@ const emptyModel: AnswerSetFormModel = {
               [disabled]="answerSetForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create') }}
+              {{
+                submitting()
+                  ? ('answerSets.form.saving' | translate)
+                  : isEditMode()
+                    ? ('answerSets.form.update' | translate)
+                    : ('answerSets.form.create' | translate)
+              }}
             </button>
             <a
               routerLink="/dashboard/answer-sets"
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </a>
             @if (isEditMode()) {
               <button
@@ -209,7 +227,7 @@ const emptyModel: AnswerSetFormModel = {
                 (click)="onDelete()"
                 class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               >
-                Delete
+                {{ 'answerSets.form.delete' | translate }}
               </button>
             }
           </div>
@@ -228,13 +246,14 @@ export default class AnswerSetFormComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input<string | undefined>(undefined);
 
   protected readonly answerSetModel = signal<AnswerSetFormModel>({ ...emptyModel });
 
   protected readonly answerSetForm = form(this.answerSetModel, (schemaPath) => {
-    required(schemaPath.name, { message: 'Name is required' });
+    required(schemaPath.name, { message: 'answerSets.form.nameRequired' });
   });
 
   protected readonly loading = signal(false);
@@ -295,7 +314,9 @@ export default class AnswerSetFormComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.submitError.set(err.message ?? 'Failed to load answer set');
+          this.submitError.set(
+            err.message ?? this.translate.instant('answerSets.form.loadFailed'),
+          );
         },
       });
   }
@@ -344,7 +365,7 @@ export default class AnswerSetFormComponent {
       }));
 
     if (answers.length === 0) {
-      this.submitError.set('Add at least one answer');
+      this.submitError.set(this.translate.instant('answerSets.form.addAnswerRequired'));
       return;
     }
 
@@ -369,7 +390,9 @@ export default class AnswerSetFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update answer set');
+            this.submitError.set(
+              err.message ?? this.translate.instant('answerSets.form.updateFailed'),
+            );
           },
         });
     } else {
@@ -391,7 +414,9 @@ export default class AnswerSetFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to create answer set');
+            this.submitError.set(
+              err.message ?? this.translate.instant('answerSets.form.createFailed'),
+            );
           },
         });
     }
@@ -401,16 +426,15 @@ export default class AnswerSetFormComponent {
     if (!this.isEditMode() || !this.id()) return;
     const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'Delete answer set',
-        message:
-          'Are you sure? This cannot be undone. Answer sets used by questions cannot be deleted.',
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
+        title: this.translate.instant('answerSets.form.deleteTitle'),
+        message: this.translate.instant('answerSets.form.deleteMessage'),
+        confirmLabel: this.translate.instant('answerSets.form.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
         confirmDanger: true,
       },
       role: 'alertdialog',
       ariaModal: true,
-      ariaLabel: 'Delete answer set confirmation',
+      ariaLabel: this.translate.instant('answerSets.form.deleteAriaLabel'),
       width: '400px',
     });
     dialogRef.closed.subscribe((result) => {
@@ -430,7 +454,9 @@ export default class AnswerSetFormComponent {
             },
             error: (err) => {
               this.submitting.set(false);
-              this.submitError.set(err.message ?? 'Failed to delete answer set');
+              this.submitError.set(
+                err.message ?? this.translate.instant('answerSets.form.deleteFailed'),
+              );
             },
           });
       }

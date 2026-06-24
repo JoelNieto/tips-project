@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required } from '@angular/forms/signals';
 import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import {
   ANSWER_SETS_QUERY,
@@ -72,7 +73,7 @@ const emptyModel: QuestionFormModel = {
 @Component({
   selector: 'app-question-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -85,10 +86,18 @@ const emptyModel: QuestionFormModel = {
         </a>
         <div>
           <h2 class="text-2xl font-bold text-slate-900">
-            {{ isEditMode() ? 'Edit question' : 'Create question' }}
+            {{
+              isEditMode()
+                ? ('questionBank.form.editTitle' | translate)
+                : ('questionBank.form.createTitle' | translate)
+            }}
           </h2>
           <p class="mt-1 text-slate-500">
-            {{ isEditMode() ? 'Update question' : 'Add to question bank' }}
+            {{
+              isEditMode()
+                ? ('questionBank.form.editSubtitle' | translate)
+                : ('questionBank.form.createSubtitle' | translate)
+            }}
           </p>
         </div>
       </div>
@@ -97,7 +106,7 @@ const emptyModel: QuestionFormModel = {
         <div
           class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
         >
-          Loading...
+          {{ 'questionBank.form.loading' | translate }}
         </div>
       } @else {
         <form
@@ -114,7 +123,9 @@ const emptyModel: QuestionFormModel = {
 
           @if (isEditMode() && surveyUsages().length > 0) {
             <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <p class="text-sm font-medium text-slate-700">Used in:</p>
+              <p class="text-sm font-medium text-slate-700">
+                {{ 'questionBank.form.usedIn' | translate }}
+              </p>
               <ul class="mt-2 space-y-1 text-sm text-slate-600">
                 @for (u of surveyUsages(); track u.surveyId + u.dimensionId) {
                   <li>{{ u.surveyTitle }} ({{ u.dimensionTitle }})</li>
@@ -125,7 +136,7 @@ const emptyModel: QuestionFormModel = {
 
           <div>
             <label for="title" class="block text-sm font-medium text-slate-700"
-              >Title *</label
+              >{{ 'questionBank.form.title' | translate }} *</label
             >
             <input
               id="title"
@@ -134,13 +145,18 @@ const emptyModel: QuestionFormModel = {
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             />
             @if (questionForm.title().touched() && questionForm.title().invalid()) {
-              <p class="mt-1 text-sm text-red-600">Title is required</p>
+              <p class="mt-1 text-sm text-red-600">
+                {{
+                  (questionForm.title().errors()[0]?.message ??
+                    'questionBank.form.titleRequired') | translate
+                }}
+              </p>
             }
           </div>
 
           <div>
             <label for="text" class="block text-sm font-medium text-slate-700"
-              >Question text *</label
+              >{{ 'questionBank.form.questionText' | translate }} *</label
             >
             <textarea
               id="text"
@@ -149,14 +165,19 @@ const emptyModel: QuestionFormModel = {
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             ></textarea>
             @if (questionForm.text().touched() && questionForm.text().invalid()) {
-              <p class="mt-1 text-sm text-red-600">Question text is required</p>
+              <p class="mt-1 text-sm text-red-600">
+                {{
+                  (questionForm.text().errors()[0]?.message ??
+                    'questionBank.form.questionTextRequired') | translate
+                }}
+              </p>
             }
           </div>
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
               <label for="weight" class="block text-sm font-medium text-slate-700"
-                >Weight</label
+                >{{ 'questionBank.form.weight' | translate }}</label
               >
               <input
                 id="weight"
@@ -175,7 +196,7 @@ const emptyModel: QuestionFormModel = {
                   class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label for="isReversed" class="text-sm font-medium text-slate-700"
-                  >Reversed scale</label
+                  >{{ 'questionBank.form.reversedScale' | translate }}</label
                 >
               </div>
               <div class="flex items-center gap-2">
@@ -186,14 +207,16 @@ const emptyModel: QuestionFormModel = {
                   class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label for="isMultiAnswer" class="text-sm font-medium text-slate-700"
-                  >Multi-answer</label
+                  >{{ 'questionBank.form.multiAnswer' | translate }}</label
                 >
               </div>
             </div>
           </div>
 
           <div class="border-t border-slate-200 pt-6 space-y-4">
-            <h3 class="text-lg font-medium text-slate-900">Answer set</h3>
+            <h3 class="text-lg font-medium text-slate-900">
+              {{ 'questionBank.form.answerSetSection' | translate }}
+            </h3>
             <div class="flex flex-wrap gap-4">
               <label class="flex items-center gap-2 text-sm text-slate-700">
                 <input
@@ -204,7 +227,7 @@ const emptyModel: QuestionFormModel = {
                   (change)="setAnswerSetMode('none')"
                   class="text-indigo-600 focus:ring-indigo-500"
                 />
-                No answers
+                {{ 'questionBank.form.modeNone' | translate }}
               </label>
               <label class="flex items-center gap-2 text-sm text-slate-700">
                 <input
@@ -215,7 +238,7 @@ const emptyModel: QuestionFormModel = {
                   (change)="setAnswerSetMode('existing')"
                   class="text-indigo-600 focus:ring-indigo-500"
                 />
-                Use existing answer set
+                {{ 'questionBank.form.modeExisting' | translate }}
               </label>
               <label class="flex items-center gap-2 text-sm text-slate-700">
                 <input
@@ -226,7 +249,7 @@ const emptyModel: QuestionFormModel = {
                   (change)="setAnswerSetMode('new')"
                   class="text-indigo-600 focus:ring-indigo-500"
                 />
-                Create new answer set
+                {{ 'questionBank.form.modeNew' | translate }}
               </label>
             </div>
 
@@ -235,7 +258,7 @@ const emptyModel: QuestionFormModel = {
                 <label
                   for="answerSetSelect"
                   class="block text-sm font-medium text-slate-700"
-                  >Answer set</label
+                  >{{ 'questionBank.form.answerSet' | translate }}</label
                 >
                 <select
                   id="answerSetSelect"
@@ -243,20 +266,32 @@ const emptyModel: QuestionFormModel = {
                   (change)="onAnswerSetSelect($event)"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="">Select an answer set...</option>
+                  <option value="">
+                    {{ 'questionBank.form.selectAnswerSet' | translate }}
+                  </option>
                   @for (set of answerSets(); track set.id) {
                     <option [value]="set.id">
-                      {{ set.name }} ({{ set.answers.length }} answers)
+                      {{ set.name }} ({{
+                        'questionBank.form.answersCount'
+                          | translate: { count: set.answers.length }
+                      }})
                     </option>
                   }
                 </select>
               </div>
               @if (selectedAnswerSetPreview().length > 0) {
                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p class="text-sm font-medium text-slate-700 mb-2">Preview</p>
+                  <p class="text-sm font-medium text-slate-700 mb-2">
+                    {{ 'questionBank.form.preview' | translate }}
+                  </p>
                   <ul class="space-y-1 text-sm text-slate-600">
                     @for (a of selectedAnswerSetPreview(); track $index) {
-                      <li>{{ a.text }} (value: {{ a.value }})</li>
+                      <li>
+                        {{ a.text }} ({{
+                          'questionBank.form.valuePreview'
+                            | translate: { value: a.value }
+                        }})
+                      </li>
                     }
                   </ul>
                 </div>
@@ -268,30 +303,32 @@ const emptyModel: QuestionFormModel = {
                 <label
                   for="newAnswerSetName"
                   class="block text-sm font-medium text-slate-700"
-                  >Answer set name</label
+                  >{{ 'questionBank.form.answerSetName' | translate }}</label
                 >
                 <input
                   id="newAnswerSetName"
                   type="text"
                   [value]="questionModel().newAnswerSetName"
                   (input)="updateNewAnswerSetName($event)"
-                  placeholder="Defaults to question title"
+                  [placeholder]="'questionBank.form.answerSetNamePlaceholder' | translate"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
               <div class="flex items-center justify-between">
-                <p class="text-sm text-slate-600">Answer options</p>
+                <p class="text-sm text-slate-600">
+                  {{ 'questionBank.form.answerOptions' | translate }}
+                </p>
                 <button
                   type="button"
                   (click)="addAnswer()"
                   class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
                 >
-                  + Add answer
+                  {{ 'questionBank.form.addAnswer' | translate }}
                 </button>
               </div>
               @if (questionModel().answers.length === 0) {
                 <p class="text-sm text-slate-500">
-                  Add at least one answer option for respondents to choose from.
+                  {{ 'questionBank.form.addAnswerHint' | translate }}
                 </p>
               }
               <div class="space-y-4">
@@ -302,7 +339,7 @@ const emptyModel: QuestionFormModel = {
                     <div class="flex-1 grid gap-4 sm:grid-cols-3">
                       <div class="sm:col-span-2">
                         <label class="block text-xs font-medium text-slate-500"
-                          >Text</label
+                          >{{ 'questionBank.form.text' | translate }}</label
                         >
                         <input
                           type="text"
@@ -313,7 +350,7 @@ const emptyModel: QuestionFormModel = {
                       </div>
                       <div>
                         <label class="block text-xs font-medium text-slate-500"
-                          >Value</label
+                          >{{ 'questionBank.form.value' | translate }}</label
                         >
                         <input
                           type="number"
@@ -325,7 +362,7 @@ const emptyModel: QuestionFormModel = {
                       </div>
                       <div>
                         <label class="block text-xs font-medium text-slate-500"
-                          >Reverse value</label
+                          >{{ 'questionBank.form.reverseValue' | translate }}</label
                         >
                         <input
                           type="number"
@@ -340,7 +377,7 @@ const emptyModel: QuestionFormModel = {
                       type="button"
                       (click)="removeAnswer(i)"
                       class="text-red-600 hover:text-red-800 p-1"
-                      aria-label="Remove answer"
+                      [attr.aria-label]="'questionBank.form.removeAnswerAria' | translate"
                     >
                       <span class="material-symbols-outlined text-[20px]"
                         >delete</span
@@ -358,13 +395,19 @@ const emptyModel: QuestionFormModel = {
               [disabled]="questionForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create') }}
+              {{
+                submitting()
+                  ? ('questionBank.form.saving' | translate)
+                  : isEditMode()
+                    ? ('questionBank.form.update' | translate)
+                    : ('questionBank.form.create' | translate)
+              }}
             </button>
             <a
               routerLink="/dashboard/question-bank"
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </a>
             @if (isEditMode()) {
               <button
@@ -373,7 +416,7 @@ const emptyModel: QuestionFormModel = {
                 (click)="onDelete()"
                 class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               >
-                Delete
+                {{ 'questionBank.form.delete' | translate }}
               </button>
             }
           </div>
@@ -392,6 +435,7 @@ export default class QuestionFormComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input<string | undefined>(undefined);
 
@@ -406,8 +450,8 @@ export default class QuestionFormComponent {
   });
 
   protected readonly questionForm = form(this.questionModel, (schemaPath) => {
-    required(schemaPath.title, { message: 'Title is required' });
-    required(schemaPath.text, { message: 'Question text is required' });
+    required(schemaPath.title, { message: 'questionBank.form.titleRequired' });
+    required(schemaPath.text, { message: 'questionBank.form.questionTextRequired' });
   });
 
   protected readonly loading = signal(false);
@@ -502,7 +546,9 @@ export default class QuestionFormComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.submitError.set(err.message ?? 'Failed to load question');
+          this.submitError.set(
+            err.message ?? this.translate.instant('questionBank.form.loadFailed'),
+          );
         },
       });
     this.apollo
@@ -584,7 +630,9 @@ export default class QuestionFormComponent {
       answerSetInput = this.buildAnswerSetInput(value);
     } catch (err) {
       this.submitError.set(
-        err instanceof Error ? err.message : 'Invalid answer set configuration'
+        err instanceof Error
+          ? err.message
+          : this.translate.instant('questionBank.form.invalidAnswerSetConfig'),
       );
       return;
     }
@@ -612,7 +660,9 @@ export default class QuestionFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update question');
+            this.submitError.set(
+              err.message ?? this.translate.instant('questionBank.form.updateFailed'),
+            );
           },
         });
     } else {
@@ -638,7 +688,9 @@ export default class QuestionFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to create question');
+            this.submitError.set(
+              err.message ?? this.translate.instant('questionBank.form.createFailed'),
+            );
           },
         });
     }
@@ -653,7 +705,9 @@ export default class QuestionFormComponent {
 
     if (value.answerSetMode === 'existing') {
       if (!value.selectedAnswerSetId) {
-        throw new Error('Please select an answer set');
+        throw new Error(
+          this.translate.instant('questionBank.form.selectAnswerSetRequired'),
+        );
       }
       return { answerSetId: value.selectedAnswerSetId };
     }
@@ -668,7 +722,9 @@ export default class QuestionFormComponent {
       }));
 
     if (answers.length === 0) {
-      throw new Error('Add at least one answer to the new answer set');
+      throw new Error(
+        this.translate.instant('questionBank.form.addAnswerRequired'),
+      );
     }
 
     return {
@@ -683,16 +739,15 @@ export default class QuestionFormComponent {
     if (!this.isEditMode() || !this.id()) return;
     const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'Delete question',
-        message:
-          'Are you sure? This will remove the question from the bank. Surveys using it may be affected.',
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
+        title: this.translate.instant('questionBank.form.deleteTitle'),
+        message: this.translate.instant('questionBank.form.deleteMessage'),
+        confirmLabel: this.translate.instant('questionBank.form.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
         confirmDanger: true,
       },
       role: 'alertdialog',
       ariaModal: true,
-      ariaLabel: 'Delete question confirmation',
+      ariaLabel: this.translate.instant('questionBank.form.deleteAriaLabel'),
       width: '400px',
     });
     dialogRef.closed.subscribe((result) => {
@@ -712,7 +767,9 @@ export default class QuestionFormComponent {
             },
             error: (err) => {
               this.submitting.set(false);
-              this.submitError.set(err.message ?? 'Failed to delete question');
+              this.submitError.set(
+                err.message ?? this.translate.instant('questionBank.form.deleteFailed'),
+              );
             },
           });
       }

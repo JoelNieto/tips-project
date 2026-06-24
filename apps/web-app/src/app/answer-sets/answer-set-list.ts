@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { ANSWER_SETS_QUERY } from './graphql/answer-sets.graphql';
 
@@ -22,23 +23,21 @@ interface AnswerSetListItem {
 @Component({
   selector: 'app-answer-set-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Answer Sets</h2>
-          <p class="mt-1 text-slate-500">
-            Reusable answer options for your questions
-          </p>
+          <h2 class="text-2xl font-bold text-slate-900">{{ 'answerSets.list.title' | translate }}</h2>
+          <p class="mt-1 text-slate-500">{{ 'answerSets.list.subtitle' | translate }}</p>
         </div>
         <a
           routerLink="/dashboard/answer-sets/new"
           class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
-          Add answer set
+          {{ 'answerSets.list.addAnswerSet' | translate }}
         </a>
       </div>
 
@@ -46,13 +45,13 @@ interface AnswerSetListItem {
         <div
           class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
         >
-          Loading answer sets...
+          {{ 'answerSets.list.loading' | translate }}
         </div>
       } @else if (error()) {
         <div
           class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700"
         >
-          <p class="font-medium">Failed to load answer sets</p>
+          <p class="font-medium">{{ 'answerSets.list.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (answerSets().length === 0) {
@@ -62,16 +61,16 @@ interface AnswerSetListItem {
           <span class="material-symbols-outlined text-4xl text-slate-300"
             >list_alt</span
           >
-          <p class="mt-4 text-slate-600">No answer sets yet</p>
+          <p class="mt-4 text-slate-600">{{ 'answerSets.list.emptyTitle' | translate }}</p>
           <p class="mt-1 text-sm text-slate-500">
-            Create your first answer set to reuse across questions
+            {{ 'answerSets.list.emptySubtitle' | translate }}
           </p>
           <a
             routerLink="/dashboard/answer-sets/new"
             class="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
           >
             <span class="material-symbols-outlined text-[20px]">add</span>
-            Add answer set
+            {{ 'answerSets.list.addAnswerSet' | translate }}
           </a>
         </div>
       } @else {
@@ -82,20 +81,20 @@ interface AnswerSetListItem {
                 <th
                   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                  Name
+                  {{ 'answerSets.list.columnName' | translate }}
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                  Answers
+                  {{ 'answerSets.list.columnAnswers' | translate }}
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                  Created by
+                  {{ 'answerSets.list.columnCreatedBy' | translate }}
                 </th>
                 <th class="relative px-6 py-3">
-                  <span class="sr-only">Actions</span>
+                  <span class="sr-only">{{ 'answerSets.list.actions' | translate }}</span>
                 </th>
               </tr>
             </thead>
@@ -116,7 +115,7 @@ interface AnswerSetListItem {
                     }
                   </td>
                   <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
-                    {{ set.answers.length }} answers
+                    {{ 'answerSets.list.answersCount' | translate: { count: set.answers.length } }}
                   </td>
                   <td
                     class="whitespace-nowrap px-6 py-4 text-sm text-slate-500"
@@ -128,7 +127,7 @@ interface AnswerSetListItem {
                       [routerLink]="['/dashboard/answer-sets', set.id]"
                       class="text-indigo-600 hover:text-indigo-800"
                     >
-                      Edit
+                      {{ 'answerSets.list.edit' | translate }}
                     </a>
                   </td>
                 </tr>
@@ -148,6 +147,7 @@ interface AnswerSetListItem {
 export default class AnswerSetListComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -172,7 +172,9 @@ export default class AnswerSetListComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load answer sets');
+          this.error.set(
+            err.message ?? this.translate.instant('answerSets.list.loadFailed'),
+          );
         },
       });
   }

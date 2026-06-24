@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
 
@@ -13,7 +14,7 @@ import { CREATE_ORGANIZATION_MUTATION } from './graphql/organizations.graphql';
 
 @Component({
   selector: 'app-organization-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-xl space-y-6">
@@ -22,7 +23,9 @@ import { CREATE_ORGANIZATION_MUTATION } from './graphql/organizations.graphql';
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Create organization</h2>
+          <h2 class="text-2xl font-bold text-slate-900">
+            {{ 'organizations.form.createTitle' | translate }}
+          </h2>
         </div>
       </div>
 
@@ -32,20 +35,30 @@ import { CREATE_ORGANIZATION_MUTATION } from './graphql/organizations.graphql';
         }
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            {{ 'organizations.form.name' | translate }}
+          </label>
           <input [(ngModel)]="name" name="name" required class="w-full px-3 py-2 border rounded-lg" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            {{ 'organizations.form.description' | translate }}
+          </label>
           <textarea [(ngModel)]="description" name="description" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
         </div>
 
         <div class="flex gap-3 pt-2">
           <button type="submit" [disabled]="saving()" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm">
-            {{ saving() ? 'Creating...' : 'Create organization' }}
+            {{
+              saving()
+                ? ('organizations.form.creating' | translate)
+                : ('organizations.form.create' | translate)
+            }}
           </button>
-          <a routerLink="/dashboard/organizations" class="px-4 py-2 rounded-lg border text-sm">Cancel</a>
+          <a routerLink="/dashboard/organizations" class="px-4 py-2 rounded-lg border text-sm">
+            {{ 'common.cancel' | translate }}
+          </a>
         </div>
       </form>
     </div>
@@ -54,6 +67,7 @@ import { CREATE_ORGANIZATION_MUTATION } from './graphql/organizations.graphql';
 export default class OrganizationFormComponent {
   private readonly apollo = inject(Apollo);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -80,7 +94,11 @@ export default class OrganizationFormComponent {
       const id = result.data?.createOrganization.id;
       await this.router.navigate(id ? ['/dashboard/organizations', id] : ['/dashboard/organizations']);
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Failed to create organization');
+      this.error.set(
+        err instanceof Error
+          ? err.message
+          : this.translate.instant('organizations.form.createFailed'),
+      );
     } finally {
       this.saving.set(false);
     }

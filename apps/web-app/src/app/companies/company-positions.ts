@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 import PositionTreeNodeComponent, {
@@ -35,15 +36,15 @@ interface Position {
 @Component({
   selector: 'app-company-positions',
   standalone: true,
-  imports: [PositionTreeNodeComponent],
+  imports: [PositionTreeNodeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 class="text-lg font-medium text-slate-900">Organization hierarchy</h3>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'companies.positions.title' | translate }}</h3>
           <p class="mt-1 text-sm text-slate-500">
-            Define positions and reporting lines for this company.
+            {{ 'companies.positions.subtitle' | translate }}
           </p>
         </div>
         <button
@@ -52,7 +53,7 @@ interface Position {
           (click)="openCreateForm()"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
-          Add position
+          {{ 'companies.positions.addPosition' | translate }}
         </button>
       </div>
 
@@ -62,7 +63,11 @@ interface Position {
           class="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
         >
           <h4 class="text-base font-medium text-slate-900">
-            {{ isEditMode() ? 'Edit position' : 'Add position' }}
+            {{
+              isEditMode()
+                ? ('companies.positions.editPosition' | translate)
+                : ('companies.positions.addPositionTitle' | translate)
+            }}
           </h4>
 
           @if (submitError()) {
@@ -74,7 +79,7 @@ interface Position {
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
               <label for="position-name" class="block text-sm font-medium text-slate-700">
-                Name *
+                {{ 'companies.positions.name' | translate }} *
               </label>
               <input
                 id="position-name"
@@ -87,7 +92,7 @@ interface Position {
 
             <div>
               <label for="position-code" class="block text-sm font-medium text-slate-700">
-                Code *
+                {{ 'companies.positions.code' | translate }} *
               </label>
               <input
                 id="position-code"
@@ -101,7 +106,7 @@ interface Position {
 
           <div>
             <label for="position-parent" class="block text-sm font-medium text-slate-700">
-              Reports to
+              {{ 'companies.positions.reportsTo' | translate }}
             </label>
             <select
               id="position-parent"
@@ -109,7 +114,7 @@ interface Position {
               (change)="formParentId.set($any($event.target).value)"
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="">None (top level)</option>
+              <option value="">{{ 'companies.positions.topLevel' | translate }}</option>
               @for (position of parentOptions(); track position.id) {
                 <option [value]="position.id">
                   {{ position.name }} ({{ position.code }})
@@ -124,14 +129,20 @@ interface Position {
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               (click)="cancelForm()"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </button>
             <button
               type="submit"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               [disabled]="submitting() || !formName().trim() || !formCode().trim()"
             >
-              {{ submitting() ? 'Saving...' : isEditMode() ? 'Update position' : 'Save position' }}
+              {{
+                submitting()
+                  ? ('companies.positions.saving' | translate)
+                  : isEditMode()
+                    ? ('companies.positions.updatePosition' | translate)
+                    : ('companies.positions.savePosition' | translate)
+              }}
             </button>
           </div>
         </form>
@@ -139,16 +150,16 @@ interface Position {
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading positions...
+          {{ 'companies.positions.loading' | translate }}
         </div>
       } @else if (error()) {
         <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p class="font-medium">Failed to load positions</p>
+          <p class="font-medium">{{ 'companies.positions.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (positionTree().length === 0) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          No positions yet. Add the first position to start building the hierarchy.
+          {{ 'companies.positions.empty' | translate }}
         </div>
       } @else {
         <div class="space-y-2">
@@ -175,6 +186,7 @@ export default class CompanyPositionsComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(Dialog);
+  private readonly translate = inject(TranslateService);
 
   readonly companyId = input.required<string>();
 
@@ -297,7 +309,9 @@ export default class CompanyPositionsComponent {
           },
           error: (err: Error) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update position');
+            this.submitError.set(
+              err.message ?? this.translate.instant('companies.positions.updateFailed'),
+            );
           },
         });
       return;
@@ -330,7 +344,9 @@ export default class CompanyPositionsComponent {
         },
         error: (err: Error) => {
           this.submitting.set(false);
-          this.submitError.set(err.message ?? 'Failed to create position');
+          this.submitError.set(
+            err.message ?? this.translate.instant('companies.positions.createFailed'),
+          );
         },
       });
   }
@@ -343,10 +359,12 @@ export default class CompanyPositionsComponent {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete position',
-        message: `Are you sure you want to delete "${position.name}"?`,
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
+        title: this.translate.instant('companies.positions.deleteTitle'),
+        message: this.translate.instant('companies.positions.deleteMessageNamed', {
+          name: position.name,
+        }),
+        confirmLabel: this.translate.instant('companies.form.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
       },
     });
 
@@ -372,7 +390,9 @@ export default class CompanyPositionsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err) => {
-          this.error.set(err.message ?? 'Failed to delete position');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.positions.deleteFailed'),
+          );
         },
       });
   }
@@ -396,7 +416,9 @@ export default class CompanyPositionsComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load positions');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.positions.loadFailed'),
+          );
         },
       });
   }

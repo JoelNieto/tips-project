@@ -15,6 +15,7 @@ import {
   required,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
 import {
@@ -64,7 +65,7 @@ const emptyModel: EmployeeFormModel = {
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -77,17 +78,25 @@ const emptyModel: EmployeeFormModel = {
         </a>
         <div>
           <h2 class="text-2xl font-bold text-slate-900">
-            {{ isEditMode() ? 'Edit employee' : 'Create employee' }}
+            {{
+              isEditMode()
+                ? ('companies.employeeForm.editTitle' | translate)
+                : ('companies.employeeForm.createTitle' | translate)
+            }}
           </h2>
           <p class="mt-1 text-slate-500">
-            {{ isEditMode() ? 'Update employee details' : 'Add a new employee' }}
+            {{
+              isEditMode()
+                ? ('companies.employeeForm.editSubtitle' | translate)
+                : ('companies.employeeForm.createSubtitle' | translate)
+            }}
           </p>
         </div>
       </div>
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading...
+          {{ 'companies.employeeForm.loading' | translate }}
         </div>
       } @else {
         <form
@@ -101,11 +110,13 @@ const emptyModel: EmployeeFormModel = {
           }
 
           <div class="border-b border-slate-200 pb-6">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">Personal information</h3>
+            <h3 class="text-lg font-medium text-slate-900 mb-4">
+              {{ 'companies.employeeForm.personalInfo' | translate }}
+            </h3>
             <div class="grid gap-6 sm:grid-cols-2">
               <div>
                 <label for="firstName" class="block text-sm font-medium text-slate-700">
-                  First name *
+                  {{ 'companies.employeeForm.firstName' | translate }} *
                 </label>
                 <input
                   id="firstName"
@@ -114,13 +125,18 @@ const emptyModel: EmployeeFormModel = {
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
                 @if (employeeForm.firstName().touched() && employeeForm.firstName().invalid()) {
-                  <p class="mt-1 text-sm text-red-600">First name is required</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{
+                      (employeeForm.firstName().errors()[0]?.message ??
+                        'companies.employeeForm.firstNameRequired') | translate
+                    }}
+                  </p>
                 }
               </div>
 
               <div>
                 <label for="lastName" class="block text-sm font-medium text-slate-700">
-                  Last name *
+                  {{ 'companies.employeeForm.lastName' | translate }} *
                 </label>
                 <input
                   id="lastName"
@@ -129,13 +145,18 @@ const emptyModel: EmployeeFormModel = {
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
                 @if (employeeForm.lastName().touched() && employeeForm.lastName().invalid()) {
-                  <p class="mt-1 text-sm text-red-600">Last name is required</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{
+                      (employeeForm.lastName().errors()[0]?.message ??
+                        'companies.employeeForm.lastNameRequired') | translate
+                    }}
+                  </p>
                 }
               </div>
 
               <div>
                 <label for="documentId" class="block text-sm font-medium text-slate-700">
-                  Document ID *
+                  {{ 'companies.employeeForm.documentId' | translate }} *
                 </label>
                 <input
                   id="documentId"
@@ -144,27 +165,36 @@ const emptyModel: EmployeeFormModel = {
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
                 @if (employeeForm.documentId().touched() && employeeForm.documentId().invalid()) {
-                  <p class="mt-1 text-sm text-red-600">Document ID is required</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{
+                      (employeeForm.documentId().errors()[0]?.message ??
+                        'companies.employeeForm.documentIdRequired') | translate
+                    }}
+                  </p>
                 }
               </div>
 
               <div>
-                <label for="gender" class="block text-sm font-medium text-slate-700">Gender *</label>
+                <label for="gender" class="block text-sm font-medium text-slate-700">
+                  {{ 'companies.employeeForm.gender' | translate }} *
+                </label>
                 <select
                   id="gender"
                   [formField]="employeeForm.gender"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
-                  <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                  <option value="MALE">{{ 'companies.employeeForm.genderMale' | translate }}</option>
+                  <option value="FEMALE">{{ 'companies.employeeForm.genderFemale' | translate }}</option>
+                  <option value="OTHER">{{ 'companies.employeeForm.genderOther' | translate }}</option>
+                  <option value="PREFER_NOT_TO_SAY">
+                    {{ 'companies.employeeForm.genderPreferNotToSay' | translate }}
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label for="birthdate" class="block text-sm font-medium text-slate-700">
-                  Birthdate
+                  {{ 'companies.employeeForm.birthdate' | translate }}
                 </label>
                 <input
                   id="birthdate"
@@ -175,7 +205,9 @@ const emptyModel: EmployeeFormModel = {
               </div>
 
               <div>
-                <label for="email" class="block text-sm font-medium text-slate-700">Email *</label>
+                <label for="email" class="block text-sm font-medium text-slate-700">
+                  {{ 'companies.employeeForm.email' | translate }} *
+                </label>
                 <input
                   id="email"
                   type="email"
@@ -183,18 +215,25 @@ const emptyModel: EmployeeFormModel = {
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
                 @if (employeeForm.email().touched() && employeeForm.email().invalid()) {
-                  <p class="mt-1 text-sm text-red-600">Email is required</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{
+                      (employeeForm.email().errors()[0]?.message ??
+                        'companies.employeeForm.emailRequired') | translate
+                    }}
+                  </p>
                 }
               </div>
             </div>
           </div>
 
           <div class="border-b border-slate-200 pb-6">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">Employment information</h3>
+            <h3 class="text-lg font-medium text-slate-900 mb-4">
+              {{ 'companies.employeeForm.employmentInfo' | translate }}
+            </h3>
             <div class="grid gap-6 sm:grid-cols-2">
               <div>
                 <label for="enrollmentDate" class="block text-sm font-medium text-slate-700">
-                  Enrollment date *
+                  {{ 'companies.employeeForm.enrollmentDate' | translate }} *
                 </label>
                 <input
                   id="enrollmentDate"
@@ -203,13 +242,18 @@ const emptyModel: EmployeeFormModel = {
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
                 @if (employeeForm.enrollmentDate().touched() && employeeForm.enrollmentDate().invalid()) {
-                  <p class="mt-1 text-sm text-red-600">Enrollment date is required</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{
+                      (employeeForm.enrollmentDate().errors()[0]?.message ??
+                        'companies.employeeForm.enrollmentDateRequired') | translate
+                    }}
+                  </p>
                 }
               </div>
 
               <div>
                 <label for="offDate" class="block text-sm font-medium text-slate-700">
-                  Off date
+                  {{ 'companies.employeeForm.offDate' | translate }}
                 </label>
                 <input
                   id="offDate"
@@ -221,14 +265,14 @@ const emptyModel: EmployeeFormModel = {
 
               <div>
                 <label for="positionId" class="block text-sm font-medium text-slate-700">
-                  Position
+                  {{ 'companies.employeeForm.position' | translate }}
                 </label>
                 <select
                   id="positionId"
                   [formField]="employeeForm.positionId"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="">No position</option>
+                  <option value="">{{ 'companies.employeeForm.noPosition' | translate }}</option>
                   @for (position of positions(); track position.id) {
                     <option [value]="position.id">{{ position.name }} ({{ position.code }})</option>
                   }
@@ -236,16 +280,18 @@ const emptyModel: EmployeeFormModel = {
               </div>
 
               <div>
-                <label for="status" class="block text-sm font-medium text-slate-700">Status *</label>
+                <label for="status" class="block text-sm font-medium text-slate-700">
+                  {{ 'companies.employeeForm.status' | translate }} *
+                </label>
                 <select
                   id="status"
                   [formField]="employeeForm.status"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                  <option value="ON_LEAVE">On leave</option>
-                  <option value="TERMINATED">Terminated</option>
+                  <option value="ACTIVE">{{ 'companies.employees.statusActive' | translate }}</option>
+                  <option value="INACTIVE">{{ 'companies.employees.statusInactive' | translate }}</option>
+                  <option value="ON_LEAVE">{{ 'companies.employees.statusOnLeave' | translate }}</option>
+                  <option value="TERMINATED">{{ 'companies.employees.statusTerminated' | translate }}</option>
                 </select>
               </div>
             </div>
@@ -257,13 +303,19 @@ const emptyModel: EmployeeFormModel = {
               [disabled]="employeeForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create') }}
+              {{
+                submitting()
+                  ? ('companies.employeeForm.saving' | translate)
+                  : isEditMode()
+                    ? ('companies.employeeForm.update' | translate)
+                    : ('companies.employeeForm.create' | translate)
+              }}
             </button>
             <a
               [routerLink]="isEditMode() ? ['/dashboard/companies', id(), 'employees', employeeId()] : ['/dashboard/companies', id()]"
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </a>
             @if (isEditMode()) {
               <button
@@ -272,7 +324,7 @@ const emptyModel: EmployeeFormModel = {
                 (click)="onDelete()"
                 class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               >
-                Delete
+                {{ 'companies.employeeForm.delete' | translate }}
               </button>
             }
           </div>
@@ -291,17 +343,18 @@ export default class EmployeeFormComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input.required<string>();
   readonly employeeId = input<string | undefined>(undefined);
 
   protected readonly employeeModel = signal<EmployeeFormModel>({ ...emptyModel });
   protected readonly employeeForm = form(this.employeeModel, (schemaPath) => {
-    required(schemaPath.firstName, { message: 'First name is required' });
-    required(schemaPath.lastName, { message: 'Last name is required' });
-    required(schemaPath.documentId, { message: 'Document ID is required' });
-    required(schemaPath.email, { message: 'Email is required' });
-    required(schemaPath.enrollmentDate, { message: 'Enrollment date is required' });
+    required(schemaPath.firstName, { message: 'companies.employeeForm.firstNameRequired' });
+    required(schemaPath.lastName, { message: 'companies.employeeForm.lastNameRequired' });
+    required(schemaPath.documentId, { message: 'companies.employeeForm.documentIdRequired' });
+    required(schemaPath.email, { message: 'companies.employeeForm.emailRequired' });
+    required(schemaPath.enrollmentDate, { message: 'companies.employeeForm.enrollmentDateRequired' });
   });
 
   protected readonly loading = signal(false);
@@ -379,7 +432,9 @@ export default class EmployeeFormComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.submitError.set(err.message ?? 'Failed to load employee');
+          this.submitError.set(
+            err.message ?? this.translate.instant('companies.employeeForm.loadFailed'),
+          );
         },
       });
   }
@@ -440,7 +495,9 @@ export default class EmployeeFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update employee');
+            this.submitError.set(
+              err.message ?? this.translate.instant('companies.employeeForm.updateFailed'),
+            );
           },
         });
     } else {
@@ -468,7 +525,9 @@ export default class EmployeeFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to create employee');
+            this.submitError.set(
+              err.message ?? this.translate.instant('companies.employeeForm.createFailed'),
+            );
           },
         });
     }
@@ -479,16 +538,15 @@ export default class EmployeeFormComponent {
 
     const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'Delete employee',
-        message:
-          'Are you sure you want to delete this employee? This action cannot be undone.',
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
+        title: this.translate.instant('companies.employeeForm.deleteTitle'),
+        message: this.translate.instant('companies.employeeForm.deleteMessage'),
+        confirmLabel: this.translate.instant('companies.employeeForm.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
         confirmDanger: true,
       },
       role: 'alertdialog',
       ariaModal: true,
-      ariaLabel: 'Delete employee confirmation',
+      ariaLabel: this.translate.instant('companies.employeeForm.deleteAriaLabel'),
       width: '400px',
     });
 
@@ -511,7 +569,9 @@ export default class EmployeeFormComponent {
             },
             error: (err) => {
               this.submitting.set(false);
-              this.submitError.set(err.message ?? 'Failed to delete employee');
+              this.submitError.set(
+                err.message ?? this.translate.instant('companies.employeeForm.deleteFailed'),
+              );
             },
           });
       }

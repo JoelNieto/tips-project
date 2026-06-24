@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { EMPLOYEES_QUERY } from './graphql/employees.graphql';
 import { POSITIONS_QUERY } from './graphql/positions.graphql';
@@ -33,11 +34,11 @@ interface EmployeeListItem {
   position?: PositionSummary | null;
 }
 
-const STATUS_LABELS: Record<EmployeeStatus, string> = {
-  ACTIVE: 'Active',
-  INACTIVE: 'Inactive',
-  ON_LEAVE: 'On leave',
-  TERMINATED: 'Terminated',
+const STATUS_KEYS: Record<EmployeeStatus, string> = {
+  ACTIVE: 'companies.employees.statusActive',
+  INACTIVE: 'companies.employees.statusInactive',
+  ON_LEAVE: 'companies.employees.statusOnLeave',
+  TERMINATED: 'companies.employees.statusTerminated',
 };
 
 const STATUS_CLASSES: Record<EmployeeStatus, string> = {
@@ -50,45 +51,45 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
 @Component({
   selector: 'app-company-employees',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 class="text-lg font-medium text-slate-900">Employees</h3>
-          <p class="mt-1 text-sm text-slate-500">Manage company employees</p>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'companies.employees.title' | translate }}</h3>
+          <p class="mt-1 text-sm text-slate-500">{{ 'companies.employees.subtitle' | translate }}</p>
         </div>
         <a
           [routerLink]="['/dashboard/companies', companyId(), 'employees', 'new']"
           class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
-          Add employee
+          {{ 'companies.employees.addEmployee' | translate }}
         </a>
       </div>
 
       <div class="flex flex-col gap-4 sm:flex-row">
         <div class="flex-1">
-          <label for="search" class="sr-only">Search employees</label>
+          <label for="search" class="sr-only">{{ 'companies.employees.searchAria' | translate }}</label>
           <input
             id="search"
             type="search"
-            placeholder="Search by name, email, or document ID..."
+            [placeholder]="'companies.employees.searchPlaceholder' | translate"
             [value]="searchText()"
             (input)="onSearchInput($event)"
             class="block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           />
         </div>
         <div class="sm:w-64">
-          <label for="positionFilter" class="sr-only">Filter by position</label>
+          <label for="positionFilter" class="sr-only">{{ 'companies.employees.filterByPositionAria' | translate }}</label>
           <select
             id="positionFilter"
             [value]="positionFilter()"
             (change)="onPositionFilterChange($event)"
             class="block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="">All positions</option>
+            <option value="">{{ 'companies.employees.allPositions' | translate }}</option>
             @for (position of positions(); track position.id) {
               <option [value]="position.id">{{ position.name }}</option>
             }
@@ -98,22 +99,22 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading employees...
+          {{ 'companies.employees.loading' | translate }}
         </div>
       } @else if (error()) {
         <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p class="font-medium">Failed to load employees</p>
+          <p class="font-medium">{{ 'companies.employees.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (filteredEmployees().length === 0) {
         <div class="rounded-xl border border-slate-200 bg-white p-12 text-center">
           <span class="material-symbols-outlined text-4xl text-slate-300">group</span>
           @if (employees().length === 0) {
-            <p class="mt-4 text-slate-600">No employees yet</p>
-            <p class="mt-1 text-sm text-slate-500">Add your first employee to get started</p>
+            <p class="mt-4 text-slate-600">{{ 'companies.employees.emptyTitle' | translate }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ 'companies.employees.emptySubtitle' | translate }}</p>
           } @else {
-            <p class="mt-4 text-slate-600">No employees match your filters</p>
-            <p class="mt-1 text-sm text-slate-500">Try adjusting your search or position filter</p>
+            <p class="mt-4 text-slate-600">{{ 'companies.employees.noMatchTitle' | translate }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ 'companies.employees.noMatchSubtitle' | translate }}</p>
           }
         </div>
       } @else {
@@ -122,25 +123,25 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
             <thead class="bg-slate-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Name
+                  {{ 'companies.employees.columnName' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Document ID
+                  {{ 'companies.employees.columnDocumentId' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Position
+                  {{ 'companies.employees.columnPosition' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Status
+                  {{ 'companies.employees.columnStatus' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Email
+                  {{ 'companies.employees.columnEmail' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Enrollment date
+                  {{ 'companies.employees.columnEnrollmentDate' | translate }}
                 </th>
                 <th class="relative px-6 py-3">
-                  <span class="sr-only">Actions</span>
+                  <span class="sr-only">{{ 'companies.employees.actions' | translate }}</span>
                 </th>
               </tr>
             </thead>
@@ -180,7 +181,7 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
                       [routerLink]="['/dashboard/companies', companyId(), 'employees', employee.id]"
                       class="text-indigo-600 hover:text-indigo-800"
                     >
-                      View
+                      {{ 'companies.employees.view' | translate }}
                     </a>
                   </td>
                 </tr>
@@ -200,6 +201,7 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
 export default class CompanyEmployeesComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly companyId = input.required<string>();
 
@@ -253,7 +255,7 @@ export default class CompanyEmployeesComponent {
   }
 
   protected statusLabel(status: EmployeeStatus): string {
-    return STATUS_LABELS[status];
+    return this.translate.instant(STATUS_KEYS[status]);
   }
 
   protected statusClass(status: EmployeeStatus): string {
@@ -285,7 +287,9 @@ export default class CompanyEmployeesComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load employees');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.employees.loadFailed'),
+          );
         },
       });
   }

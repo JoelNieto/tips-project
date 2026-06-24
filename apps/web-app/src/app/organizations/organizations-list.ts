@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { ORGANIZATIONS_QUERY } from './graphql/organizations.graphql';
 
@@ -18,26 +19,30 @@ interface OrganizationRow {
 
 @Component({
   selector: 'app-organizations-list',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Organizations</h2>
-          <p class="text-slate-500 mt-1">Manage tenant organizations</p>
+          <h2 class="text-2xl font-bold text-slate-900">
+            {{ 'organizations.list.title' | translate }}
+          </h2>
+          <p class="text-slate-500 mt-1">
+            {{ 'organizations.list.subtitle' | translate }}
+          </p>
         </div>
         <a
           routerLink="/dashboard/organizations/new"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700"
         >
           <span class="material-symbols-outlined text-lg">add</span>
-          New organization
+          {{ 'organizations.list.newOrganization' | translate }}
         </a>
       </div>
 
       @if (loading()) {
-        <p class="text-slate-500">Loading organizations...</p>
+        <p class="text-slate-500">{{ 'organizations.list.loading' | translate }}</p>
       } @else if (error()) {
         <p class="text-red-600">{{ error() }}</p>
       } @else {
@@ -53,7 +58,7 @@ interface OrganizationRow {
               }
             </a>
           } @empty {
-            <p class="text-slate-500">No organizations yet.</p>
+            <p class="text-slate-500">{{ 'organizations.list.empty' | translate }}</p>
           }
         </div>
       }
@@ -63,6 +68,7 @@ interface OrganizationRow {
 export default class OrganizationsListComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly organizations = signal<OrganizationRow[]>([]);
   protected readonly loading = signal(true);
@@ -82,7 +88,9 @@ export default class OrganizationsListComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load organizations');
+          this.error.set(
+            err.message ?? this.translate.instant('organizations.list.loadFailed'),
+          );
         },
       });
   }

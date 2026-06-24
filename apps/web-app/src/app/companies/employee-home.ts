@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { EMPLOYEE_QUERY } from './graphql/employees.graphql';
 
@@ -33,18 +34,18 @@ interface EmployeeDetail {
   updatedAt: string;
 }
 
-const GENDER_LABELS: Record<Gender, string> = {
-  MALE: 'Male',
-  FEMALE: 'Female',
-  OTHER: 'Other',
-  PREFER_NOT_TO_SAY: 'Prefer not to say',
+const GENDER_KEYS: Record<Gender, string> = {
+  MALE: 'companies.employeeForm.genderMale',
+  FEMALE: 'companies.employeeForm.genderFemale',
+  OTHER: 'companies.employeeForm.genderOther',
+  PREFER_NOT_TO_SAY: 'companies.employeeForm.genderPreferNotToSay',
 };
 
-const STATUS_LABELS: Record<EmployeeStatus, string> = {
-  ACTIVE: 'Active',
-  INACTIVE: 'Inactive',
-  ON_LEAVE: 'On leave',
-  TERMINATED: 'Terminated',
+const STATUS_KEYS: Record<EmployeeStatus, string> = {
+  ACTIVE: 'companies.employees.statusActive',
+  INACTIVE: 'companies.employees.statusInactive',
+  ON_LEAVE: 'companies.employees.statusOnLeave',
+  TERMINATED: 'companies.employees.statusTerminated',
 };
 
 const STATUS_CLASSES: Record<EmployeeStatus, string> = {
@@ -57,7 +58,7 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
 @Component({
   selector: 'app-employee-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -71,9 +72,13 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
           </a>
           <div>
             <h2 class="text-2xl font-bold text-slate-900">
-              {{ employee() ? employee()!.firstName + ' ' + employee()!.lastName : 'Employee details' }}
+              {{
+                employee()
+                  ? employee()!.firstName + ' ' + employee()!.lastName
+                  : ('companies.employeeHome.defaultTitle' | translate)
+              }}
             </h2>
-            <p class="mt-1 text-slate-500">Employee profile</p>
+            <p class="mt-1 text-slate-500">{{ 'companies.employeeHome.subtitle' | translate }}</p>
           </div>
         </div>
         @if (employee()) {
@@ -82,64 +87,86 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
             class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
           >
             <span class="material-symbols-outlined text-[20px]">edit</span>
-            Edit employee
+            {{ 'companies.employeeHome.editEmployee' | translate }}
           </a>
         }
       </div>
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading employee...
+          {{ 'companies.employeeHome.loading' | translate }}
         </div>
       } @else if (error()) {
         <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p class="font-medium">Failed to load employee</p>
+          <p class="font-medium">{{ 'companies.employeeHome.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (employee(); as e) {
         <div class="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 class="text-lg font-medium text-slate-900">Personal information</h3>
+          <h3 class="text-lg font-medium text-slate-900">
+            {{ 'companies.employeeForm.personalInfo' | translate }}
+          </h3>
           <dl class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">First name</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.firstName' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ e.firstName }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Last name</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.lastName' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ e.lastName }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Document ID</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.documentId' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ e.documentId }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Gender</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.gender' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ genderLabel(e.gender) }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Birthdate</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.birthdate' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ formatDate(e.birthdate) }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.email' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ e.email }}</dd>
             </div>
           </dl>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 class="text-lg font-medium text-slate-900">Employment information</h3>
+          <h3 class="text-lg font-medium text-slate-900">
+            {{ 'companies.employeeForm.employmentInfo' | translate }}
+          </h3>
           <dl class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Enrollment date</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.enrollmentDate' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ formatDate(e.enrollmentDate) }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Off date</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.offDate' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">{{ formatDate(e.offDate) }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Position</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.position' | translate }}
+              </dt>
               <dd class="mt-1 text-sm text-slate-900">
                 @if (e.position) {
                   {{ e.position.name }} ({{ e.position.code }})
@@ -149,7 +176,9 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
               </dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Status</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">
+                {{ 'companies.employeeForm.status' | translate }}
+              </dt>
               <dd class="mt-1">
                 <span
                   class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
@@ -163,7 +192,7 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
         </div>
       } @else {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Employee not found.
+          {{ 'companies.employeeHome.notFound' | translate }}
         </div>
       }
     </div>
@@ -177,6 +206,7 @@ const STATUS_CLASSES: Record<EmployeeStatus, string> = {
 export default class EmployeeHomeComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input.required<string>();
   readonly employeeId = input.required<string>();
@@ -195,11 +225,11 @@ export default class EmployeeHomeComponent {
   }
 
   protected genderLabel(gender: Gender): string {
-    return GENDER_LABELS[gender];
+    return this.translate.instant(GENDER_KEYS[gender]);
   }
 
   protected statusLabel(status: EmployeeStatus): string {
-    return STATUS_LABELS[status];
+    return this.translate.instant(STATUS_KEYS[status]);
   }
 
   protected statusClass(status: EmployeeStatus): string {
@@ -235,7 +265,9 @@ export default class EmployeeHomeComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load employee');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.employeeHome.loadFailed'),
+          );
         },
       });
   }

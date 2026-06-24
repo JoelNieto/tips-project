@@ -8,6 +8,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
 
@@ -21,9 +22,16 @@ interface OrganizationOption {
   name: string;
 }
 
+const ROLE_KEYS: Record<UserRole, string> = {
+  ADMIN: 'users.form.roleAdmin',
+  DESIGNER: 'users.form.roleDesigner',
+  ORG_ADMIN: 'users.form.roleOrgAdmin',
+  EMPLOYEE: 'users.form.roleEmployee',
+};
+
 @Component({
   selector: 'app-user-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-xl space-y-6">
@@ -35,8 +43,8 @@ interface OrganizationOption {
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Create user</h2>
-          <p class="text-slate-500 mt-1">Provision a new account with a role</p>
+          <h2 class="text-2xl font-bold text-slate-900">{{ 'users.form.createTitle' | translate }}</h2>
+          <p class="text-slate-500 mt-1">{{ 'users.form.createSubtitle' | translate }}</p>
         </div>
       </div>
 
@@ -54,7 +62,7 @@ interface OrganizationOption {
           <label
             for="name"
             class="block text-sm font-medium text-slate-700 mb-1"
-            >Name</label
+            >{{ 'users.form.name' | translate }}</label
           >
           <input
             id="name"
@@ -69,9 +77,10 @@ interface OrganizationOption {
           <label
             for="email"
             class="block text-sm font-medium text-slate-700 mb-1"
-            >Email</label
+            >{{ 'users.form.email' | translate }}</label
           >
           <input
+            id="email"
             [(ngModel)]="email"
             name="email"
             type="email"
@@ -84,9 +93,10 @@ interface OrganizationOption {
           <label
             for="password"
             class="block text-sm font-medium text-slate-700 mb-1"
-            >Password</label
+            >{{ 'users.form.password' | translate }}</label
           >
           <input
+            id="password"
             [(ngModel)]="password"
             name="password"
             type="password"
@@ -100,7 +110,7 @@ interface OrganizationOption {
           <label
             for="role"
             class="block text-sm font-medium text-slate-700 mb-1"
-            >Role</label
+            >{{ 'users.form.role' | translate }}</label
           >
           <select
             [(ngModel)]="role"
@@ -109,7 +119,7 @@ interface OrganizationOption {
             class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           >
             @for (option of roleOptions; track option) {
-              <option [value]="option">{{ option }}</option>
+              <option [value]="option">{{ roleLabel(option) }}</option>
             }
           </select>
         </div>
@@ -119,7 +129,7 @@ interface OrganizationOption {
             <label
               for="organizationId"
               class="block text-sm font-medium text-slate-700 mb-1"
-              >Organization</label
+              >{{ 'users.form.organization' | translate }}</label
             >
             <select
               [(ngModel)]="organizationId"
@@ -127,7 +137,7 @@ interface OrganizationOption {
               required
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="">Select organization</option>
+              <option value="">{{ 'users.form.selectOrganization' | translate }}</option>
               @for (org of organizations(); track org.id) {
                 <option [value]="org.id">{{ org.name }}</option>
               }
@@ -141,11 +151,15 @@ interface OrganizationOption {
             [disabled]="saving()"
             class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
-            {{ saving() ? 'Creating...' : 'Create user' }}
+            {{
+              saving()
+                ? ('users.form.creating' | translate)
+                : ('users.form.createUser' | translate)
+            }}
           </button>
-          <a routerLink="/dashboard/users" class="px-4 py-2 rounded-lg  text-sm"
-            >Cancel</a
-          >
+          <a routerLink="/dashboard/users" class="px-4 py-2 rounded-lg text-sm">
+            {{ 'common.cancel' | translate }}
+          </a>
         </div>
       </form>
     </div>
@@ -155,6 +169,7 @@ export default class UserFormComponent {
   private readonly apollo = inject(Apollo);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly roleOptions: UserRole[] = [
     'ADMIN',
@@ -185,6 +200,10 @@ export default class UserFormComponent {
       });
   }
 
+  protected roleLabel(role: UserRole): string {
+    return this.translate.instant(ROLE_KEYS[role]);
+  }
+
   async onSubmit() {
     this.saving.set(true);
     this.error.set(null);
@@ -208,7 +227,9 @@ export default class UserFormComponent {
       await this.router.navigate(['/dashboard/users']);
     } catch (err) {
       this.error.set(
-        err instanceof Error ? err.message : 'Failed to create user',
+        err instanceof Error
+          ? err.message
+          : this.translate.instant('users.form.createFailed'),
       );
     } finally {
       this.saving.set(false);

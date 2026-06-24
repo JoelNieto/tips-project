@@ -15,6 +15,7 @@ import {
 } from '@angular/forms/signals';
 import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import {
   COMPANIES_QUERY,
@@ -67,7 +68,7 @@ const emptyModel: CompanyFormModel = {
 @Component({
   selector: 'app-company-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -80,17 +81,21 @@ const emptyModel: CompanyFormModel = {
         </a>
         <div>
           <h2 class="text-2xl font-bold text-slate-900">
-            {{ isEditMode() ? 'Edit company' : 'Create company' }}
+            {{ isEditMode() ? ('companies.form.editTitle' | translate) : ('companies.form.createTitle' | translate) }}
           </h2>
           <p class="mt-1 text-slate-500">
-            {{ isEditMode() ? 'Update company details' : 'Add a new company' }}
+            {{
+              isEditMode()
+                ? ('companies.form.editSubtitle' | translate)
+                : ('companies.form.createSubtitle' | translate)
+            }}
           </p>
         </div>
       </div>
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading...
+          {{ 'companies.form.loading' | translate }}
         </div>
       } @else {
         <form
@@ -105,13 +110,13 @@ const emptyModel: CompanyFormModel = {
 
           @if (!isEditMode()) {
             <div>
-              <label for="organizationId" class="block text-sm font-medium text-slate-700">Organization *</label>
+              <label for="organizationId" class="block text-sm font-medium text-slate-700">{{ 'companies.form.organization' | translate }} *</label>
               <select
                 id="organizationId"
                 [formField]="companyForm.organizationId"
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               >
-                <option value="">Select organization</option>
+                <option value="">{{ 'companies.form.selectOrganization' | translate }}</option>
                 @for (org of organizations(); track org.id) {
                   <option [value]="org.id">{{ org.name }}</option>
                 }
@@ -121,7 +126,7 @@ const emptyModel: CompanyFormModel = {
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <label for="name" class="block text-sm font-medium text-slate-700">Name *</label>
+              <label for="name" class="block text-sm font-medium text-slate-700">{{ 'companies.form.name' | translate }} *</label>
               <input
                 id="name"
                 type="text"
@@ -129,13 +134,18 @@ const emptyModel: CompanyFormModel = {
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
               @if (companyForm.name().touched() && companyForm.name().invalid()) {
-                <p class="mt-1 text-sm text-red-600">Name is required</p>
+                <p class="mt-1 text-sm text-red-600">
+                  {{
+                    (companyForm.name().errors()[0]?.message ??
+                      'companies.form.nameRequired') | translate
+                  }}
+                </p>
               }
             </div>
 
             <div>
               <label for="legalName" class="block text-sm font-medium text-slate-700">
-                Legal name
+                {{ 'companies.form.legalName' | translate }}
               </label>
               <input
                 id="legalName"
@@ -148,7 +158,7 @@ const emptyModel: CompanyFormModel = {
 
           <div>
             <label for="description" class="block text-sm font-medium text-slate-700">
-              Description
+              {{ 'companies.form.description' | translate }}
             </label>
             <textarea
               id="description"
@@ -159,10 +169,10 @@ const emptyModel: CompanyFormModel = {
           </div>
 
           <div class="border-t border-slate-200 pt-6">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">Contact</h3>
+            <h3 class="text-lg font-medium text-slate-900 mb-4">{{ 'companies.form.contact' | translate }}</h3>
             <div class="grid gap-6 sm:grid-cols-3">
               <div>
-                <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
+                <label for="email" class="block text-sm font-medium text-slate-700">{{ 'companies.form.email' | translate }}</label>
                 <input
                   id="email"
                   type="email"
@@ -171,7 +181,7 @@ const emptyModel: CompanyFormModel = {
                 />
               </div>
               <div>
-                <label for="phone" class="block text-sm font-medium text-slate-700">Phone</label>
+                <label for="phone" class="block text-sm font-medium text-slate-700">{{ 'companies.form.phone' | translate }}</label>
                 <input
                   id="phone"
                   type="tel"
@@ -180,7 +190,7 @@ const emptyModel: CompanyFormModel = {
                 />
               </div>
               <div>
-                <label for="website" class="block text-sm font-medium text-slate-700">Website</label>
+                <label for="website" class="block text-sm font-medium text-slate-700">{{ 'companies.form.website' | translate }}</label>
                 <input
                   id="website"
                   type="url"
@@ -192,10 +202,10 @@ const emptyModel: CompanyFormModel = {
           </div>
 
           <div class="border-t border-slate-200 pt-6">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">Address</h3>
+            <h3 class="text-lg font-medium text-slate-900 mb-4">{{ 'companies.form.address' | translate }}</h3>
             <div class="space-y-4">
               <div>
-                <label for="street" class="block text-sm font-medium text-slate-700">Street</label>
+                <label for="street" class="block text-sm font-medium text-slate-700">{{ 'companies.form.street' | translate }}</label>
                 <input
                   id="street"
                   type="text"
@@ -205,7 +215,7 @@ const emptyModel: CompanyFormModel = {
               </div>
               <div class="grid gap-6 sm:grid-cols-3">
                 <div>
-                  <label for="city" class="block text-sm font-medium text-slate-700">City</label>
+                  <label for="city" class="block text-sm font-medium text-slate-700">{{ 'companies.form.city' | translate }}</label>
                   <input
                     id="city"
                     type="text"
@@ -214,7 +224,7 @@ const emptyModel: CompanyFormModel = {
                   />
                 </div>
                 <div>
-                  <label for="state" class="block text-sm font-medium text-slate-700">State</label>
+                  <label for="state" class="block text-sm font-medium text-slate-700">{{ 'companies.form.state' | translate }}</label>
                   <input
                     id="state"
                     type="text"
@@ -224,7 +234,7 @@ const emptyModel: CompanyFormModel = {
                 </div>
                 <div>
                   <label for="postalCode" class="block text-sm font-medium text-slate-700">
-                    Postal code
+                    {{ 'companies.form.postalCode' | translate }}
                   </label>
                   <input
                     id="postalCode"
@@ -235,7 +245,7 @@ const emptyModel: CompanyFormModel = {
                 </div>
               </div>
               <div>
-                <label for="country" class="block text-sm font-medium text-slate-700">Country</label>
+                <label for="country" class="block text-sm font-medium text-slate-700">{{ 'companies.form.country' | translate }}</label>
                 <input
                   id="country"
                   type="text"
@@ -247,10 +257,10 @@ const emptyModel: CompanyFormModel = {
           </div>
 
           <div class="border-t border-slate-200 pt-6">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">Details</h3>
+            <h3 class="text-lg font-medium text-slate-900 mb-4">{{ 'companies.form.details' | translate }}</h3>
             <div class="grid gap-6 sm:grid-cols-3">
               <div>
-                <label for="taxId" class="block text-sm font-medium text-slate-700">Tax ID</label>
+                <label for="taxId" class="block text-sm font-medium text-slate-700">{{ 'companies.form.taxId' | translate }}</label>
                 <input
                   id="taxId"
                   type="text"
@@ -259,7 +269,7 @@ const emptyModel: CompanyFormModel = {
                 />
               </div>
               <div>
-                <label for="industry" class="block text-sm font-medium text-slate-700">Industry</label>
+                <label for="industry" class="block text-sm font-medium text-slate-700">{{ 'companies.form.industry' | translate }}</label>
                 <input
                   id="industry"
                   type="text"
@@ -268,18 +278,18 @@ const emptyModel: CompanyFormModel = {
                 />
               </div>
               <div>
-                <label for="size" class="block text-sm font-medium text-slate-700">Size</label>
+                <label for="size" class="block text-sm font-medium text-slate-700">{{ 'companies.form.size' | translate }}</label>
                 <input
                   id="size"
                   type="text"
                   [formField]="companyForm.size"
-                  placeholder="e.g. 1-10"
+                  [placeholder]="'companies.form.sizePlaceholder' | translate"
                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
             <div class="mt-4">
-              <label for="logo" class="block text-sm font-medium text-slate-700">Logo URL</label>
+              <label for="logo" class="block text-sm font-medium text-slate-700">{{ 'companies.form.logoUrl' | translate }}</label>
               <input
                 id="logo"
                 type="url"
@@ -295,13 +305,19 @@ const emptyModel: CompanyFormModel = {
               [disabled]="companyForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create') }}
+              {{
+                submitting()
+                  ? ('companies.form.saving' | translate)
+                  : isEditMode()
+                    ? ('companies.form.update' | translate)
+                    : ('companies.form.create' | translate)
+              }}
             </button>
             <a
               routerLink="/dashboard/companies"
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </a>
             @if (isEditMode()) {
               <button
@@ -310,7 +326,7 @@ const emptyModel: CompanyFormModel = {
                 (click)="onDelete()"
                 class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               >
-                Delete
+                {{ 'companies.form.delete' | translate }}
               </button>
             }
           </div>
@@ -329,13 +345,14 @@ export default class CompanyFormComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input<string | undefined>(undefined);
 
   protected readonly companyModel = signal<CompanyFormModel>({ ...emptyModel });
 
   protected readonly companyForm = form(this.companyModel, (schemaPath) => {
-    required(schemaPath.name, { message: 'Name is required' });
+    required(schemaPath.name, { message: 'companies.form.nameRequired' });
   });
 
   protected readonly organizations = signal<{ id: string; name: string }[]>([]);
@@ -405,7 +422,9 @@ export default class CompanyFormComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.submitError.set(err.message ?? 'Failed to load company');
+          this.submitError.set(
+            err.message ?? this.translate.instant('companies.form.loadFailed'),
+          );
         },
       });
   }
@@ -450,12 +469,16 @@ export default class CompanyFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update company');
+            this.submitError.set(
+              err.message ?? this.translate.instant('companies.form.updateFailed'),
+            );
           },
         });
     } else {
       if (!value.organizationId) {
-        this.submitError.set('Organization is required');
+        this.submitError.set(
+          this.translate.instant('companies.form.organizationRequired'),
+        );
         return;
       }
       this.submitting.set(true);
@@ -472,7 +495,9 @@ export default class CompanyFormComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to create company');
+            this.submitError.set(
+              err.message ?? this.translate.instant('companies.form.createFailed'),
+            );
           },
         });
     }
@@ -483,15 +508,15 @@ export default class CompanyFormComponent {
 
     const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'Delete company',
-        message: 'Are you sure you want to delete this company? This action cannot be undone.',
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
+        title: this.translate.instant('companies.form.deleteTitle'),
+        message: this.translate.instant('companies.form.deleteMessage'),
+        confirmLabel: this.translate.instant('companies.form.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
         confirmDanger: true,
       },
       role: 'alertdialog',
       ariaModal: true,
-      ariaLabel: 'Delete company confirmation',
+      ariaLabel: this.translate.instant('companies.form.deleteAriaLabel'),
       width: '400px',
     });
 
@@ -512,7 +537,9 @@ export default class CompanyFormComponent {
             },
             error: (err) => {
               this.submitting.set(false);
-              this.submitError.set(err.message ?? 'Failed to delete company');
+              this.submitError.set(
+                err.message ?? this.translate.instant('companies.form.deleteFailed'),
+              );
             },
           });
       }

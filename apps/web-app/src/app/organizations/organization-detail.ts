@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
 
@@ -33,7 +34,7 @@ interface AssignedSurvey {
 
 @Component({
   selector: 'app-organization-detail',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -49,7 +50,7 @@ interface AssignedSurvey {
             {{ organizationName() }}
           </h2>
           <p class="text-slate-500 mt-1">
-            Assigned surveys and organization settings
+            {{ 'organizations.detail.subtitle' | translate }}
           </p>
         </div>
       </div>
@@ -57,7 +58,9 @@ interface AssignedSurvey {
       <section
         class="bg-white rounded-xl border border-slate-200 p-6 space-y-4"
       >
-        <h3 class="text-lg font-semibold text-slate-900">Assign survey</h3>
+        <h3 class="text-lg font-semibold text-slate-900">
+          {{ 'organizations.detail.assignSurvey' | translate }}
+        </h3>
         <form
           (ngSubmit)="assignSurvey()"
           class="flex flex-col sm:flex-row gap-3"
@@ -68,7 +71,7 @@ interface AssignedSurvey {
             required
             class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="">Select survey</option>
+            <option value="">{{ 'organizations.detail.selectSurvey' | translate }}</option>
             @for (survey of surveys(); track survey.id) {
               <option [value]="survey.id">{{ survey.title }}</option>
             }
@@ -77,7 +80,7 @@ interface AssignedSurvey {
             type="submit"
             class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm"
           >
-            Assign
+            {{ 'organizations.detail.assign' | translate }}
           </button>
         </form>
       </section>
@@ -86,7 +89,9 @@ interface AssignedSurvey {
         class="bg-white rounded-xl border border-slate-200 overflow-hidden"
       >
         <div class="px-6 py-4 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-900">Assigned surveys</h3>
+          <h3 class="text-lg font-semibold text-slate-900">
+            {{ 'organizations.detail.assignedSurveys' | translate }}
+          </h3>
         </div>
         <ul class="divide-y divide-slate-200">
           @for (item of assignedSurveys(); track item.id) {
@@ -99,12 +104,12 @@ interface AssignedSurvey {
                 (click)="removeAssignment(item.id)"
                 class="text-sm text-red-600 hover:text-red-700"
               >
-                Remove
+                {{ 'organizations.detail.remove' | translate }}
               </button>
             </li>
           } @empty {
             <li class="px-6 py-8 text-center text-slate-500">
-              No surveys assigned yet.
+              {{ 'organizations.detail.noSurveysAssigned' | translate }}
             </li>
           }
         </ul>
@@ -115,10 +120,13 @@ interface AssignedSurvey {
 export default class OrganizationDetailComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   id = input.required<string>();
 
-  protected readonly organizationName = signal('Organization');
+  protected readonly organizationName = signal(
+    this.translate.instant('organizations.detail.defaultName'),
+  );
   protected readonly surveys = signal<SurveyOption[]>([]);
   protected readonly assignedSurveys = signal<AssignedSurvey[]>([]);
   protected selectedSurveyId = '';

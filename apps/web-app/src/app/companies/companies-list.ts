@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import { COMPANIES_QUERY } from './graphql/companies.graphql';
 
@@ -20,44 +21,48 @@ interface CompanyListItem {
 @Component({
   selector: 'app-companies-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Companies</h2>
-          <p class="mt-1 text-slate-500">Manage your companies</p>
+          <h2 class="text-2xl font-bold text-slate-900">
+            {{ 'companies.list.title' | translate }}
+          </h2>
+          <p class="mt-1 text-slate-500">{{ 'companies.list.subtitle' | translate }}</p>
         </div>
         <a
           routerLink="/dashboard/companies/new"
           class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
-          Add company
+          {{ 'companies.list.addCompany' | translate }}
         </a>
       </div>
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading companies...
+          {{ 'companies.list.loading' | translate }}
         </div>
       } @else if (error()) {
         <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p class="font-medium">Failed to load companies</p>
+          <p class="font-medium">{{ 'companies.list.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (companies().length === 0) {
         <div class="rounded-xl border border-slate-200 bg-white p-12 text-center">
           <span class="material-symbols-outlined text-4xl text-slate-300">business</span>
-          <p class="mt-4 text-slate-600">No companies yet</p>
-          <p class="mt-1 text-sm text-slate-500">Create your first company to get started</p>
+          <p class="mt-4 text-slate-600">{{ 'companies.list.emptyTitle' | translate }}</p>
+          <p class="mt-1 text-sm text-slate-500">
+            {{ 'companies.list.emptySubtitle' | translate }}
+          </p>
           <a
             routerLink="/dashboard/companies/new"
             class="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
           >
             <span class="material-symbols-outlined text-[20px]">add</span>
-            Add company
+            {{ 'companies.list.addCompany' | translate }}
           </a>
         </div>
       } @else {
@@ -66,16 +71,16 @@ interface CompanyListItem {
             <thead class="bg-slate-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Name
+                  {{ 'companies.list.columnName' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Email
+                  {{ 'companies.list.columnEmail' | translate }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Created by
+                  {{ 'companies.list.columnCreatedBy' | translate }}
                 </th>
                 <th class="relative px-6 py-3">
-                  <span class="sr-only">Actions</span>
+                  <span class="sr-only">{{ 'companies.list.actions' | translate }}</span>
                 </th>
               </tr>
             </thead>
@@ -101,7 +106,7 @@ interface CompanyListItem {
                       [routerLink]="['/dashboard/companies', company.id]"
                       class="text-indigo-600 hover:text-indigo-800"
                     >
-                      View
+                      {{ 'companies.list.view' | translate }}
                     </a>
                   </td>
                 </tr>
@@ -121,6 +126,7 @@ interface CompanyListItem {
 export default class CompaniesListComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -145,7 +151,9 @@ export default class CompaniesListComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load companies');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.list.loadFailed'),
+          );
         },
       });
   }

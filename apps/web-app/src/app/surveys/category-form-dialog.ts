@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import {
   CREATE_DIMENSION_MUTATION,
@@ -104,13 +105,25 @@ const emptyInlineQuestion: InlineQuestionModel = {
 @Component({
   selector: 'app-category-form-dialog',
   standalone: true,
-  imports: [FormField],
+  imports: [FormField, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
       <div class="p-6 overflow-y-auto flex-1">
-        <h2 class="text-lg font-semibold text-slate-900 mb-1">{{ isEditMode() ? 'Edit category' : 'Add category' }}</h2>
-        <p class="text-sm text-slate-500 mb-6">{{ isEditMode() ? 'Update the category and add more questions.' : 'Define the category and add questions from the bank or create new ones inline.' }}</p>
+        <h2 class="text-lg font-semibold text-slate-900 mb-1">
+          {{
+            isEditMode()
+              ? ('surveys.category.editTitle' | translate)
+              : ('surveys.category.addTitle' | translate)
+          }}
+        </h2>
+        <p class="text-sm text-slate-500 mb-6">
+          {{
+            isEditMode()
+              ? ('surveys.category.editSubtitle' | translate)
+              : ('surveys.category.addSubtitle' | translate)
+          }}
+        </p>
 
         @if (submitError()) {
           <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm mb-4">
@@ -121,7 +134,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
         <form (submit)="onSubmit($event)" class="space-y-6">
           <div class="space-y-4">
             <div>
-              <label for="cat-title" class="block text-sm font-medium text-slate-700">Title *</label>
+              <label for="cat-title" class="block text-sm font-medium text-slate-700">{{ 'surveys.category.title' | translate }} *</label>
               <input
                 id="cat-title"
                 type="text"
@@ -129,11 +142,16 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
               @if (dimensionForm.title().touched() && dimensionForm.title().invalid()) {
-                <p class="mt-1 text-sm text-red-600">Title is required</p>
+                <p class="mt-1 text-sm text-red-600">
+                  {{
+                    (dimensionForm.title().errors()[0]?.message ??
+                      'surveys.category.titleRequired') | translate
+                  }}
+                </p>
               }
             </div>
             <div>
-              <label for="cat-desc" class="block text-sm font-medium text-slate-700">Description</label>
+              <label for="cat-desc" class="block text-sm font-medium text-slate-700">{{ 'surveys.category.description' | translate }}</label>
               <textarea
                 id="cat-desc"
                 [formField]="dimensionForm.description"
@@ -142,7 +160,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
               ></textarea>
             </div>
             <div>
-              <label for="cat-main-q" class="block text-sm font-medium text-slate-700">Main question text</label>
+              <label for="cat-main-q" class="block text-sm font-medium text-slate-700">{{ 'surveys.category.mainQuestionText' | translate }}</label>
               <input
                 id="cat-main-q"
                 type="text"
@@ -153,15 +171,15 @@ const emptyInlineQuestion: InlineQuestionModel = {
             <div class="rounded-lg border border-slate-200 p-4">
               <div class="flex items-center justify-between mb-3">
                 <div>
-                  <h4 class="text-sm font-medium text-slate-900">Main question answers</h4>
-                  <p class="text-xs text-slate-500">Answer options shown with the main question in the survey.</p>
+                  <h4 class="text-sm font-medium text-slate-900">{{ 'surveys.category.mainQuestionAnswers' | translate }}</h4>
+                  <p class="text-xs text-slate-500">{{ 'surveys.category.mainQuestionAnswersHint' | translate }}</p>
                 </div>
                 <button
                   type="button"
                   (click)="addMainQuestionAnswer()"
                   class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
                 >
-                  + Add answer
+                  {{ 'surveys.category.addAnswer' | translate }}
                 </button>
               </div>
               <div class="space-y-3">
@@ -169,7 +187,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                   <div class="flex gap-3 items-start rounded-lg border border-slate-200 p-3 bg-white">
                     <div class="flex-1 grid gap-3 sm:grid-cols-3">
                       <div class="sm:col-span-2">
-                        <label class="block text-xs font-medium text-slate-500">Text</label>
+                        <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.text' | translate }}</label>
                         <input
                           type="text"
                           [value]="a.text"
@@ -178,7 +196,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                         />
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-slate-500">Value</label>
+                        <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.value' | translate }}</label>
                         <input
                           type="number"
                           step="any"
@@ -188,7 +206,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                         />
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                        <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.reverseValue' | translate }}</label>
                         <input
                           type="number"
                           step="any"
@@ -202,7 +220,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                       type="button"
                       (click)="removeMainQuestionAnswer(i)"
                       class="text-red-600 hover:text-red-800 p-1"
-                      aria-label="Remove answer"
+                      [attr.aria-label]="'surveys.category.removeAnswer' | translate"
                     >
                       <span class="material-symbols-outlined text-[20px]">delete</span>
                     </button>
@@ -215,11 +233,16 @@ const emptyInlineQuestion: InlineQuestionModel = {
           <div class="rounded-lg border border-slate-200 p-4">
             <div class="flex items-center justify-between mb-3">
               <div>
-                <h4 class="text-sm font-medium text-slate-900">Score ranges</h4>
+                <h4 class="text-sm font-medium text-slate-900">{{ 'surveys.category.scoreRanges' | translate }}</h4>
                 <p class="text-xs text-slate-500">
-                  Optional interpretation messages for score bands.
+                  {{ 'surveys.category.scoreRangesHint' | translate }}
                   @if (scoreBoundsGuide()) {
-                    Possible score range: {{ scoreBoundsGuide()!.min }} – {{ scoreBoundsGuide()!.max }}
+                    {{
+                      'surveys.category.possibleScoreRange' | translate: {
+                        min: scoreBoundsGuide()!.min,
+                        max: scoreBoundsGuide()!.max,
+                      }
+                    }}
                   }
                 </p>
               </div>
@@ -228,7 +251,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 (click)="addScoreRange()"
                 class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
               >
-                + Add range
+                {{ 'surveys.category.addRange' | translate }}
               </button>
             </div>
             <div class="space-y-3">
@@ -236,17 +259,17 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 <div class="rounded-lg border border-slate-200 p-3 bg-white space-y-3">
                   <div class="grid gap-3 sm:grid-cols-3">
                     <div>
-                      <label class="block text-xs font-medium text-slate-500">Label</label>
+                      <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.label' | translate }}</label>
                       <input
                         type="text"
                         [value]="r.label"
                         (input)="updateScoreRange(i, 'label', $event)"
-                        placeholder="e.g. Deficient"
+                        [placeholder]="'surveys.category.labelPlaceholder' | translate"
                         class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-slate-500">Min value</label>
+                      <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.minValue' | translate }}</label>
                       <input
                         type="number"
                         step="any"
@@ -256,7 +279,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-slate-500">Max value</label>
+                      <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.maxValue' | translate }}</label>
                       <input
                         type="number"
                         step="any"
@@ -267,7 +290,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                     </div>
                   </div>
                   <div>
-                    <label class="block text-xs font-medium text-slate-500">Message</label>
+                    <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.message' | translate }}</label>
                     <textarea
                       rows="2"
                       [value]="r.message"
@@ -281,7 +304,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                       (click)="removeScoreRange(i)"
                       class="text-red-600 hover:text-red-800 text-sm"
                     >
-                      Remove range
+                      {{ 'surveys.category.removeRange' | translate }}
                     </button>
                   </div>
                 </div>
@@ -290,21 +313,21 @@ const emptyInlineQuestion: InlineQuestionModel = {
           </div>
 
           <div class="border-t border-slate-200 pt-6">
-            <h3 class="text-sm font-medium text-slate-900 mb-3">Questions</h3>
+            <h3 class="text-sm font-medium text-slate-900 mb-3">{{ 'surveys.category.questions' | translate }}</h3>
 
             @if (selectedQuestions().length > 0) {
               <ul class="space-y-2 mb-4">
                 @for (q of selectedQuestions(); track trackQuestion($index, q); let i = $index) {
                   <li class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                    <span>{{ q.text || 'New question' }}</span>
+                    <span>{{ q.text || ('surveys.category.newQuestion' | translate) }}</span>
                     @if (q.type === 'new') {
-                      <span class="text-xs text-amber-600">(will save to bank)</span>
+                      <span class="text-xs text-amber-600">{{ 'surveys.category.willSaveToBank' | translate }}</span>
                     }
                     <button
                       type="button"
                       (click)="removeQuestion(i)"
                       class="text-red-600 hover:text-red-800 p-1"
-                      aria-label="Remove"
+                      [attr.aria-label]="'surveys.category.remove' | translate"
                     >
                       <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
@@ -319,7 +342,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 [value]="selectedBankId()"
                 class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
               >
-                <option value="">Select from bank...</option>
+                <option value="">{{ 'surveys.category.selectFromBank' | translate }}</option>
                 @for (q of bankQuestions(); track q.id) {
                   <option [value]="q.id">{{ q.title }}</option>
                 }
@@ -330,23 +353,27 @@ const emptyInlineQuestion: InlineQuestionModel = {
                 [disabled]="!selectedBankId()"
                 class="rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white disabled:opacity-50"
               >
-                Add from bank
+                {{ 'surveys.category.addFromBank' | translate }}
               </button>
               <button
                 type="button"
                 (click)="showInlineForm.set(!showInlineForm())"
                 class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
               >
-                {{ showInlineForm() ? 'Cancel' : '+ Create new inline' }}
+                {{
+                  showInlineForm()
+                    ? ('surveys.category.cancelInline' | translate)
+                    : ('surveys.category.createInline' | translate)
+                }}
               </button>
             </div>
 
             @if (showInlineForm()) {
               <div class="rounded-lg border border-slate-200 p-4 bg-slate-50 space-y-3">
-                <p class="text-xs font-medium text-slate-600">New question (saved to bank on save)</p>
+                <p class="text-xs font-medium text-slate-600">{{ 'surveys.category.inlineNewHint' | translate }}</p>
                 <div class="grid gap-3 sm:grid-cols-2">
                   <div class="sm:col-span-2">
-                    <label class="block text-xs font-medium text-slate-600">Title *</label>
+                    <label class="block text-xs font-medium text-slate-600">{{ 'surveys.category.title' | translate }} *</label>
                     <input
                       type="text"
                       [value]="inlineModel().title"
@@ -355,7 +382,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                     />
                   </div>
                   <div class="sm:col-span-2">
-                    <label class="block text-xs font-medium text-slate-600">Question text *</label>
+                    <label class="block text-xs font-medium text-slate-600">{{ 'surveys.category.questionText' | translate }} *</label>
                     <textarea
                       [value]="inlineModel().text"
                       (input)="updateInline('text', $event)"
@@ -364,7 +391,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                     ></textarea>
                   </div>
                   <div>
-                    <label class="block text-xs font-medium text-slate-600">Weight</label>
+                    <label class="block text-xs font-medium text-slate-600">{{ 'surveys.category.weight' | translate }}</label>
                     <input
                       type="number"
                       step="any"
@@ -381,7 +408,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                         (change)="updateInlineCheckbox('isReversed', $event)"
                         class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span class="text-xs font-medium text-slate-600">Reversed scale</span>
+                      <span class="text-xs font-medium text-slate-600">{{ 'surveys.category.reversedScale' | translate }}</span>
                     </label>
                     <label class="flex items-center gap-2">
                       <input
@@ -390,39 +417,51 @@ const emptyInlineQuestion: InlineQuestionModel = {
                         (change)="updateInlineCheckbox('isMultiAnswer', $event)"
                         class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span class="text-xs font-medium text-slate-600">Multi-answer</span>
+                      <span class="text-xs font-medium text-slate-600">{{ 'surveys.category.multiAnswer' | translate }}</span>
                     </label>
                   </div>
                 </div>
                 <div class="border-t border-slate-200 pt-3">
                   <div class="space-y-3 mb-3">
                     <div>
-                      <label for="inline-answer-set" class="block text-xs font-medium text-slate-700">Answer set from bank</label>
+                      <label for="inline-answer-set" class="block text-xs font-medium text-slate-700">{{ 'surveys.category.answerSetFromBank' | translate }}</label>
                       <select
                         id="inline-answer-set"
                         [value]="inlineModel().selectedAnswerSetId"
                         (change)="onInlineAnswerSetSelect($event)"
                         class="mt-1 block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
                       >
-                        <option value="">Use custom answers below...</option>
+                        <option value="">{{ 'surveys.category.useCustomAnswers' | translate }}</option>
                         @for (set of answerSets(); track set.id) {
-                          <option [value]="set.id">{{ set.name }} ({{ set.answers.length }} answers)</option>
+                          <option [value]="set.id">
+                            {{ set.name }} ({{
+                              'surveys.category.answersCount' | translate: {
+                                count: set.answers.length,
+                              }
+                            }})
+                          </option>
                         }
                       </select>
                     </div>
                     @if (selectedInlineAnswerSetPreview().length > 0) {
                       <div class="rounded border border-slate-200 bg-white p-3">
-                        <p class="text-xs font-medium text-slate-600 mb-1">Selected answers</p>
+                        <p class="text-xs font-medium text-slate-600 mb-1">{{ 'surveys.category.selectedAnswers' | translate }}</p>
                         <ul class="space-y-1 text-xs text-slate-500">
                           @for (a of selectedInlineAnswerSetPreview(); track $index) {
-                            <li>{{ a.text }} (value: {{ a.value }})</li>
+                            <li>
+                              {{ a.text }} ({{
+                                'surveys.category.answerValue' | translate: {
+                                  value: a.value,
+                                }
+                              }})
+                            </li>
                           }
                         </ul>
                       </div>
                     }
                   </div>
                   <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-xs font-medium text-slate-700">Custom answer options</h4>
+                    <h4 class="text-xs font-medium text-slate-700">{{ 'surveys.category.customAnswerOptions' | translate }}</h4>
                     <button
                       type="button"
                       (click)="addInlineAnswer()"
@@ -431,18 +470,18 @@ const emptyInlineQuestion: InlineQuestionModel = {
                       [class.opacity-50]="!!inlineModel().selectedAnswerSetId"
                       [class.cursor-not-allowed]="!!inlineModel().selectedAnswerSetId"
                     >
-                      + Add answer
+                      {{ 'surveys.category.addAnswer' | translate }}
                     </button>
                   </div>
                   @if (inlineModel().selectedAnswerSetId) {
-                    <p class="text-xs text-slate-500">Clear the answer set selection to define custom answers.</p>
+                    <p class="text-xs text-slate-500">{{ 'surveys.category.clearAnswerSetToCustomize' | translate }}</p>
                   } @else {
                     <div class="space-y-2">
                       @for (a of inlineModel().answers; track $index; let i = $index) {
                         <div class="flex gap-2 items-start rounded border border-slate-200 p-2 bg-white">
                           <div class="flex-1 grid gap-2 sm:grid-cols-3">
                             <div class="sm:col-span-2">
-                              <label class="block text-xs font-medium text-slate-500">Text</label>
+                              <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.text' | translate }}</label>
                               <input
                                 type="text"
                                 [value]="a.text"
@@ -451,7 +490,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                               />
                             </div>
                             <div>
-                              <label class="block text-xs font-medium text-slate-500">Value</label>
+                              <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.value' | translate }}</label>
                               <input
                                 type="number"
                                 step="any"
@@ -461,7 +500,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                               />
                             </div>
                             <div>
-                              <label class="block text-xs font-medium text-slate-500">Reverse value</label>
+                              <label class="block text-xs font-medium text-slate-500">{{ 'surveys.category.reverseValue' | translate }}</label>
                               <input
                                 type="number"
                                 step="any"
@@ -475,7 +514,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
                             type="button"
                             (click)="removeInlineAnswer(i)"
                             class="text-red-600 hover:text-red-800 p-1"
-                            aria-label="Remove answer"
+                            [attr.aria-label]="'surveys.category.removeAnswer' | translate"
                           >
                             <span class="material-symbols-outlined text-[18px]">delete</span>
                           </button>
@@ -491,14 +530,14 @@ const emptyInlineQuestion: InlineQuestionModel = {
                     [disabled]="!inlineModel().title.trim() || !inlineModel().text.trim()"
                     class="rounded bg-indigo-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
                   >
-                    Add to list
+                    {{ 'surveys.category.addToList' | translate }}
                   </button>
                   <button
                     type="button"
                     (click)="resetInlineForm()"
                     class="rounded border border-slate-300 px-3 py-1.5 text-sm"
                   >
-                    Clear
+                    {{ 'surveys.category.clear' | translate }}
                   </button>
                 </div>
               </div>
@@ -511,14 +550,20 @@ const emptyInlineQuestion: InlineQuestionModel = {
               [disabled]="dimensionForm().invalid() || submitting()"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update category' : 'Save category') }}
+              {{
+                submitting()
+                  ? ('surveys.category.saving' | translate)
+                  : isEditMode()
+                    ? ('surveys.category.updateCategory' | translate)
+                    : ('surveys.category.saveCategory' | translate)
+              }}
             </button>
             <button
               type="button"
               (click)="cancel()"
               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              {{ 'common.cancel' | translate }}
             </button>
           </div>
         </form>
@@ -533,6 +578,7 @@ const emptyInlineQuestion: InlineQuestionModel = {
 })
 export default class CategoryFormDialogComponent {
   private readonly apollo = inject(Apollo);
+  private readonly translate = inject(TranslateService);
   protected readonly dialogRef = inject(DialogRef<CategoryFormDialogResult | null>);
   protected readonly data = inject<CategoryFormDialogData>(DIALOG_DATA);
 
@@ -542,7 +588,7 @@ export default class CategoryFormDialogComponent {
     mainQuestionText: '',
   });
   protected readonly dimensionForm = form(this.dimensionModel, (schemaPath) => {
-    required(schemaPath.title, { message: 'Title is required' });
+    required(schemaPath.title, { message: 'surveys.category.titleRequired' });
   });
 
   protected readonly selectedQuestions = signal<SelectedQuestion[]>([]);
@@ -801,7 +847,9 @@ export default class CategoryFormDialogComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to update category');
+            this.submitError.set(
+              err.message ?? this.translate.instant('surveys.category.updateFailed'),
+            );
           },
         });
     } else {
@@ -818,7 +866,9 @@ export default class CategoryFormDialogComponent {
           next: (res) => {
             const dimensionId = res.data?.createDimension?.id;
             if (!dimensionId) {
-              this.submitError.set('Failed to create category');
+              this.submitError.set(
+                this.translate.instant('surveys.category.createFailed'),
+              );
               this.submitting.set(false);
               return;
             }
@@ -826,7 +876,9 @@ export default class CategoryFormDialogComponent {
           },
           error: (err) => {
             this.submitting.set(false);
-            this.submitError.set(err.message ?? 'Failed to create category');
+            this.submitError.set(
+              err.message ?? this.translate.instant('surveys.category.createFailed'),
+            );
           },
         });
     }
@@ -881,7 +933,7 @@ export default class CategoryFormDialogComponent {
         })
         .subscribe({
           next: () => checkDone(),
-          error: (err) => onError(err.message ?? 'Failed to add question'),
+          error: (err) => onError(err.message ?? this.translate.instant('surveys.category.addQuestionFailed')),
         });
     };
 
@@ -925,7 +977,8 @@ export default class CategoryFormDialogComponent {
             if (id) addOne(id);
             else checkDone();
           },
-          error: (err) => onError(err.message ?? 'Failed to create question'),
+          error: (err) =>
+            onError(err.message ?? this.translate.instant('surveys.category.createQuestionFailed')),
         });
     });
   }
@@ -954,7 +1007,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to delete main question answer'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.deleteMainAnswerFailed'),
+                ),
             });
         });
       }
@@ -977,7 +1034,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to update main question answer'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.updateMainAnswerFailed'),
+                ),
             });
         });
       } else {
@@ -989,7 +1050,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to create main question answer'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.createMainAnswerFailed'),
+                ),
             });
         });
       }
@@ -1022,7 +1087,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to delete score range'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.deleteScoreRangeFailed'),
+                ),
             });
         });
       }
@@ -1046,7 +1115,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to update score range'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.updateScoreRangeFailed'),
+                ),
             });
         });
       } else {
@@ -1058,7 +1131,11 @@ export default class CategoryFormDialogComponent {
             })
             .subscribe({
               next: () => onDone(),
-              error: (err) => onError(err.message ?? 'Failed to create score range'),
+              error: (err) =>
+                onError(
+                  err.message ??
+                    this.translate.instant('surveys.category.createScoreRangeFailed'),
+                ),
             });
         });
       }

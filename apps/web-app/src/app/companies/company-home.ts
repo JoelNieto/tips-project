@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
 import CompanyEmployeesComponent from './company-employees';
 import CompanyPositionsComponent from './company-positions';
@@ -39,7 +40,7 @@ interface CompanyDetail {
 @Component({
   selector: 'app-company-home',
   standalone: true,
-  imports: [RouterLink, CompanyPositionsComponent, CompanyEmployeesComponent],
+  imports: [RouterLink, CompanyPositionsComponent, CompanyEmployeesComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
@@ -50,9 +51,9 @@ interface CompanyDetail {
           </a>
           <div>
             <h2 class="text-2xl font-bold text-slate-900">
-              {{ company()?.name ?? 'Company details' }}
+              {{ company()?.name ?? ('companies.home.defaultTitle' | translate) }}
             </h2>
-            <p class="mt-1 text-slate-500">Company home</p>
+            <p class="mt-1 text-slate-500">{{ 'companies.home.subtitle' | translate }}</p>
           </div>
         </div>
         <a
@@ -60,12 +61,12 @@ interface CompanyDetail {
           class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
         >
           <span class="material-symbols-outlined text-[20px]">edit</span>
-          Edit company
+          {{ 'companies.home.editCompany' | translate }}
         </a>
       </div>
 
       <div class="border-b border-slate-200">
-        <nav class="-mb-px flex gap-6" aria-label="Company sections">
+        <nav class="-mb-px flex gap-6" [attr.aria-label]="'companies.home.sectionsAria' | translate">
           <button
             type="button"
             class="border-b-2 px-1 py-3 text-sm font-medium transition"
@@ -76,7 +77,7 @@ interface CompanyDetail {
             [class.hover:text-slate-700]="activeTab() !== 'info'"
             (click)="activeTab.set('info')"
           >
-            Info
+            {{ 'companies.home.tabInfo' | translate }}
           </button>
           <button
             type="button"
@@ -88,7 +89,7 @@ interface CompanyDetail {
             [class.hover:text-slate-700]="activeTab() !== 'employees'"
             (click)="activeTab.set('employees')"
           >
-            Employees
+            {{ 'companies.home.tabEmployees' | translate }}
           </button>
           <button
             type="button"
@@ -100,18 +101,18 @@ interface CompanyDetail {
             [class.hover:text-slate-700]="activeTab() !== 'hierarchy'"
             (click)="activeTab.set('hierarchy')"
           >
-            Hierarchy
+            {{ 'companies.home.tabHierarchy' | translate }}
           </button>
         </nav>
       </div>
 
       @if (loading()) {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading company...
+          {{ 'companies.home.loading' | translate }}
         </div>
       } @else if (error()) {
         <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p class="font-medium">Failed to load company</p>
+          <p class="font-medium">{{ 'companies.home.loadFailed' | translate }}</p>
           <p class="mt-1 text-sm">{{ error() }}</p>
         </div>
       } @else if (company(); as c) {
@@ -120,49 +121,49 @@ interface CompanyDetail {
           @if (c.logo) {
             <img
               [src]="c.logo"
-              [alt]="c.name + ' logo'"
+              [alt]="logoAlt(c.name)"
               class="h-16 w-16 rounded-lg border border-slate-200 object-cover"
             />
           }
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
-              <p class="text-xs uppercase tracking-wide text-slate-500">Legal name</p>
+              <p class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.legalName' | translate }}</p>
               <p class="mt-1 text-sm text-slate-900">{{ c.legalName ?? '—' }}</p>
             </div>
             <div>
-              <p class="text-xs uppercase tracking-wide text-slate-500">Industry</p>
+              <p class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.industry' | translate }}</p>
               <p class="mt-1 text-sm text-slate-900">{{ c.industry ?? '—' }}</p>
             </div>
             <div>
-              <p class="text-xs uppercase tracking-wide text-slate-500">Company size</p>
+              <p class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.home.companySize' | translate }}</p>
               <p class="mt-1 text-sm text-slate-900">{{ c.size ?? '—' }}</p>
             </div>
             <div>
-              <p class="text-xs uppercase tracking-wide text-slate-500">Tax ID</p>
+              <p class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.taxId' | translate }}</p>
               <p class="mt-1 text-sm text-slate-900">{{ c.taxId ?? '—' }}</p>
             </div>
           </div>
 
           <div>
-            <p class="text-xs uppercase tracking-wide text-slate-500">Description</p>
+            <p class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.description' | translate }}</p>
             <p class="mt-1 text-sm text-slate-900 whitespace-pre-wrap">{{ c.description ?? '—' }}</p>
           </div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 class="text-lg font-medium text-slate-900">Contact</h3>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'companies.form.contact' | translate }}</h3>
           <dl class="mt-4 grid gap-4 sm:grid-cols-3">
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.email' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.email ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Phone</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.phone' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.phone ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Website</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.website' | translate }}</dt>
               <dd class="mt-1 text-sm">
                 @if (c.website) {
                   <a
@@ -182,26 +183,26 @@ interface CompanyDetail {
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 class="text-lg font-medium text-slate-900">Address</h3>
+          <h3 class="text-lg font-medium text-slate-900">{{ 'companies.form.address' | translate }}</h3>
           <dl class="mt-4 grid gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Street</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.street' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.street ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">City</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.city' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.city ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">State</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.state' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.state ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Postal code</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.postalCode' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.postalCode ?? '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs uppercase tracking-wide text-slate-500">Country</dt>
+              <dt class="text-xs uppercase tracking-wide text-slate-500">{{ 'companies.form.country' | translate }}</dt>
               <dd class="mt-1 text-sm text-slate-900">{{ c.country ?? '—' }}</dd>
             </div>
           </dl>
@@ -213,7 +214,7 @@ interface CompanyDetail {
         }
       } @else {
         <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Company not found.
+          {{ 'companies.home.notFound' | translate }}
         </div>
       }
     </div>
@@ -227,6 +228,7 @@ interface CompanyDetail {
 export default class CompanyHomeComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly id = input.required<string>();
 
@@ -242,6 +244,10 @@ export default class CompanyHomeComponent {
         this.loadCompany(companyId);
       }
     });
+  }
+
+  protected logoAlt(name: string): string {
+    return this.translate.instant('companies.home.logoAlt', { name });
   }
 
   private loadCompany(id: string): void {
@@ -268,7 +274,9 @@ export default class CompanyHomeComponent {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(err.message ?? 'Failed to load company');
+          this.error.set(
+            err.message ?? this.translate.instant('companies.home.loadFailed'),
+          );
         },
       });
   }

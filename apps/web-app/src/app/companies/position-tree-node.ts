@@ -6,6 +6,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface PositionNode {
   id: string;
@@ -18,7 +19,7 @@ export interface PositionNode {
 @Component({
   selector: 'app-position-tree-node',
   standalone: true,
-  imports: [forwardRef(() => PositionTreeNodeComponent)],
+  imports: [forwardRef(() => PositionTreeNodeComponent), TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div>
@@ -32,7 +33,11 @@ export interface PositionNode {
             class="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-500 hover:bg-slate-100"
             (click)="toggleExpanded.emit(node().id)"
             [attr.aria-expanded]="expanded()"
-            [attr.aria-label]="expanded() ? 'Collapse' : 'Expand'"
+            [attr.aria-label]="
+              expanded()
+                ? ('companies.positions.collapseAria' | translate)
+                : ('companies.positions.expandAria' | translate)
+            "
           >
             <span class="material-symbols-outlined text-[18px]">
               {{ expanded() ? 'expand_more' : 'chevron_right' }}
@@ -56,7 +61,7 @@ export interface PositionNode {
           type="button"
           class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-indigo-50 hover:text-indigo-600"
           (click)="editPosition.emit(node().id)"
-          aria-label="Edit position"
+          [attr.aria-label]="'companies.positions.editAria' | translate"
         >
           <span class="material-symbols-outlined text-[18px]">edit</span>
         </button>
@@ -65,7 +70,7 @@ export interface PositionNode {
           type="button"
           class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600"
           (click)="deletePosition.emit(node().id)"
-          aria-label="Delete position"
+          [attr.aria-label]="'companies.positions.deleteAria' | translate"
         >
           <span class="material-symbols-outlined text-[18px]">delete</span>
         </button>
