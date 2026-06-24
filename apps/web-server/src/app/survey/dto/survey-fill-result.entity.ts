@@ -99,6 +99,21 @@ export class SurveyAssignationResultsEntity {
   @Field()
   visibleSubcategories!: boolean;
 
+  @Field({ nullable: true })
+  surveyTitle?: string | null;
+
+  @Field({ nullable: true })
+  companyName?: string | null;
+
+  @Field({ nullable: true })
+  companyLogo?: string | null;
+
+  @Field({ nullable: true })
+  assignationStartDate?: Date | null;
+
+  @Field({ nullable: true })
+  assignationExpirationDate?: Date | null;
+
   @Field(() => [SurveyResultDimensionEntity])
   dimensions!: SurveyResultDimensionEntity[];
 

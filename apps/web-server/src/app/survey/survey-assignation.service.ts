@@ -300,6 +300,11 @@ export class SurveyAssignationService {
 
     return {
       ...surveyConfig,
+      surveyTitle: assignation.survey?.title ?? survey?.title ?? null,
+      companyName: assignation.company?.name ?? null,
+      companyLogo: assignation.company?.logo ?? null,
+      assignationStartDate: assignation.startDate,
+      assignationExpirationDate: assignation.expirationDate,
       dimensions: this.flattenDimensionsForResults(survey?.dimensions ?? []),
       fills: fills.map((fill) => ({
         inviteeId: fill.inviteeId,

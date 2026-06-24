@@ -7,6 +7,7 @@ import {
   inject,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -14,106 +15,22 @@ import { Apollo } from 'apollo-angular';
 import SurveyResultsChartComponent from '../shared/survey-results-chart/survey-results-chart';
 import { SURVEY_ASSIGNATION_FILL_RESULTS_QUERY } from './graphql/survey-assignations.graphql';
 import {
+  buildParticipantReportData,
+  buildSummaryReportData,
+  formatScore,
+  participantLabel,
+  type ResultsData,
+} from './survey-results-report.utils';
+import { SurveyResultsPdfService } from './survey-results-pdf.service';
+import {
   categoryTotals,
   collectCategoryAxes,
-  dimensionTotals,
   mapTotalsToAxes,
-  matchRange,
-  type MatchedScoreRange,
   type ResultsChartSeries,
   type ResultsChartType,
 } from './survey-results-chart.utils';
 
 type ChartTypeSelection = 'none' | ResultsChartType;
-
-// ─── Domain types ────────────────────────────────────────────────────────────
-
-interface AnswerResult {
-  id: string;
-  text: string;
-  value: number;
-}
-
-interface MainAnswerResult {
-  dimensionId: string;
-  dimensionTitle: string;
-  categoryId?: string | null;
-  categoryTitle?: string | null;
-  answerText: string;
-  answerValue: number;
-}
-
-interface QuestionAnswerGroup {
-  dimensionQuestionId: string;
-  dimensionId: string;
-  dimensionTitle: string;
-  categoryId?: string | null;
-  categoryTitle?: string | null;
-  questionText: string;
-  answers: AnswerResult[];
-}
-
-interface FillResult {
-  inviteeId: string;
-  inviteeEmail: string;
-  inviteeName?: string | null;
-  submittedAt: string;
-  mainAnswers: MainAnswerResult[];
-  questionAnswers: QuestionAnswerGroup[];
-}
-
-interface ResultDimension {
-  id: string;
-  title: string;
-  parentId?: string | null;
-  scoreRanges: {
-    label?: string | null;
-    message: string;
-    minValue: number;
-    maxValue: number;
-    order?: number | null;
-  }[];
-}
-
-interface ResultsData {
-  hasCategories: boolean;
-  hasSubcategories: boolean;
-  categoryName?: string | null;
-  subcategoryName?: string | null;
-  visibleCategories: boolean;
-  visibleSubcategories: boolean;
-  dimensions: ResultDimension[];
-  fills: FillResult[];
-}
-
-// ─── Grouped answer types (for rendering) ────────────────────────────────────
-
-interface ResultGroup {
-  id: string;
-  title: string;
-  categoryTotal?: number;
-  categoryMessage?: MatchedScoreRange | null;
-  subdimensions: SubdimensionGroup[];
-}
-
-interface SubdimensionGroup {
-  dimensionId: string;
-  dimensionTitle: string;
-  dimensionTotal?: number;
-  dimensionMessage?: MatchedScoreRange | null;
-  mainAnswer?: { text: string; value: number };
-  questions: QuestionAnswerGroup[];
-}
-
-interface SummaryRow {
-  inviteeId: string;
-  displayName: string;
-  email: string;
-  hasName: boolean;
-  scores: number[];
-}
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 @Component({
   selector: 'app-survey-assignation-results-page',
@@ -122,30 +39,50 @@ interface SummaryRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex items-center gap-4">
-        <a
-          [routerLink]="[
-            '/dashboard/surveys',
-            surveyId(),
-            'assignations',
-            id(),
-          ]"
-          class="text-slate-500 hover:text-slate-700"
-        >
-          <span class="material-symbols-outlined">arrow_back</span>
-        </a>
-        <div>
-          <h2 class="text-2xl font-bold text-slate-900">Survey Results</h2>
-          <p class="mt-1 text-slate-500">
-            {{ completedCount() }} submission{{
-              completedCount() === 1 ? '' : 's'
-            }}
-          </p>
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <a
+            [routerLink]="[
+              '/dashboard/surveys',
+              surveyId(),
+              'assignations',
+              id(),
+            ]"
+            class="text-slate-500 hover:text-slate-700"
+          >
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Survey Results</h2>
+            <p class="mt-1 text-slate-500">
+              {{ completedCount() }} submission{{
+                completedCount() === 1 ? '' : 's'
+              }}
+            </p>
+          </div>
         </div>
+
+        @if (completedCount() > 0 && !loading() && !error()) {
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+            [disabled]="exportingPdf()"
+            (click)="downloadPdf()"
+          >
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+              >picture_as_pdf</span
+            >
+            {{
+              exportingPdf()
+                ? 'Generating PDF...'
+                : selectedFill()
+                  ? 'Download participant PDF'
+                  : 'Download summary PDF'
+            }}
+          </button>
+        }
       </div>
 
-      <!-- Loading / Error -->
       @if (loading()) {
         <div
           class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
@@ -172,7 +109,6 @@ interface SummaryRow {
           </p>
         </div>
       } @else {
-        <!-- Invitee selector -->
         <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
           <div>
             <label
@@ -225,11 +161,8 @@ interface SummaryRow {
           }
         </div>
 
-        <!-- Chart panel -->
         @if (showChartPanel()) {
-          <div
-            class="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
-          >
+          <div class="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
             <div
               class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
@@ -265,7 +198,6 @@ interface SummaryRow {
           </div>
         }
 
-        <!-- Results panel -->
         @if (selectedFill(); as fill) {
           <div class="space-y-1 text-sm text-slate-500 px-1">
             Submitted:
@@ -286,7 +218,6 @@ interface SummaryRow {
                 <div
                   class="overflow-hidden rounded-xl border border-slate-200 bg-white"
                 >
-                  <!-- Group header (category or top-level dimension) -->
                   <div class="border-b border-slate-200 bg-slate-50 px-6 py-3">
                     <h3 class="font-semibold text-slate-900">
                       @if (hasCategories()) {
@@ -298,7 +229,7 @@ interface SummaryRow {
                       }
                       {{ group.title }}
                     </h3>
-                    @if (group.categoryTotal !== null) {
+                    @if (group.categoryTotal !== undefined && group.categoryTotal !== null) {
                       <p class="mt-1 text-sm text-slate-600">
                         Total:
                         <span class="font-medium">{{
@@ -318,7 +249,6 @@ interface SummaryRow {
                     }
                   </div>
 
-                  <!-- Sub-dimension sections -->
                   @for (sub of group.subdimensions; track sub.dimensionId) {
                     <div
                       class="px-6 py-4 space-y-3 border-b border-slate-100 last:border-b-0"
@@ -329,7 +259,6 @@ interface SummaryRow {
                         </h4>
                       }
 
-                      <!-- Main question answer -->
                       @if (sub.mainAnswer) {
                         <div
                           class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3"
@@ -346,7 +275,6 @@ interface SummaryRow {
                         </div>
                       }
 
-                      <!-- Survey questions -->
                       @if (sub.questions.length > 0) {
                         <div
                           class="divide-y divide-slate-100 rounded-lg border border-slate-200"
@@ -477,6 +405,8 @@ interface SummaryRow {
 export default class SurveyAssignationResultsPageComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly pdfService = inject(SurveyResultsPdfService);
+  private readonly chartComponent = viewChild(SurveyResultsChartComponent);
 
   readonly surveyId = input.required<string>();
   readonly id = input.required<string>();
@@ -487,6 +417,7 @@ export default class SurveyAssignationResultsPageComponent {
   protected readonly selectedInviteeId = signal<string | null>(null);
   protected readonly compareToAverage = signal(true);
   protected readonly selectedChartType = signal<ChartTypeSelection>('none');
+  protected readonly exportingPdf = signal(false);
 
   protected readonly completedCount = computed(
     () => this.resultsData()?.fills.length ?? 0,
@@ -518,55 +449,27 @@ export default class SurveyAssignationResultsPageComponent {
     () => this.chartCategoryAxes().titles,
   );
 
-  protected readonly summaryColumns = computed(() => {
-    const axes = this.chartCategoryAxes();
-    return axes.ids.map((id, index) => ({
-      id,
-      title: axes.titles[index],
-    }));
-  });
-
-  protected readonly summaryRows = computed((): SummaryRow[] => {
+  protected readonly summaryReport = computed(() => {
     const data = this.resultsData();
-    const axisIds = this.chartCategoryAxes().ids;
-    if (!data || axisIds.length === 0) return [];
-
-    const hasCategories = this.hasCategories();
-    return data.fills.map((fill) => {
-      const displayName =
-        fill.inviteeName?.trim() || fill.inviteeEmail || 'Unknown';
-      const totals = categoryTotals(fill, hasCategories);
-      return {
-        inviteeId: fill.inviteeId,
-        displayName,
-        email: fill.inviteeEmail,
-        hasName: !!fill.inviteeName?.trim(),
-        scores: mapTotalsToAxes(totals, axisIds),
-      };
-    });
+    if (!data) return null;
+    return buildSummaryReportData(data);
   });
+
+  protected readonly summaryColumns = computed(
+    () => this.summaryReport()?.columns ?? [],
+  );
+
+  protected readonly summaryRows = computed(
+    () => this.summaryReport()?.rows ?? [],
+  );
 
   protected readonly summaryAverages = computed(
-    () => this.averageSeries()?.values ?? null,
+    () => this.summaryReport()?.averages ?? null,
   );
 
   protected readonly averageSeries = computed((): ResultsChartSeries | null => {
-    const data = this.resultsData();
-    const axisIds = this.chartCategoryAxes().ids;
-    if (!data || axisIds.length === 0 || data.fills.length === 0) return null;
-
-    const hasCategories = this.hasCategories();
-    const sums = axisIds.map(() => 0);
-
-    for (const fill of data.fills) {
-      const totals = categoryTotals(fill, hasCategories);
-      const values = mapTotalsToAxes(totals, axisIds);
-      values.forEach((value, index) => {
-        sums[index] += value;
-      });
-    }
-
-    const averages = sums.map((sum) => sum / data.fills.length);
+    const averages = this.summaryAverages();
+    if (!averages) return null;
     return {
       label: 'Group average',
       color: '#d97706',
@@ -580,8 +483,7 @@ export default class SurveyAssignationResultsPageComponent {
     if (!fill || axisIds.length === 0) return null;
 
     const totals = categoryTotals(fill, this.hasCategories());
-    const label =
-      fill.inviteeName?.trim() || fill.inviteeEmail || 'Selected invitee';
+    const label = participantLabel(fill);
 
     return {
       label,
@@ -626,88 +528,11 @@ export default class SurveyAssignationResultsPageComponent {
     return type === 'none' ? 'bar' : type;
   });
 
-  protected readonly groupedResults = computed((): ResultGroup[] => {
+  protected readonly groupedResults = computed(() => {
+    const data = this.resultsData();
     const fill = this.selectedFill();
-    if (!fill) return [];
-
-    const hasCategories = this.hasCategories();
-    const dimensions = this.resultsData()?.dimensions ?? [];
-    const rangesByDimensionId = new Map(
-      dimensions.map((d) => [d.id, d.scoreRanges]),
-    );
-    const categoryTotalsById = new Map(
-      categoryTotals(fill, hasCategories).map((t) => [t.id, t.total]),
-    );
-    const dimensionTotalsById = new Map(
-      dimensionTotals(fill).map((t) => [t.id, t.total]),
-    );
-    const groups = new Map<string, ResultGroup>();
-
-    // Helper to get/create a group entry
-    const getGroup = (groupId: string, groupTitle: string): ResultGroup => {
-      if (!groups.has(groupId)) {
-        const total = categoryTotalsById.get(groupId);
-        const ranges = rangesByDimensionId.get(groupId) ?? [];
-        groups.set(groupId, {
-          id: groupId,
-          title: groupTitle,
-          categoryTotal: total,
-          categoryMessage: total != null ? matchRange(total, ranges) : null,
-          subdimensions: [],
-        });
-      }
-      return groups.get(groupId)!;
-    };
-
-    // Helper to get/create a subdimension within a group
-    const getSubdimension = (
-      group: ResultGroup,
-      dimensionId: string,
-      dimensionTitle: string,
-    ): SubdimensionGroup => {
-      let sub = group.subdimensions.find((s) => s.dimensionId === dimensionId);
-      if (!sub) {
-        const total = dimensionTotalsById.get(dimensionId);
-        const ranges = rangesByDimensionId.get(dimensionId) ?? [];
-        sub = {
-          dimensionId,
-          dimensionTitle,
-          dimensionTotal: total,
-          dimensionMessage: total != null ? matchRange(total, ranges) : null,
-          questions: [],
-        };
-        group.subdimensions.push(sub);
-      }
-      return sub;
-    };
-
-    // Index main answers
-    for (const ma of fill.mainAnswers) {
-      const groupId = hasCategories
-        ? (ma.categoryId ?? ma.dimensionId)
-        : ma.dimensionId;
-      const groupTitle = hasCategories
-        ? (ma.categoryTitle ?? ma.dimensionTitle)
-        : ma.dimensionTitle;
-      const group = getGroup(groupId, groupTitle);
-      const sub = getSubdimension(group, ma.dimensionId, ma.dimensionTitle);
-      sub.mainAnswer = { text: ma.answerText, value: ma.answerValue };
-    }
-
-    // Index question answers
-    for (const qa of fill.questionAnswers) {
-      const groupId = hasCategories
-        ? (qa.categoryId ?? qa.dimensionId)
-        : qa.dimensionId;
-      const groupTitle = hasCategories
-        ? (qa.categoryTitle ?? qa.dimensionTitle)
-        : qa.dimensionTitle;
-      const group = getGroup(groupId, groupTitle);
-      const sub = getSubdimension(group, qa.dimensionId, qa.dimensionTitle);
-      sub.questions.push(qa);
-    }
-
-    return [...groups.values()];
+    if (!data || !fill) return [];
+    return buildParticipantReportData(data, fill).groups;
   });
 
   constructor() {
@@ -731,8 +556,7 @@ export default class SurveyAssignationResultsPageComponent {
         next: (result) => {
           this.loading.set(false);
           this.resultsData.set(
-            (result.data?.surveyAssignationFillResults ??
-              null) as ResultsData | null,
+            result.data?.surveyAssignationFillResults ?? null,
           );
         },
         error: (err) => {
@@ -776,7 +600,35 @@ export default class SurveyAssignationResultsPageComponent {
     return new Date(iso).toLocaleString();
   }
 
-  protected formatScore(value: number): string {
-    return Number.isInteger(value) ? String(value) : value.toFixed(1);
+  protected formatScore = formatScore;
+
+  protected async downloadPdf(): Promise<void> {
+    const data = this.resultsData();
+    if (!data || this.exportingPdf()) return;
+
+    this.exportingPdf.set(true);
+    try {
+      const fill = this.selectedFill();
+      if (fill) {
+        const chartImage =
+          this.showChartPanel() && this.selectedFill()
+            ? (this.chartComponent()?.exportChartImage() ?? null)
+            : null;
+        await this.pdfService.downloadParticipantPdf(
+          data,
+          fill,
+          this.id(),
+          chartImage,
+        );
+      } else {
+        await this.pdfService.downloadSummaryPdf(data, this.id());
+      }
+    } catch (err) {
+      this.error.set(
+        err instanceof Error ? err.message : 'Failed to generate PDF',
+      );
+    } finally {
+      this.exportingPdf.set(false);
+    }
   }
 }

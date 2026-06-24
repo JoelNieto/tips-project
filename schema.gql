@@ -471,12 +471,17 @@ type SurveyAssignationEntity {
 }
 
 type SurveyAssignationResultsEntity {
+  assignationExpirationDate: DateTime
+  assignationStartDate: DateTime
   categoryName: String
+  companyLogo: String
+  companyName: String
   dimensions: [SurveyResultDimensionEntity!]!
   fills: [SurveyFillResultEntity!]!
   hasCategories: Boolean!
   hasSubcategories: Boolean!
   subcategoryName: String
+  surveyTitle: String
   visibleCategories: Boolean!
   visibleSubcategories: Boolean!
 }

@@ -108,6 +108,11 @@ export const SURVEY_ASSIGNATION_FILL_RESULTS_QUERY = gql`
       subcategoryName
       visibleCategories
       visibleSubcategories
+      surveyTitle
+      companyName
+      companyLogo
+      assignationStartDate
+      assignationExpirationDate
       dimensions {
         id
         title

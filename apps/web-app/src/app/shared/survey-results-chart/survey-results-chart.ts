@@ -6,6 +6,7 @@ import {
   inject,
   input,
   PLATFORM_ID,
+  signal,
 } from '@angular/core';
 import { BarChart, RadarChart } from 'echarts/charts';
 import {
@@ -16,6 +17,7 @@ import {
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { EChartsCoreOption } from 'echarts/core';
+import type { ECharts } from 'echarts/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import type {
   ResultsChartSeries,
@@ -51,6 +53,7 @@ echarts.use([
       <div
         echarts
         [options]="chartOptions()"
+        (chartInit)="onChartInit($event)"
         class="h-[360px] w-full"
         role="img"
         [attr.aria-label]="chartAriaLabel()"
@@ -65,6 +68,7 @@ echarts.use([
 })
 export default class SurveyResultsChartComponent {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly chartInstance = signal<ECharts | null>(null);
 
   readonly chartType = input.required<ResultsChartType>();
   readonly axes = input.required<string[]>();
@@ -169,5 +173,15 @@ export default class SurveyResultsChartComponent {
     const axes = this.axes();
     const series = this.series();
     return `${this.chartType()} chart with ${axes.length} categories and ${series.length} series`;
+  }
+
+  protected onChartInit(chart: ECharts): void {
+    this.chartInstance.set(chart);
+  }
+
+  exportChartImage(): string | null {
+    const chart = this.chartInstance();
+    if (!chart || this.series().length === 0) return null;
+    return chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' });
   }
 }
