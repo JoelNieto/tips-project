@@ -5,11 +5,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
-import { DUPLICATE_SURVEY_MUTATION, SURVEYS_QUERY } from './graphql/surveys.graphql';
+import ConfirmDialogComponent from '../shared/confirm-dialog/confirm-dialog';
+import {
+  DELETE_SURVEY_MUTATION,
+  DUPLICATE_SURVEY_MUTATION,
+  SURVEYS_QUERY,
+} from './graphql/surveys.graphql';
 
 interface SurveyListItem {
   id: string;
@@ -143,6 +149,18 @@ interface SurveyListItem {
                     >
                       {{ 'surveys.list.edit' | translate }}
                     </a>
+                    <button
+                      type="button"
+                      [disabled]="deletingId() === survey.id"
+                      (click)="onDelete(survey)"
+                      class="text-red-600 hover:text-red-800 disabled:opacity-50"
+                    >
+                      {{
+                        deletingId() === survey.id
+                          ? ('surveys.list.deleting' | translate)
+                          : ('surveys.list.delete' | translate)
+                      }}
+                    </button>
                   </td>
                 </tr>
               }
@@ -163,11 +181,13 @@ export default class SurveysListComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(Dialog);
 
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly surveys = signal<SurveyListItem[]>([]);
   protected readonly duplicatingId = signal<string | null>(null);
+  protected readonly deletingId = signal<string | null>(null);
 
   protected structureLabel(survey: SurveyListItem): string {
     if (survey.hasCategories) {
@@ -203,6 +223,48 @@ export default class SurveysListComponent {
           );
         },
       });
+  }
+
+  protected onDelete(survey: SurveyListItem): void {
+    const dialogRef = this.dialog.open<boolean>(ConfirmDialogComponent, {
+      data: {
+        title: this.translate.instant('surveys.list.deleteTitle'),
+        message: this.translate.instant('surveys.list.deleteMessage', {
+          title: survey.title,
+        }),
+        confirmLabel: this.translate.instant('surveys.list.deleteConfirm'),
+        cancelLabel: this.translate.instant('common.cancel'),
+        confirmDanger: true,
+      },
+      role: 'alertdialog',
+      ariaModal: true,
+      ariaLabel: this.translate.instant('surveys.list.deleteAriaLabel'),
+      width: '400px',
+    });
+
+    dialogRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result) => {
+      if (result !== true) return;
+      this.deletingId.set(survey.id);
+      this.error.set(null);
+
+      this.apollo
+        .mutate({
+          mutation: DELETE_SURVEY_MUTATION,
+          variables: { id: survey.id },
+          refetchQueries: [{ query: SURVEYS_QUERY }],
+        })
+        .subscribe({
+          next: () => {
+            this.deletingId.set(null);
+          },
+          error: (err) => {
+            this.deletingId.set(null);
+            this.error.set(
+              err.message ?? this.translate.instant('surveys.list.deleteFailed'),
+            );
+          },
+        });
+    });
   }
 
   constructor() {

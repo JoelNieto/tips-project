@@ -104,6 +104,13 @@
       "duplicate": "Duplicar",
       "duplicating": "Duplicando...",
       "duplicateFailed": "Error al duplicar la encuesta",
+      "delete": "Eliminar",
+      "deleting": "Eliminando...",
+      "deleteTitle": "Eliminar encuesta",
+      "deleteMessage": "¿Seguro que deseas eliminar \"{{title}}\"? Se eliminará permanentemente la encuesta junto con sus dimensiones, asignaciones y respuestas recopiladas.",
+      "deleteConfirm": "Eliminar",
+      "deleteAriaLabel": "Confirmación de eliminación de encuesta",
+      "deleteFailed": "Error al eliminar la encuesta",
       "structureCategorizedSub": "Categorizada + subcategorías",
       "structureCategorized": "Categorizada",
       "structureSingleGroup": "Grupo único"

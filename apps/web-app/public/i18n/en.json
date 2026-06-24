@@ -104,6 +104,13 @@
       "duplicate": "Duplicate",
       "duplicating": "Duplicating...",
       "duplicateFailed": "Failed to duplicate survey",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "deleteTitle": "Delete survey",
+      "deleteMessage": "Are you sure you want to delete \"{{title}}\"? This will permanently delete the survey along with its dimensions, assignations, and collected responses.",
+      "deleteConfirm": "Delete",
+      "deleteAriaLabel": "Delete survey confirmation",
+      "deleteFailed": "Failed to delete survey",
       "structureCategorizedSub": "Categorized + subcategories",
       "structureCategorized": "Categorized",
       "structureSingleGroup": "Single group"
