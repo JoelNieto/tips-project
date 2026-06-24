@@ -105,6 +105,14 @@ interface SubdimensionGroup {
   questions: QuestionAnswerGroup[];
 }
 
+interface SummaryRow {
+  inviteeId: string;
+  displayName: string;
+  email: string;
+  hasName: boolean;
+  scores: number[];
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 @Component({
@@ -176,6 +184,7 @@ interface SubdimensionGroup {
             <select
               id="invitee-select"
               class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+              [value]="selectedInviteeId() ?? ''"
               (change)="onInviteeChange($event)"
             >
               <option value="">— Choose an invitee —</option>
@@ -373,10 +382,87 @@ interface SubdimensionGroup {
             </div>
           }
         } @else {
-          <div
-            class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-500"
-          >
-            Select an invitee above to view their results
+          <div class="space-y-4">
+            <div class="px-1">
+              <h3 class="text-lg font-semibold text-slate-900">Summary</h3>
+              <p class="mt-1 text-sm text-slate-500">
+                Score totals per {{ categoryLabel().toLowerCase() }}. Click a
+                row to view detailed results.
+              </p>
+            </div>
+
+            @if (summaryColumns().length === 0) {
+              <div
+                class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500"
+              >
+                No category scores available.
+              </div>
+            } @else {
+              <div
+                class="overflow-x-auto rounded-xl border border-slate-200 bg-white"
+              >
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
+                      >
+                        Participant
+                      </th>
+                      @for (col of summaryColumns(); track col.id) {
+                        <th
+                          class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500"
+                        >
+                          {{ col.title }}
+                        </th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200 bg-white">
+                    @for (row of summaryRows(); track row.inviteeId) {
+                      <tr
+                        class="cursor-pointer hover:bg-slate-50"
+                        (click)="selectInvitee(row.inviteeId)"
+                      >
+                        <td class="whitespace-nowrap px-6 py-4">
+                          <p class="text-sm font-medium text-slate-900">
+                            {{ row.displayName }}
+                          </p>
+                          @if (row.hasName) {
+                            <p class="text-xs text-slate-500">{{ row.email }}</p>
+                          }
+                        </td>
+                        @for (score of row.scores; track $index) {
+                          <td
+                            class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700"
+                          >
+                            {{ formatScore(score) }}
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                  @if (summaryAverages(); as averages) {
+                    <tfoot class="bg-slate-50">
+                      <tr>
+                        <td
+                          class="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900"
+                        >
+                          Group average
+                        </td>
+                        @for (avg of averages; track $index) {
+                          <td
+                            class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium text-slate-900"
+                          >
+                            {{ formatScore(avg) }}
+                          </td>
+                        }
+                      </tr>
+                    </tfoot>
+                  }
+                </table>
+              </div>
+            }
           </div>
         }
       }
@@ -430,6 +516,38 @@ export default class SurveyAssignationResultsPageComponent {
 
   protected readonly chartAxes = computed(
     () => this.chartCategoryAxes().titles,
+  );
+
+  protected readonly summaryColumns = computed(() => {
+    const axes = this.chartCategoryAxes();
+    return axes.ids.map((id, index) => ({
+      id,
+      title: axes.titles[index],
+    }));
+  });
+
+  protected readonly summaryRows = computed((): SummaryRow[] => {
+    const data = this.resultsData();
+    const axisIds = this.chartCategoryAxes().ids;
+    if (!data || axisIds.length === 0) return [];
+
+    const hasCategories = this.hasCategories();
+    return data.fills.map((fill) => {
+      const displayName =
+        fill.inviteeName?.trim() || fill.inviteeEmail || 'Unknown';
+      const totals = categoryTotals(fill, hasCategories);
+      return {
+        inviteeId: fill.inviteeId,
+        displayName,
+        email: fill.inviteeEmail,
+        hasName: !!fill.inviteeName?.trim(),
+        scores: mapTotalsToAxes(totals, axisIds),
+      };
+    });
+  });
+
+  protected readonly summaryAverages = computed(
+    () => this.averageSeries()?.values ?? null,
   );
 
   protected readonly averageSeries = computed((): ResultsChartSeries | null => {
@@ -624,6 +742,10 @@ export default class SurveyAssignationResultsPageComponent {
       });
   }
 
+  protected selectInvitee(inviteeId: string): void {
+    this.selectedInviteeId.set(inviteeId);
+  }
+
   protected onInviteeChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedInviteeId.set(value || null);
@@ -652,5 +774,9 @@ export default class SurveyAssignationResultsPageComponent {
 
   protected formatDateTime(iso: string): string {
     return new Date(iso).toLocaleString();
+  }
+
+  protected formatScore(value: number): string {
+    return Number.isInteger(value) ? String(value) : value.toFixed(1);
   }
 }
