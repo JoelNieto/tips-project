@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/roles.guard';
 import { AuthPolicyService } from '../auth/auth-policy.service';
 import { SurveyEntity } from './dto/survey.entity';
 import { CreateSurveyInput } from './dto/create-survey.input';
+import { DuplicateSurveyInput } from './dto/duplicate-survey.input';
 import { UpdateSurveyInput } from './dto/update-survey.input';
 import { SurveyService } from './survey.service';
 
@@ -54,6 +55,17 @@ export class SurveyResolver {
   ) {
     const user = await this.authPolicy.getUserContext(session.user.id);
     return this.surveyService.update(id, input, user);
+  }
+
+  @Mutation(() => SurveyEntity)
+  @Roles(UserRole.ADMIN, UserRole.DESIGNER)
+  async duplicateSurvey(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input', { nullable: true }) input: DuplicateSurveyInput | undefined,
+    @Session() session: UserSession
+  ) {
+    const user = await this.authPolicy.getUserContext(session.user.id);
+    return this.surveyService.duplicate(id, input, user);
   }
 
   @Mutation(() => SurveyEntity)

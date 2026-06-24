@@ -22,6 +22,7 @@ import { toSurveyFillData } from './fill/survey-fill.utils';
 import {
   CREATE_SURVEY_MUTATION,
   DELETE_SURVEY_MUTATION,
+  DUPLICATE_SURVEY_MUTATION,
   REMOVE_QUESTION_FROM_DIMENSION_MUTATION,
   SURVEY_QUERY,
   SURVEYS_QUERY,
@@ -482,6 +483,18 @@ const emptyModel: SurveyFormModel = {
               <button
                 type="button"
                 [disabled]="submitting()"
+                (click)="onDuplicate()"
+                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
+              >
+                {{
+                  submitting()
+                    ? ('surveys.form.duplicating' | translate)
+                    : ('surveys.form.duplicate' | translate)
+                }}
+              </button>
+              <button
+                type="button"
+                [disabled]="submitting()"
                 (click)="onDelete()"
                 class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               >
@@ -811,6 +824,35 @@ export default class SurveyFormComponent {
           this.submitError.set(
             err.message ??
               this.translate.instant('surveys.form.removeQuestionFailed'),
+          );
+        },
+      });
+  }
+
+  protected onDuplicate(): void {
+    if (!this.isEditMode() || !this.id()) return;
+
+    this.submitting.set(true);
+    this.submitError.set(null);
+
+    this.apollo
+      .mutate<{ duplicateSurvey: { id: string } }>({
+        mutation: DUPLICATE_SURVEY_MUTATION,
+        variables: { id: this.id() },
+        refetchQueries: [{ query: SURVEYS_QUERY }],
+      })
+      .subscribe({
+        next: (result) => {
+          this.submitting.set(false);
+          const duplicatedId = result.data?.duplicateSurvey.id;
+          if (duplicatedId) {
+            void this.router.navigate(['/dashboard/surveys', duplicatedId]);
+          }
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.submitError.set(
+            err.message ?? this.translate.instant('surveys.form.duplicateFailed'),
           );
         },
       });

@@ -213,6 +213,15 @@ export const DELETE_SURVEY_MUTATION = gql`
   }
 `;
 
+export const DUPLICATE_SURVEY_MUTATION = gql`
+  mutation DuplicateSurvey($id: ID!, $input: DuplicateSurveyInput) {
+    duplicateSurvey(id: $id, input: $input) {
+      id
+      title
+    }
+  }
+`;
+
 export const CREATE_DIMENSION_MUTATION = gql`
   mutation CreateDimension($input: CreateDimensionInput!) {
     createDimension(input: $input) {

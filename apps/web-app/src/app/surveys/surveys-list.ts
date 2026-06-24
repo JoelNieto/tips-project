@@ -6,10 +6,10 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
-import { SURVEYS_QUERY } from './graphql/surveys.graphql';
+import { DUPLICATE_SURVEY_MUTATION, SURVEYS_QUERY } from './graphql/surveys.graphql';
 
 interface SurveyListItem {
   id: string;
@@ -125,6 +125,18 @@ interface SurveyListItem {
                     >
                       {{ 'surveys.list.assign' | translate }}
                     </a>
+                    <button
+                      type="button"
+                      [disabled]="duplicatingId() === survey.id"
+                      (click)="onDuplicate(survey.id)"
+                      class="text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                    >
+                      {{
+                        duplicatingId() === survey.id
+                          ? ('surveys.list.duplicating' | translate)
+                          : ('surveys.list.duplicate' | translate)
+                      }}
+                    </button>
                     <a
                       [routerLink]="['/dashboard/surveys', survey.id]"
                       class="text-indigo-600 hover:text-indigo-800"
@@ -148,12 +160,14 @@ interface SurveyListItem {
 })
 export default class SurveysListComponent {
   private readonly apollo = inject(Apollo);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly surveys = signal<SurveyListItem[]>([]);
+  protected readonly duplicatingId = signal<string | null>(null);
 
   protected structureLabel(survey: SurveyListItem): string {
     if (survey.hasCategories) {
@@ -162,6 +176,33 @@ export default class SurveysListComponent {
         : this.translate.instant('surveys.list.structureCategorized');
     }
     return this.translate.instant('surveys.list.structureSingleGroup');
+  }
+
+  protected onDuplicate(id: string): void {
+    this.duplicatingId.set(id);
+    this.error.set(null);
+
+    this.apollo
+      .mutate<{ duplicateSurvey: { id: string } }>({
+        mutation: DUPLICATE_SURVEY_MUTATION,
+        variables: { id },
+        refetchQueries: [{ query: SURVEYS_QUERY }],
+      })
+      .subscribe({
+        next: (result) => {
+          this.duplicatingId.set(null);
+          const duplicatedId = result.data?.duplicateSurvey.id;
+          if (duplicatedId) {
+            void this.router.navigate(['/dashboard/surveys', duplicatedId]);
+          }
+        },
+        error: (err) => {
+          this.duplicatingId.set(null);
+          this.error.set(
+            err.message ?? this.translate.instant('surveys.list.duplicateFailed'),
+          );
+        },
+      });
   }
 
   constructor() {

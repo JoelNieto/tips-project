@@ -9,7 +9,17 @@ import { PrismaService } from '../prisma.service';
 import type { AuthUserContext } from '../auth/auth-policy.service';
 import { AuthPolicyService } from '../auth/auth-policy.service';
 import type { CreateSurveyInput } from './dto/create-survey.input';
+import type { DuplicateSurveyInput } from './dto/duplicate-survey.input';
 import type { UpdateSurveyInput } from './dto/update-survey.input';
+
+type LoadedSurvey = NonNullable<Awaited<ReturnType<SurveyService['findOne']>>>;
+type LoadedDimension = LoadedSurvey['dimensions'][number];
+type LoadedSubdimension = LoadedDimension['subdimensions'][number];
+type LoadedDimensionContent = LoadedDimension | LoadedSubdimension;
+type LoadedDimensionQuestion =
+  LoadedDimensionContent['dimensionQuestions'][number];
+type LoadedQuestion = LoadedDimensionQuestion['question'];
+type LoadedAnswerSet = NonNullable<LoadedQuestion['answerSet']>;
 
 @Injectable()
 export class SurveyService {
@@ -171,6 +181,282 @@ export class SurveyService {
   async delete(id: string, user: AuthUserContext): Promise<Survey> {
     await this.assertWriteAccess(user, id);
     return this.prisma.survey.delete({ where: { id } });
+  }
+
+  async duplicate(
+    id: string,
+    input: DuplicateSurveyInput | undefined,
+    user: AuthUserContext
+  ) {
+    this.authPolicy.assertRole(user, [UserRole.ADMIN, UserRole.DESIGNER]);
+
+    const source = await this.findOne(id, user);
+    if (!source) {
+      throw new NotFoundException(`Survey with id ${id} not found`);
+    }
+
+    const duplicatedSurveyId = await this.prisma.$transaction(async (tx) => {
+      const survey = await tx.survey.create({
+        data: {
+          title: input?.title?.trim() || `${source.title} (Copy)`,
+          description: source.description ?? undefined,
+          categoryName: source.categoryName ?? undefined,
+          subcategoryName: source.subcategoryName ?? undefined,
+          hasCategories: source.hasCategories,
+          hasSubcategories: source.hasSubcategories,
+          visibleCategories: source.visibleCategories,
+          visibleSubcategories: source.visibleSubcategories,
+          randomizeQuestions: source.randomizeQuestions,
+          presentAllQuestionsAtOnce: source.presentAllQuestionsAtOnce,
+          allowPreviousQuestion: source.allowPreviousQuestion,
+          createdById: user.id,
+        },
+      });
+
+      const questionIdMap = new Map<string, string>();
+      const clonedAnswerSets = new Map<
+        string,
+        { answerSetId: string; answerIdMap: Map<string, string> }
+      >();
+
+      for (const dimension of source.dimensions) {
+        const newDimension = await tx.dimension.create({
+          data: {
+            surveyId: survey.id,
+            title: dimension.title,
+            description: dimension.description ?? undefined,
+            weighting: dimension.weighting ?? undefined,
+            mainQuestionText: dimension.mainQuestionText ?? undefined,
+            order: dimension.order ?? undefined,
+          },
+        });
+
+        await this.copyDimensionTree(
+          tx,
+          dimension,
+          newDimension.id,
+          user.id,
+          questionIdMap,
+          clonedAnswerSets
+        );
+
+        for (const subdimension of dimension.subdimensions ?? []) {
+          const newSubdimension = await tx.dimension.create({
+            data: {
+              surveyId: survey.id,
+              parentDimensionId: newDimension.id,
+              title: subdimension.title,
+              description: subdimension.description ?? undefined,
+              weighting: subdimension.weighting ?? undefined,
+              mainQuestionText: subdimension.mainQuestionText ?? undefined,
+              order: subdimension.order ?? undefined,
+            },
+          });
+
+          await this.copyDimensionTree(
+            tx,
+            subdimension,
+            newSubdimension.id,
+            user.id,
+            questionIdMap,
+            clonedAnswerSets
+          );
+        }
+      }
+
+      return survey.id;
+    });
+
+    const result = await this.findOne(duplicatedSurveyId);
+    if (!result) {
+      throw new NotFoundException('Failed to load duplicated survey');
+    }
+    return result;
+  }
+
+  private async copyDimensionTree(
+    tx: Prisma.TransactionClient,
+    sourceDimension: LoadedDimensionContent,
+    targetDimensionId: string,
+    userId: string,
+    questionIdMap: Map<string, string>,
+    clonedAnswerSets: Map<
+      string,
+      { answerSetId: string; answerIdMap: Map<string, string> }
+    >
+  ): Promise<void> {
+    if (sourceDimension.mainQuestionAnswers.length > 0) {
+      await tx.mainQuestionAnswer.createMany({
+        data: sourceDimension.mainQuestionAnswers.map((answer) => ({
+          dimensionId: targetDimensionId,
+          text: answer.text,
+          sortOrder: answer.sortOrder ?? undefined,
+          value: answer.value,
+          reverseValue: answer.reverseValue ?? undefined,
+        })),
+      });
+    }
+
+    if (sourceDimension.scoreRanges.length > 0) {
+      await tx.dimensionScoreRange.createMany({
+        data: sourceDimension.scoreRanges.map((range) => ({
+          dimensionId: targetDimensionId,
+          label: range.label ?? undefined,
+          message: range.message,
+          minValue: range.minValue,
+          maxValue: range.maxValue,
+          order: range.order ?? undefined,
+        })),
+      });
+    }
+
+    for (const dimensionQuestion of sourceDimension.dimensionQuestions) {
+      const questionId = await this.getOrCloneQuestion(
+        tx,
+        dimensionQuestion.question,
+        userId,
+        questionIdMap,
+        clonedAnswerSets
+      );
+
+      const createdDimensionQuestion = await tx.dimensionQuestion.create({
+        data: {
+          dimensionId: targetDimensionId,
+          questionId,
+          order: dimensionQuestion.order ?? undefined,
+          weightOverride: dimensionQuestion.weightOverride ?? undefined,
+          isReversedOverride:
+            dimensionQuestion.isReversedOverride ?? undefined,
+          isMultiAnswerOverride:
+            dimensionQuestion.isMultiAnswerOverride ?? undefined,
+        },
+      });
+
+      if (dimensionQuestion.answerOverrides.length === 0) {
+        continue;
+      }
+
+      const sourceAnswerSetId = dimensionQuestion.question.answerSet?.id;
+      const clonedAnswerSet = sourceAnswerSetId
+        ? clonedAnswerSets.get(sourceAnswerSetId)
+        : undefined;
+
+      if (!clonedAnswerSet) {
+        continue;
+      }
+
+      const overrideRows = dimensionQuestion.answerOverrides.flatMap(
+        (override) => {
+          const answerId = clonedAnswerSet.answerIdMap.get(override.answerId);
+          if (!answerId) {
+            return [];
+          }
+
+          return [
+            {
+              dimensionQuestionId: createdDimensionQuestion.id,
+              answerId,
+              valueOverride: override.valueOverride ?? undefined,
+              reverseValueOverride: override.reverseValueOverride ?? undefined,
+              orderOverride: override.orderOverride ?? undefined,
+            },
+          ];
+        }
+      );
+
+      if (overrideRows.length > 0) {
+        await tx.dimensionQuestionAnswer.createMany({ data: overrideRows });
+      }
+    }
+  }
+
+  private async getOrCloneQuestion(
+    tx: Prisma.TransactionClient,
+    sourceQuestion: LoadedQuestion,
+    userId: string,
+    questionIdMap: Map<string, string>,
+    clonedAnswerSets: Map<
+      string,
+      { answerSetId: string; answerIdMap: Map<string, string> }
+    >
+  ): Promise<string> {
+    const cachedQuestionId = questionIdMap.get(sourceQuestion.id);
+    if (cachedQuestionId) {
+      return cachedQuestionId;
+    }
+
+    const answerSetId = sourceQuestion.answerSet
+      ? await this.getOrCloneAnswerSet(
+          tx,
+          sourceQuestion.answerSet,
+          userId,
+          clonedAnswerSets
+        )
+      : undefined;
+
+    const question = await tx.question.create({
+      data: {
+        title: sourceQuestion.title,
+        text: sourceQuestion.text,
+        weight: sourceQuestion.weight ?? undefined,
+        isReversed: sourceQuestion.isReversed,
+        isMultiAnswer: sourceQuestion.isMultiAnswer,
+        createdById: userId,
+        answerSetId,
+      },
+    });
+
+    questionIdMap.set(sourceQuestion.id, question.id);
+    return question.id;
+  }
+
+  private async getOrCloneAnswerSet(
+    tx: Prisma.TransactionClient,
+    sourceAnswerSet: LoadedAnswerSet,
+    userId: string,
+    clonedAnswerSets: Map<
+      string,
+      { answerSetId: string; answerIdMap: Map<string, string> }
+    >
+  ): Promise<string> {
+    const cachedAnswerSet = clonedAnswerSets.get(sourceAnswerSet.id);
+    if (cachedAnswerSet) {
+      return cachedAnswerSet.answerSetId;
+    }
+
+    const createdAnswerSet = await tx.answerSet.create({
+      data: {
+        name: sourceAnswerSet.name,
+        description: sourceAnswerSet.description ?? undefined,
+        createdById: userId,
+        answers: {
+          create: sourceAnswerSet.answers.map((answer, index) => ({
+            text: answer.text,
+            sortOrder: answer.sortOrder ?? index,
+            value: answer.value,
+            reverseValue: answer.reverseValue ?? undefined,
+          })),
+        },
+      },
+      include: {
+        answers: { orderBy: { sortOrder: 'asc' } },
+      },
+    });
+
+    const answerIdMap = new Map<string, string>();
+    sourceAnswerSet.answers.forEach((sourceAnswer, index) => {
+      const clonedAnswer = createdAnswerSet.answers[index];
+      if (clonedAnswer) {
+        answerIdMap.set(sourceAnswer.id, clonedAnswer.id);
+      }
+    });
+
+    clonedAnswerSets.set(sourceAnswerSet.id, {
+      answerSetId: createdAnswerSet.id,
+      answerIdMap,
+    });
+
+    return createdAnswerSet.id;
   }
 
   private async assertReadAccess(

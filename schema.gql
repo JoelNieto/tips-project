@@ -272,6 +272,10 @@ type DimensionScoreRangeEntity {
   order: Int
 }
 
+input DuplicateSurveyInput {
+  title: String
+}
+
 type EmployeeEntity {
   birthdate: DateTime
   companyId: ID!
@@ -342,6 +346,7 @@ type Mutation {
   deleteQuestion(id: ID!): QuestionEntity!
   deleteSurvey(id: ID!): SurveyEntity!
   deleteSurveyAssignation(id: ID!): SurveyAssignationEntity!
+  duplicateSurvey(id: ID!, input: DuplicateSurveyInput): SurveyEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
   removeSurveyFromOrganization(id: ID!): OrganizationSurveyEntity!
   submitSurveyFill(input: SubmitSurveyFillInput!): SurveyFillSubmissionEntity!
