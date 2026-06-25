@@ -41,3 +41,9 @@ export const UPDATE_USER_MUTATION = gql`
     }
   }
 `;
+
+export const RESET_USER_PASSWORD_MUTATION = gql`
+  mutation ResetUserPassword($id: ID!, $newPassword: String!) {
+    resetUserPassword(id: $id, newPassword: $newPassword)
+  }
+`;

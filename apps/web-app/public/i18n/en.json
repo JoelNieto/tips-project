@@ -558,7 +558,8 @@
       "columnName": "Name",
       "columnEmail": "Email",
       "columnRole": "Role",
-      "columnCreated": "Created"
+      "columnCreated": "Created",
+      "columnActions": "Actions"
     },
     "form": {
       "createTitle": "Create user",
@@ -578,6 +579,20 @@
       "roleEmployee": "Employee",
       "passwordRequired": "Password is required",
       "passwordMinLength": "Password must be at least 8 characters"
+    },
+    "resetPassword": {
+      "buttonLabel": "Reset password",
+      "title": "Reset password",
+      "subtitle": "Set a new password for {{name}}",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "confirm": "Reset password",
+      "resetting": "Resetting...",
+      "success": "Password reset successfully.",
+      "failed": "Failed to reset password.",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordsMustMatch": "Passwords must match"
     }
   }
 }

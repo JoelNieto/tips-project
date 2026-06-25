@@ -9,8 +9,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Dialog } from '@angular/cdk/dialog';
 import { Apollo } from 'apollo-angular';
-import { USERS_QUERY } from './graphql/users.graphql';
+import { firstValueFrom } from 'rxjs';
+import { RESET_USER_PASSWORD_MUTATION, USERS_QUERY } from './graphql/users.graphql';
+import ResetPasswordDialogComponent from './reset-password-dialog';
 
 type UserRole = 'ADMIN' | 'DESIGNER' | 'ORG_ADMIN' | 'EMPLOYEE';
 
@@ -49,6 +52,19 @@ const ROLE_KEYS: Record<UserRole, string> = {
         </a>
       </div>
 
+      @if (resetSuccess()) {
+        <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          {{ 'users.resetPassword.success' | translate }}
+        </div>
+      }
+
+      @if (resetError()) {
+        <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {{ resetError() }}
+        </div>
+      }
+
       @if (loading()) {
         <p class="text-slate-500">{{ 'users.list.loading' | translate }}</p>
       } @else if (error()) {
@@ -70,6 +86,9 @@ const ROLE_KEYS: Record<UserRole, string> = {
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">
                   {{ 'users.list.columnCreated' | translate }}
                 </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">
+                  {{ 'users.list.columnActions' | translate }}
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
@@ -83,10 +102,25 @@ const ROLE_KEYS: Record<UserRole, string> = {
                     </span>
                   </td>
                   <td class="px-4 py-3 text-sm text-slate-500">{{ user.createdAt | date: 'mediumDate' }}</td>
+                  <td class="px-4 py-3">
+                    <button
+                      type="button"
+                      (click)="onResetPassword(user)"
+                      [disabled]="resettingId() === user.id"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                    >
+                      <span class="material-symbols-outlined text-sm">lock_reset</span>
+                      @if (resettingId() === user.id) {
+                        {{ 'users.resetPassword.resetting' | translate }}
+                      } @else {
+                        {{ 'users.resetPassword.buttonLabel' | translate }}
+                      }
+                    </button>
+                  </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4" class="px-4 py-8 text-center text-slate-500">
+                  <td colspan="5" class="px-4 py-8 text-center text-slate-500">
                     {{ 'users.list.empty' | translate }}
                   </td>
                 </tr>
@@ -102,10 +136,14 @@ export default class UsersListComponent {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(Dialog);
 
   protected readonly users = signal<UserRow[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly resettingId = signal<string | null>(null);
+  protected readonly resetSuccess = signal(false);
+  protected readonly resetError = signal<string | null>(null);
 
   constructor() {
     this.apollo
@@ -128,5 +166,43 @@ export default class UsersListComponent {
 
   protected roleLabel(role: UserRole): string {
     return this.translate.instant(ROLE_KEYS[role]);
+  }
+
+  protected onResetPassword(user: UserRow): void {
+    this.resetSuccess.set(false);
+    this.resetError.set(null);
+
+    const dialogRef = this.dialog.open<string | null>(
+      ResetPasswordDialogComponent,
+      {
+        data: { userName: user.name },
+        ariaLabel: this.translate.instant('users.resetPassword.title'),
+      },
+    );
+
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(async (newPassword) => {
+        if (!newPassword) return;
+
+        this.resettingId.set(user.id);
+        try {
+          await firstValueFrom(
+            this.apollo.mutate<{ resetUserPassword: boolean }>({
+              mutation: RESET_USER_PASSWORD_MUTATION,
+              variables: { id: user.id, newPassword },
+            }),
+          );
+          this.resetSuccess.set(true);
+        } catch (err) {
+          this.resetError.set(
+            err instanceof Error
+              ? err.message
+              : this.translate.instant('users.resetPassword.failed'),
+          );
+        } finally {
+          this.resettingId.set(null);
+        }
+      });
   }
 }

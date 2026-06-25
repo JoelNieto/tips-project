@@ -349,6 +349,7 @@ type Mutation {
   duplicateSurvey(id: ID!, input: DuplicateSurveyInput): SurveyEntity!
   removeQuestionFromDimension(dimensionQuestionId: ID!): DimensionQuestionEntity!
   removeSurveyFromOrganization(id: ID!): OrganizationSurveyEntity!
+  resetUserPassword(id: ID!, newPassword: String!): Boolean!
   submitSurveyFill(input: SubmitSurveyFillInput!): SurveyFillSubmissionEntity!
   updateAnswer(id: ID!, input: UpdateAnswerInput!): AnswerEntity!
   updateAnswerSet(id: ID!, input: UpdateAnswerSetInput!): AnswerSetEntity!

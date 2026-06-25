@@ -56,4 +56,15 @@ export class UserResolver {
     const actor = await this.authPolicy.getUserContext(session.user.id);
     return this.userService.update(id, input, actor);
   }
+
+  @Mutation(() => Boolean)
+  @Roles(UserRole.ADMIN)
+  async resetUserPassword(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('newPassword') newPassword: string,
+    @Session() session: UserSession
+  ) {
+    const actor = await this.authPolicy.getUserContext(session.user.id);
+    return this.userService.resetPassword(id, newPassword, actor);
+  }
 }

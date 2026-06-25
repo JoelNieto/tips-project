@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserRole } from '@generated/prisma';
+import { hashPassword } from 'better-auth/crypto';
 import { PrismaService } from '../prisma.service';
 import { auth } from '../auth/auth';
 import type { AuthUserContext } from '../auth/auth-policy.service';
@@ -138,6 +139,38 @@ export class UserService {
         },
       });
     });
+  }
+
+  async resetPassword(
+    id: string,
+    newPassword: string,
+    actor: AuthUserContext
+  ) {
+    this.authPolicy.assertRole(actor, [UserRole.ADMIN]);
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (newPassword.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters');
+    }
+
+    const hashed = await hashPassword(newPassword);
+
+    const updated = await this.prisma.account.updateMany({
+      where: { userId: id, providerId: 'credential' },
+      data: { password: hashed },
+    });
+
+    if (updated.count === 0) {
+      throw new BadRequestException(
+        'No credential account found for this user'
+      );
+    }
+
+    return true;
   }
 
   async update(id: string, input: UpdateUserInput, actor: AuthUserContext) {
