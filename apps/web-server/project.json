@@ -9,11 +9,11 @@
       "options": {
         "command": "webpack-cli build",
         "cwd": "apps/web-server",
-        "args": ["--config-node-env=production"]
+        "args": ["--node-env=production"]
       },
       "configurations": {
         "development": {
-          "args": ["--config-node-env=development"]
+          "args": ["--node-env=development"]
         }
       }
     },
