@@ -12,10 +12,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
-import { RESET_USER_PASSWORD_MUTATION, USERS_QUERY } from './graphql/users.graphql';
+import { RESET_USER_PASSWORD_MUTATION, UPDATE_USER_MUTATION, USERS_QUERY } from './graphql/users.graphql';
+import ChangeRoleDialogComponent, { type UserRole } from './change-role-dialog';
 import ResetPasswordDialogComponent from './reset-password-dialog';
-
-type UserRole = 'ADMIN' | 'DESIGNER' | 'ORG_ADMIN' | 'EMPLOYEE';
 
 interface UserRow {
   id: string;
@@ -59,9 +58,22 @@ const ROLE_KEYS: Record<UserRole, string> = {
         </div>
       }
 
+      @if (roleChangeSuccess()) {
+        <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          {{ 'users.changeRole.success' | translate }}
+        </div>
+      }
+
       @if (resetError()) {
         <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {{ resetError() }}
+        </div>
+      }
+
+      @if (roleChangeError()) {
+        <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {{ roleChangeError() }}
         </div>
       }
 
@@ -103,19 +115,34 @@ const ROLE_KEYS: Record<UserRole, string> = {
                   </td>
                   <td class="px-4 py-3 text-sm text-slate-500">{{ user.createdAt | date: 'mediumDate' }}</td>
                   <td class="px-4 py-3">
-                    <button
-                      type="button"
-                      (click)="onResetPassword(user)"
-                      [disabled]="resettingId() === user.id"
-                      class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
-                    >
-                      <span class="material-symbols-outlined text-sm">lock_reset</span>
-                      @if (resettingId() === user.id) {
-                        {{ 'users.resetPassword.resetting' | translate }}
-                      } @else {
-                        {{ 'users.resetPassword.buttonLabel' | translate }}
-                      }
-                    </button>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        (click)="onChangeRole(user)"
+                        [disabled]="changingRoleId() === user.id"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                      >
+                        <span class="material-symbols-outlined text-sm">manage_accounts</span>
+                        @if (changingRoleId() === user.id) {
+                          {{ 'users.changeRole.changing' | translate }}
+                        } @else {
+                          {{ 'users.changeRole.buttonLabel' | translate }}
+                        }
+                      </button>
+                      <button
+                        type="button"
+                        (click)="onResetPassword(user)"
+                        [disabled]="resettingId() === user.id"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                      >
+                        <span class="material-symbols-outlined text-sm">lock_reset</span>
+                        @if (resettingId() === user.id) {
+                          {{ 'users.resetPassword.resetting' | translate }}
+                        } @else {
+                          {{ 'users.resetPassword.buttonLabel' | translate }}
+                        }
+                      </button>
+                    </div>
                   </td>
                 </tr>
               } @empty {
@@ -144,6 +171,9 @@ export default class UsersListComponent {
   protected readonly resettingId = signal<string | null>(null);
   protected readonly resetSuccess = signal(false);
   protected readonly resetError = signal<string | null>(null);
+  protected readonly changingRoleId = signal<string | null>(null);
+  protected readonly roleChangeSuccess = signal(false);
+  protected readonly roleChangeError = signal<string | null>(null);
 
   constructor() {
     this.apollo
@@ -166,6 +196,45 @@ export default class UsersListComponent {
 
   protected roleLabel(role: UserRole): string {
     return this.translate.instant(ROLE_KEYS[role]);
+  }
+
+  protected onChangeRole(user: UserRow): void {
+    this.roleChangeSuccess.set(false);
+    this.roleChangeError.set(null);
+
+    const dialogRef = this.dialog.open<UserRole | null>(
+      ChangeRoleDialogComponent,
+      {
+        data: { userName: user.name, currentRole: user.role },
+        ariaLabel: this.translate.instant('users.changeRole.title'),
+      },
+    );
+
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(async (newRole) => {
+        if (!newRole) return;
+
+        this.changingRoleId.set(user.id);
+        try {
+          await firstValueFrom(
+            this.apollo.mutate({
+              mutation: UPDATE_USER_MUTATION,
+              variables: { id: user.id, input: { role: newRole } },
+              refetchQueries: ['Users'],
+            }),
+          );
+          this.roleChangeSuccess.set(true);
+        } catch (err) {
+          this.roleChangeError.set(
+            err instanceof Error
+              ? err.message
+              : this.translate.instant('users.changeRole.failed'),
+          );
+        } finally {
+          this.changingRoleId.set(null);
+        }
+      });
   }
 
   protected onResetPassword(user: UserRow): void {

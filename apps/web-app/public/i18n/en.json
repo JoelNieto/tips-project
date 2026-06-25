@@ -593,6 +593,16 @@
       "passwordRequired": "Password is required",
       "passwordMinLength": "Password must be at least 8 characters",
       "passwordsMustMatch": "Passwords must match"
+    },
+    "changeRole": {
+      "buttonLabel": "Change role",
+      "title": "Change role",
+      "subtitle": "Select a new role for {{name}}",
+      "role": "Role",
+      "confirm": "Change role",
+      "changing": "Changing...",
+      "success": "Role updated successfully.",
+      "failed": "Failed to change role."
     }
   }
 }

@@ -558,7 +558,8 @@
       "columnName": "Nombre",
       "columnEmail": "Correo electrónico",
       "columnRole": "Rol",
-      "columnCreated": "Creado"
+      "columnCreated": "Creado",
+      "columnActions": "Acciones"
     },
     "form": {
       "createTitle": "Crear usuario",
@@ -578,6 +579,30 @@
       "roleEmployee": "Empleado",
       "passwordRequired": "La contraseña es obligatoria",
       "passwordMinLength": "La contraseña debe tener al menos 8 caracteres"
+    },
+    "resetPassword": {
+      "buttonLabel": "Restablecer contraseña",
+      "title": "Restablecer contraseña",
+      "subtitle": "Establece una nueva contraseña para {{name}}",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "confirm": "Restablecer contraseña",
+      "resetting": "Restableciendo...",
+      "success": "Contraseña restablecida correctamente.",
+      "failed": "Error al restablecer la contraseña.",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+      "passwordsMustMatch": "Las contraseñas deben coincidir"
+    },
+    "changeRole": {
+      "buttonLabel": "Cambiar rol",
+      "title": "Cambiar rol",
+      "subtitle": "Selecciona un nuevo rol para {{name}}",
+      "role": "Rol",
+      "confirm": "Cambiar rol",
+      "changing": "Cambiando...",
+      "success": "Rol actualizado correctamente.",
+      "failed": "Error al cambiar el rol."
     }
   }
 }
