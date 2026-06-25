@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Apollo } from 'apollo-angular';
@@ -49,7 +49,8 @@ const ROLE_KEYS: Record<UserRole, string> = {
       </div>
 
       <form
-        (ngSubmit)="onSubmit()"
+        #userForm="ngForm"
+        (ngSubmit)="onSubmit(userForm)"
         class="bg-white rounded-xl border border-slate-200 p-6 space-y-4"
       >
         @if (error()) {
@@ -96,6 +97,7 @@ const ROLE_KEYS: Record<UserRole, string> = {
             >{{ 'users.form.password' | translate }}</label
           >
           <input
+            #passwordField="ngModel"
             id="password"
             [(ngModel)]="password"
             name="password"
@@ -103,7 +105,13 @@ const ROLE_KEYS: Record<UserRole, string> = {
             required
             minlength="8"
             class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+            [class.border-red-500]="passwordField.invalid && passwordField.touched"
           />
+          @if (passwordField.touched && passwordField.errors?.['required']) {
+            <p class="mt-1 text-xs text-red-600">{{ 'users.form.passwordRequired' | translate }}</p>
+          } @else if (passwordField.touched && passwordField.errors?.['minlength']) {
+            <p class="mt-1 text-xs text-red-600">{{ 'users.form.passwordMinLength' | translate }}</p>
+          }
         </div>
 
         <div>
@@ -204,7 +212,12 @@ export default class UserFormComponent {
     return this.translate.instant(ROLE_KEYS[role]);
   }
 
-  async onSubmit() {
+  async onSubmit(form: NgForm) {
+    if (form.invalid) {
+      form.form.markAllAsTouched();
+      return;
+    }
+
     this.saving.set(true);
     this.error.set(null);
 

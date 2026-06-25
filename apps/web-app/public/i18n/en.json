@@ -575,7 +575,9 @@
       "roleAdmin": "Admin",
       "roleDesigner": "Designer",
       "roleOrgAdmin": "Organization admin",
-      "roleEmployee": "Employee"
+      "roleEmployee": "Employee",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters"
     }
   }
 }
